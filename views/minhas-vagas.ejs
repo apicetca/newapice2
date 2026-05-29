@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Suas vagas salvas e roadmaps em andamento na Ápice." />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Ápice — Minhas Vagas</title>
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/vagas.css" />
+  <link rel="stylesheet" href="/css/minhas-vagas.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="page-hero" aria-label="Minhas vagas">
+    <div class="hero-eyebrow" aria-hidden="true">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+      Minhas vagas
+    </div>
+    <h1 class="hero-title">
+      Suas vagas,<br>
+      em um só <em>lugar</em>
+    </h1>
+    <p class="hero-sub">
+      Gerencie as vagas salvas e acompanhe o progresso dos seus roadmaps de carreira.
+    </p>
+    <div class="hero-stats" aria-label="Estatísticas">
+      <div class="hstat">
+        <div class="hstat-val" id="stat-salvas">—</div>
+        <div class="hstat-lbl">Salvas</div>
+      </div>
+      <div class="hstat-sep" aria-hidden="true"></div>
+      <div class="hstat">
+        <div class="hstat-val" id="stat-andamento">—</div>
+        <div class="hstat-lbl">Em andamento</div>
+      </div>
+      <div class="hstat-sep" aria-hidden="true"></div>
+      <div class="hstat">
+        <div class="hstat-val" id="stat-concluidas">—</div>
+        <div class="hstat-lbl">Concluídas</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ TABS ══════════ -->
+  <div class="mv-tabs" role="tablist" aria-label="Filtrar minhas vagas">
+    <button class="mv-tab active" role="tab" data-tab="salvas" aria-selected="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+      Salvas
+      <span class="mv-tab-count" id="tab-count-salvas"></span>
+    </button>
+    <button class="mv-tab" role="tab" data-tab="andamento" aria-selected="false">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h4l3 10 4-14 3 8 2-4h2"/></svg>
+      Em andamento
+      <span class="mv-tab-count" id="tab-count-andamento"></span>
+    </button>
+    <button class="mv-tab" role="tab" data-tab="concluidas" aria-selected="false">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      Concluídas
+      <span class="mv-tab-count" id="tab-count-concluidas"></span>
+    </button>
+  </div>
+
+  <!-- ══════════ GRID ══════════ -->
+  <main class="jobs-section" aria-label="Lista de vagas">
+    <div class="jobs-grid" id="jobs-grid" role="list">
+      <div class="skeleton-card" aria-hidden="true">
+        <div class="skel skel-h" style="width:40%"></div>
+        <div class="skel skel-h"></div>
+        <div class="skel skel-sm"></div>
+        <div class="skel skel-h" style="width:70%;height:10px"></div>
+      </div>
+      <div class="skeleton-card" aria-hidden="true">
+        <div class="skel skel-h" style="width:55%"></div>
+        <div class="skel skel-h"></div>
+        <div class="skel skel-sm"></div>
+        <div class="skel skel-h" style="width:80%;height:10px"></div>
+      </div>
+      <div class="skeleton-card" aria-hidden="true">
+        <div class="skel skel-h" style="width:45%"></div>
+        <div class="skel skel-h"></div>
+        <div class="skel skel-sm"></div>
+        <div class="skel skel-h" style="width:65%;height:10px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2025 Dev Estágios. Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    // ─── SVGs ─────────────────────────────────────────────
+    const IC = {
+      briefcase: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
+      pentool:   `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>`,
+      settings:  `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+      wrench:    `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`,
+      smartphone:`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`,
+      barchart:  `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+      building:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/></svg>`,
+      monitor:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+      users:     `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      arrow:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+      bookmark:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>`,
+      bookmarkFill:`<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>`,
+      check:     `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`,
+      vagas:     `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
+    };
+
+    const LEVEL_LABEL = { estagio:"Estágio", junior:"Júnior", pleno:"Pleno" };
+    const LEVEL_CLASS = { estagio:"lvl-estagio", junior:"lvl-junior", pleno:"lvl-pleno" };
+
+    function jobIcon(title) {
+      const t = title.toLowerCase();
+      if (t.includes("front"))                       return IC.pentool;
+      if (t.includes("back"))                        return IC.settings;
+      if (t.includes("full"))                        return IC.wrench;
+      if (t.includes("mobile"))                      return IC.smartphone;
+      if (t.includes("dados") || t.includes("data")) return IC.barchart;
+      return IC.briefcase;
+    }
+
+    // ─── Estado ───────────────────────────────────────────
+    let savedJobs    = [];
+    let roadmapJobs  = [];
+    let activeTab    = "salvas";
+
+    // ─── Tabs ─────────────────────────────────────────────
+    document.querySelectorAll(".mv-tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".mv-tab").forEach(b => {
+          b.classList.remove("active"); b.setAttribute("aria-selected","false");
+        });
+        btn.classList.add("active"); btn.setAttribute("aria-selected","true");
+        activeTab = btn.dataset.tab;
+        renderCurrentTab();
+      });
+    });
+
+    // ─── Renderiza tab ativa ──────────────────────────────
+    function renderCurrentTab() {
+      if (activeTab === "salvas")     renderSaved();
+      if (activeTab === "andamento")  renderInProgress();
+      if (activeTab === "concluidas") renderDone();
+    }
+
+    // ─── Cards: vagas salvas ──────────────────────────────
+    function renderSaved() {
+      const grid = document.getElementById("jobs-grid");
+      grid.innerHTML = "";
+
+      if (!savedJobs.length) {
+        grid.innerHTML = emptyState(
+          "Nenhuma vaga salva ainda",
+          "Explore as vagas disponíveis e salve as que te interessam.",
+          "/vagas"
+        );
+        return;
+      }
+
+      savedJobs.forEach((job, idx) => {
+        const card = buildSavedCard(job, idx);
+        grid.appendChild(card);
+      });
+    }
+
+    function buildSavedCard(job, idx) {
+      const card = document.createElement("article");
+      card.className = "job-card";
+      card.setAttribute("role", "listitem");
+      card.style.animationDelay = `${idx * 0.04}s`;
+
+      const hardObrig = job.skills?.filter(s => s.type === "hard" && s.importance === "obrigatoria") ?? [];
+      const hardDesej = job.skills?.filter(s => s.type === "hard" && s.importance === "desejavel")  ?? [];
+      const softSkills= job.skills?.filter(s => s.type === "soft") ?? [];
+      const allHard   = [...hardObrig, ...hardDesej];
+      const visible   = allHard.slice(0, 5);
+      const remaining = allHard.length - visible.length;
+
+      const skillTagsHtml = visible.map(s => `
+        <span class="skill-tag ${s.importance === "desejavel" ? "skill-tag-desejev" : ""}" title="${s.importance === "desejavel" ? "Desejável" : "Obrigatória"}">
+          ${IC.monitor} ${s.name}
+        </span>`).join("");
+
+      const softHtml = softSkills.slice(0, 2).map(s =>
+        `<span class="skill-tag skill-tag-soft">${IC.users} ${s.name}</span>`).join("");
+
+      const moreHtml = remaining > 0 ? `<span class="skills-more">+${remaining}</span>` : "";
+
+      card.innerHTML = `
+        <div class="job-card-accent" aria-hidden="true"></div>
+        <div class="job-card-body">
+          <div class="job-card-top">
+            <div class="job-icon-wrap" aria-hidden="true">${jobIcon(job.title)}</div>
+            <div class="job-meta">
+              <div class="job-title">${job.title}</div>
+              <div class="job-company">${IC.building} ${job.company ?? "Empresa"}</div>
+            </div>
+            <span class="level-badge ${LEVEL_CLASS[job.level] ?? "lvl-estagio"}" aria-label="Nível: ${LEVEL_LABEL[job.level] ?? job.level}">
+              ${LEVEL_LABEL[job.level] ?? job.level}
+            </span>
+          </div>
+
+          ${job.description ? `<p class="job-desc">${job.description}</p>` : ""}
+
+          ${allHard.length ? `
+            <div class="skill-block">
+              <div class="skill-block-label">Habilidades técnicas</div>
+              <div class="skills-row">${skillTagsHtml}${moreHtml}</div>
+            </div>` : ""}
+
+          ${softSkills.length ? `
+            <div class="skill-block">
+              <div class="skill-block-label">Habilidades comportamentais</div>
+              <div class="skills-row">${softHtml}</div>
+            </div>` : ""}
+        </div>
+
+        <div class="job-card-footer">
+          <a href="/roadmap?job=${job.id}" class="btn-roadmap" aria-label="Ver meu roadmap para ${job.title}">
+            Ver meu roadmap ${IC.arrow}
+          </a>
+          <button class="btn-bookmark saved" aria-label="Remover vaga salva" onclick="toggleSave(event, ${job.id}, this)">
+            ${IC.bookmarkFill}
+          </button>
+        </div>`;
+
+      return card;
+    }
+
+    // ─── Cards: em andamento ──────────────────────────────
+    function renderInProgress() {
+      const grid = document.getElementById("jobs-grid");
+      grid.innerHTML = "";
+
+      const inProgress = roadmapJobs.filter(j => j.progress_percent > 0 && j.progress_percent < 100);
+
+      if (!inProgress.length) {
+        grid.innerHTML = emptyState(
+          "Nenhum roadmap em andamento",
+          "Explore as vagas, inicie um roadmap e acompanhe seu progresso aqui.",
+          "/vagas"
+        );
+        return;
+      }
+
+      inProgress.forEach((job, idx) => {
+        const card = buildProgressCard(job, idx);
+        grid.appendChild(card);
+      });
+    }
+
+    // ─── Cards: concluídas ────────────────────────────────
+    function renderDone() {
+      const grid = document.getElementById("jobs-grid");
+      grid.innerHTML = "";
+
+      const done = roadmapJobs.filter(j => j.progress_percent >= 100);
+
+      if (!done.length) {
+        grid.innerHTML = emptyState(
+          "Nenhum roadmap concluído ainda",
+          "Continue estudando! Seus roadmaps 100% concluídos aparecerão aqui.",
+          "/meu-progresso"
+        );
+        return;
+      }
+
+      done.forEach((job, idx) => {
+        const card = buildProgressCard(job, idx, true);
+        grid.appendChild(card);
+      });
+    }
+
+    function buildProgressCard(job, idx, done = false) {
+      const card = document.createElement("article");
+      card.className = "job-card";
+      card.setAttribute("role", "listitem");
+      card.style.animationDelay = `${idx * 0.04}s`;
+
+      const pct = Math.min(job.progress_percent ?? 0, 100);
+
+      card.innerHTML = `
+        <div class="job-card-accent" aria-hidden="true"></div>
+        <div class="job-card-body">
+          <div class="job-card-top">
+            <div class="job-icon-wrap" aria-hidden="true">${jobIcon(job.title)}</div>
+            <div class="job-meta">
+              <div class="job-title">${job.title}</div>
+              <div class="job-company">${IC.building} ${job.company ?? "Empresa"}</div>
+            </div>
+            ${done
+              ? `<span class="mv-badge-done">${IC.check} Concluído</span>`
+              : `<span class="level-badge ${LEVEL_CLASS[job.level] ?? "lvl-estagio"}" aria-label="Nível: ${LEVEL_LABEL[job.level] ?? job.level}">${LEVEL_LABEL[job.level] ?? job.level}</span>`
+            }
+          </div>
+
+          <div class="mv-progress">
+            <div class="mv-progress-header">
+              <span>${job.concluded ?? 0} de ${job.total_skills ?? 0} skills</span>
+              <span class="mv-progress-pct">${pct}%</span>
+            </div>
+            <div class="mv-progress-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso do roadmap">
+              <div class="mv-progress-fill ${done ? "mv-progress-done" : ""}" style="width:${pct}%"></div>
+            </div>
+          </div>
+
+          ${job.in_progress > 0 ? `
+            <div class="mv-stats-row">
+              <span class="mv-stat"><strong>${job.concluded ?? 0}</strong> concluídas</span>
+              <span class="mv-stat-sep" aria-hidden="true"></span>
+              <span class="mv-stat"><strong>${job.in_progress ?? 0}</strong> em progresso</span>
+            </div>` : ""}
+        </div>
+
+        <div class="job-card-footer">
+          <a href="/roadmap?job=${job.id}" class="btn-roadmap" aria-label="${done ? "Revisar roadmap" : "Continuar roadmap"} para ${job.title}">
+            ${done ? "Revisar roadmap" : "Continuar roadmap"} ${IC.arrow}
+          </a>
+        </div>`;
+
+      return card;
+    }
+
+    // ─── Empty state ──────────────────────────────────────
+    function emptyState(title, sub, href) {
+      return `
+        <div class="mv-empty" role="status">
+          <div class="mv-empty-icon">${IC.vagas}</div>
+          <p class="mv-empty-title">${title}</p>
+          <p class="mv-empty-sub">${sub}</p>
+          <a href="${href}" class="mv-empty-cta">
+            ${href === "/vagas" ? "Explorar vagas" : "Ver progresso"} ${IC.arrow}
+          </a>
+        </div>`;
+    }
+
+    // ─── Salvar / remover vaga ────────────────────────────
+    async function toggleSave(e, jobId, btn) {
+      e.preventDefault();
+      const isSaved = btn.classList.contains("saved");
+
+      try {
+        const method = isSaved ? "DELETE" : "POST";
+        const res = await fetch(`/api/user/saved-jobs/${jobId}`, { method });
+        if (!res.ok) throw new Error();
+
+        if (isSaved) {
+          savedJobs = savedJobs.filter(j => j.id !== jobId);
+          btn.closest(".job-card").style.transition = "opacity .25s, transform .25s";
+          btn.closest(".job-card").style.opacity = "0";
+          btn.closest(".job-card").style.transform = "scale(.96)";
+          setTimeout(() => renderCurrentTab(), 260);
+        } else {
+          btn.classList.add("saved");
+          btn.innerHTML = IC.bookmarkFill;
+          btn.setAttribute("aria-label", "Remover vaga salva");
+        }
+
+        updateStats();
+      } catch {
+        showToast("Erro ao atualizar. Tente novamente.");
+      }
+    }
+
+    // ─── Toast ────────────────────────────────────────────
+    function showToast(msg) {
+      const el = document.createElement("div");
+      el.textContent = msg;
+      Object.assign(el.style, {
+        position:"fixed", bottom:"24px", right:"24px", zIndex:"999",
+        padding:"10px 16px",
+        background:"var(--bg-3)", border:"1px solid var(--border-lite)",
+        borderRadius:"var(--radius-md)", fontSize:".85rem",
+        color:"var(--text)", boxShadow:"0 8px 24px rgba(0,0,0,.4)",
+        transition:"opacity .25s",
+      });
+      document.body.appendChild(el);
+      setTimeout(() => { el.style.opacity = "0"; setTimeout(() => el.remove(), 300); }, 2200);
+    }
+
+    // ─── Atualiza stats e contadores de tabs ──────────────
+    function updateStats() {
+      const inProgress = roadmapJobs.filter(j => j.progress_percent > 0 && j.progress_percent < 100);
+      const done       = roadmapJobs.filter(j => j.progress_percent >= 100);
+
+      document.getElementById("stat-salvas").textContent    = savedJobs.length;
+      document.getElementById("stat-andamento").textContent = inProgress.length;
+      document.getElementById("stat-concluidas").textContent= done.length;
+
+      const countSalvas    = document.getElementById("tab-count-salvas");
+      const countAndamento = document.getElementById("tab-count-andamento");
+      const countConcluidas= document.getElementById("tab-count-concluidas");
+
+      if (countSalvas)     countSalvas.textContent     = savedJobs.length    || "";
+      if (countAndamento)  countAndamento.textContent  = inProgress.length   || "";
+      if (countConcluidas) countConcluidas.textContent = done.length         || "";
+    }
+
+    // ─── Bootstrap ───────────────────────────────────────
+    async function init() {
+      try {
+        const userRes = await fetch("/api/user");
+        if (!userRes.ok) {
+          window.location.href = "/login?next=/minhas-vagas";
+          return;
+        }
+
+        const [savedRes, roadmapRes] = await Promise.all([
+          fetch("/api/user/saved-jobs"),
+          fetch("/api/dashboard"),
+        ]);
+
+        savedJobs   = savedRes.ok   ? await savedRes.json()   : [];
+        roadmapJobs = roadmapRes.ok ? await roadmapRes.json() : [];
+
+        updateStats();
+        renderCurrentTab();
+
+      } catch (err) {
+        document.getElementById("jobs-grid").innerHTML = `
+          <div class="mv-empty" role="alert">
+            <div class="mv-empty-icon">${IC.vagas}</div>
+            <p class="mv-empty-title">Erro ao carregar</p>
+            <p class="mv-empty-sub">Verifique sua conexão e recarregue a página.</p>
+          </div>`;
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

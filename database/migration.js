@@ -76,6 +76,53 @@ async function migrate() {
       console.log("✅ FK fk_jobs_company criada");
     }
 
+    // ── user_dev_profiles: cpf ───────────────────────
+    if (await columnExists("user_dev_profiles", "cpf")) {
+      console.log("⏭  cpf já existe — pulando");
+    } else {
+      await db.query(`ALTER TABLE user_dev_profiles ADD COLUMN cpf VARCHAR(14) NULL`);
+      console.log("✅ Coluna cpf adicionada");
+    }
+
+    // ── user_dev_profiles: telefone ──────────────────
+    if (await columnExists("user_dev_profiles", "telefone")) {
+      console.log("⏭  telefone já existe — pulando");
+    } else {
+      await db.query(`ALTER TABLE user_dev_profiles ADD COLUMN telefone VARCHAR(15) NULL`);
+      console.log("✅ Coluna telefone adicionada");
+    }
+
+    // ── user_dev_profiles: rg ────────────────────────
+    if (await columnExists("user_dev_profiles", "rg")) {
+      console.log("⏭  rg já existe — pulando");
+    } else {
+      await db.query(`ALTER TABLE user_dev_profiles ADD COLUMN rg VARCHAR(12) NULL`);
+      console.log("✅ Coluna rg adicionada");
+    }
+
+    // ── user_saved_jobs ──────────────────────────
+    const [savedTable] = await db.query(`
+      SELECT COUNT(*) AS total
+      FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME   = 'user_saved_jobs'
+    `);
+    if (savedTable[0].total > 0) {
+      console.log("⏭  user_saved_jobs já existe — pulando");
+    } else {
+      await db.query(`
+        CREATE TABLE user_saved_jobs (
+          user_id  INT NOT NULL,
+          job_id   INT NOT NULL,
+          saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (user_id, job_id),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (job_id)  REFERENCES jobs(id)  ON DELETE CASCADE
+        )
+      `);
+      console.log("✅ Tabela user_saved_jobs criada");
+    }
+
     console.log("\n🎉 Migration concluída com sucesso!");
     process.exit(0);
 

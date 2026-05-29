@@ -1,121 +1,12 @@
 /* =============================================
    perfil.css — Página de perfil do desenvolvedor
-   Identidade Visual: Ápice 2026
+   Requer: design-system.css + header.css
 ============================================= */
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-
-:root {
-  --bg:          #0a0a0f;
-  --bg-2:        #0f0f17;
-  --bg-3:        #16161f;
-  --border:      #1e1e2e;
-  --border-lite: #2a2a3d;
-  --text:        #e8e8f0;
-  --muted:       #6b6b8a;
-  --accent:      #7C3AED;
-  --accent-hv:   #9461f7;
-  --accent-dim:  rgba(124,58,237,.13);
-  --accent-border: rgba(124,58,237,.30);
-  --teal:        #10B691;
-  --teal-hv:     #0ed4a8;
-  --teal-dim:    rgba(16,182,145,.12);
-  --teal-border: rgba(16,182,145,.28);
-  --blue:        #60a5fa;
-  --yellow:      #fbbf24;
-  --red:         #f87171;
-  --red-dim:     rgba(248,113,113,.10);
-  --radius-sm:   5px;
-  --radius-md:   9px;
-  --radius-lg:   14px;
-  --font-display: 'Montserrat', sans-serif;
-  --font-body:    'DM Mono', monospace;
-}
-
-html { scroll-behavior: smooth; }
-
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 1rem;
-  line-height: 1.65;
-  min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  overflow-x: hidden;
 }
-
-a { color: inherit; text-decoration: none; }
-ul, ol { list-style: none; }
-
-/* Grade de fundo */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 44px 44px;
-  opacity: .30;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* =====================
-   HEADER
-===================== */
-body > header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40px;
-  height: 58px;
-  background: rgba(10,10,15,.90);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  font-size: 0.875rem;
-}
-
-.header-nav a { color: var(--muted); transition: color .15s; }
-.header-nav a:hover { color: var(--text); }
-.header-nav a.active { color: var(--accent); font-weight: 600; }
-
-.btn-logout {
-  background: none;
-  border: 1px solid var(--border-lite);
-  border-radius: var(--radius-sm);
-  color: var(--muted);
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  padding: 5px 12px;
-  cursor: pointer;
-  transition: all .15s;
-}
-.btn-logout:hover { border-color: var(--red); color: var(--red); }
 
 /* =====================
    LAYOUT PRINCIPAL
@@ -166,7 +57,7 @@ main {
 .card-title span { color: var(--muted); font-weight: 400; font-size: .85rem; font-family: var(--font-body); }
 
 /* =====================
-   HERO DO PERFIL (avatar + nome)
+   HERO DO PERFIL
 ===================== */
 .profile-hero {
   display: flex;
@@ -175,7 +66,6 @@ main {
   flex-wrap: wrap;
 }
 
-/* Wrapper do avatar */
 .avatar-wrap {
   position: relative;
   flex-shrink: 0;
@@ -204,7 +94,6 @@ main {
   color: var(--muted);
 }
 
-/* Botão de upload sobre o avatar */
 .avatar-upload-btn {
   position: absolute;
   bottom: 0;
@@ -225,7 +114,6 @@ main {
 
 .avatar-upload-btn:hover { background: var(--accent-hv); transform: scale(1.1); }
 
-/* Input file escondido */
 #avatar-input { display: none; }
 
 .profile-meta {
@@ -370,7 +258,6 @@ form { display: flex; flex-direction: column; gap: 16px; }
 .alert.error   { background: var(--red-dim);    border: 1px solid rgba(248,113,113,.30); color: #ff7b72; }
 .alert.success { background: var(--accent-dim); border: 1px solid rgba(124,58,237,.30); color: var(--accent); }
 
-/* Toast fixo no canto */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -512,7 +399,6 @@ form { display: flex; flex-direction: column; gap: 16px; }
   padding: 8px 0;
 }
 
-/* Adicionar skill manualmente */
 .add-skill-row {
   display: flex;
   gap: 10px;
@@ -523,7 +409,6 @@ form { display: flex; flex-direction: column; gap: 16px; }
 
 .add-skill-row .field { flex: 1; min-width: 200px; margin: 0; }
 
-/* Barra de re-análise */
 .reanalyze-bar {
   display: flex;
   align-items: center;
@@ -544,7 +429,6 @@ form { display: flex; flex-direction: column; gap: 16px; }
 
 .reanalyze-bar p strong { color: var(--text); display: block; margin-bottom: 2px; }
 
-/* Spinner */
 .spinner {
   display: inline-block;
   width: 14px;
@@ -590,21 +474,14 @@ body > footer {
    RESPONSIVIDADE
 ===================== */
 @media (max-width: 640px) {
-  body > header { padding: 0 20px; }
-  .header-nav   { gap: 12px; }
-  .header-nav a:not(.active) { display: none; }
-
+  .site-header { padding: 0 20px; }
   main { padding: 24px 16px 48px; }
   .card { padding: 20px; }
-
   .field-row { grid-template-columns: 1fr; }
   .profile-hero { flex-direction: column; align-items: center; text-align: center; }
   .profile-badges { justify-content: center; }
-
   .add-skill-row { flex-direction: column; }
   .add-skill-row .field { width: 100%; }
-
   .reanalyze-bar { flex-direction: column; align-items: flex-start; }
-
   body > footer { padding: 16px 20px; }
 }

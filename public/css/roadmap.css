@@ -1,159 +1,9 @@
 /* =============================================
    roadmap.css — Roadmap de Carreira
-   Identidade Visual: Ápice 2026
-   Montserrat (títulos) · DM Mono (textos)
-   #000 · #2D2D2D · #7C3AED · #10B691 · #FFF
+   Requer: design-system.css + header.css
 ============================================= */
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  --bg:             #000000;
-  --bg-2:           #0a0a0a;
-  --bg-3:           #111111;
-  --bg-4:           #1a1a1a;
-  --border:         #2d2d2d;
-  --border-lite:    #3a3a3a;
-  --text:           #ffffff;
-  --muted:          #888888;
-
-  --accent:         #7c3aed;
-  --accent-hv:      #8b5cf6;
-  --accent-dim:     rgba(124,58,237,.12);
-  --accent-border:  rgba(124,58,237,.30);
-  --accent-glow:    rgba(124,58,237,.25);
-
-  --teal:           #10b691;
-  --teal-hv:        #0fd4a8;
-  --teal-dim:       rgba(16,182,145,.12);
-  --teal-border:    rgba(16,182,145,.28);
-
-  --red:            #f87171;
-  --red-dim:        rgba(248,113,113,.12);
-  --yellow:         #fbbf24;
-  --yellow-dim:     rgba(251,191,36,.12);
-
-  --radius-sm:      5px;
-  --radius-md:      9px;
-  --radius-lg:      14px;
-  --radius-xl:      20px;
-
-  --font-display:   'Montserrat', sans-serif;
-  --font-body:      'DM Mono', monospace;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: .92rem;
-  line-height: 1.7;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-}
-
-a { color: inherit; text-decoration: none; }
-ul, ol { list-style: none; }
-img { display: block; max-width: 100%; }
-
-/* Grade de fundo */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 44px 44px;
-  opacity: .30;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Brilho roxo no topo */
-body::after {
-  content: "";
-  position: fixed;
-  top: -100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 900px;
-  height: 540px;
-  background: radial-gradient(ellipse, rgba(124,58,237,.10) 0%, transparent 62%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* =====================
-   HEADER
-===================== */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40px;
-  height: 58px;
-  background: rgba(0,0,0,.92);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -.01em;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.nav-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 13px;
-  border-radius: var(--radius-sm);
-  font-size: .78rem;
-  font-family: var(--font-body);
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all .15s;
-  text-decoration: none;
-}
-
-.nav-btn:hover {
-  color: var(--text);
-  background: var(--bg-3);
-  border-color: var(--border-lite);
-  text-decoration: none;
-}
-
-.nav-btn.danger:hover {
-  color: var(--red);
-  background: var(--red-dim);
-  border-color: rgba(248,113,113,.2);
-}
+body { display: flex; flex-direction: column; }
 
 /* =====================
    LAYOUT PRINCIPAL
@@ -196,7 +46,6 @@ main#roadmap-main {
   text-decoration: underline;
 }
 
-/* Spinner */
 .spinner-wrap {
   width: 30px;
   height: 30px;
@@ -210,7 +59,6 @@ main#roadmap-main {
 
 /* =====================
    HERO DO ROADMAP
-   (.roadmap-header no HTML)
 ===================== */
 .roadmap-header {
   display: flex;
@@ -229,7 +77,6 @@ main#roadmap-main {
   flex-wrap: wrap;
 }
 
-/* Linha de accent no topo */
 .roadmap-header::before {
   content: "";
   position: absolute;
@@ -241,7 +88,6 @@ main#roadmap-main {
   border-radius: 0 0 2px 2px;
 }
 
-/* Breadcrumb */
 .roadmap-breadcrumb {
   font-size: .75rem;
   color: var(--muted);
@@ -256,7 +102,6 @@ main#roadmap-main {
 
 .roadmap-breadcrumb a:hover { color: var(--accent-hv); }
 
-/* Título da vaga */
 .roadmap-header h1 {
   font-family: var(--font-display);
   font-size: 1.5rem;
@@ -303,7 +148,6 @@ main#roadmap-main {
   line-height: 1;
 }
 
-/* Barra de progresso */
 progress {
   width: 100%;
   height: 6px;
@@ -391,7 +235,6 @@ progress.bar-low::-moz-progress-bar       { background: var(--red); }
   padding-left: 0;
 }
 
-/* Contador numérico na trilha */
 .skill-trail {
   counter-reset: trail-counter;
 }
@@ -421,7 +264,6 @@ progress.bar-low::-moz-progress-bar       { background: var(--red); }
   color: var(--muted);
 }
 
-/* Número verde-água para concluídas */
 .skill-trail .skill-item.status-concluido::before {
   background: var(--teal-dim);
   border-color: var(--teal-border);
@@ -450,7 +292,6 @@ progress.bar-low::-moz-progress-bar       { background: var(--red); }
   opacity: .7;
 }
 
-/* Cabeçalho da skill */
 .skill-header {
   display: flex;
   align-items: center;
@@ -469,7 +310,6 @@ progress.bar-low::-moz-progress-bar       { background: var(--red); }
   color: var(--text);
 }
 
-/* Badges de importância */
 .skill-badge {
   font-size: .68rem;
   padding: 2px 9px;
@@ -492,7 +332,6 @@ progress.bar-low::-moz-progress-bar       { background: var(--red); }
   border: 1px solid var(--accent-border);
 }
 
-/* Tag hard/soft */
 .skill-type-tag {
   font-size: .68rem;
   color: var(--muted);
@@ -500,7 +339,6 @@ progress.bar-low::-moz-progress-bar       { background: var(--red); }
   font-family: var(--font-body);
 }
 
-/* Status atual */
 .skill-status-label {
   font-size: .78rem;
   color: var(--muted);
@@ -508,7 +346,7 @@ progress.bar-low::-moz-progress-bar       { background: var(--red); }
 }
 
 /* =====================
-   BARRA DE CONFIANÇA (habilidades que já sabe)
+   BARRA DE CONFIANÇA
 ===================== */
 meter.skill-confidence {
   width: 100%;

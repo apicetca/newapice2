@@ -1,174 +1,7 @@
 /* =============================================
-   landing.css — Dev Estágios / Ápice 2026
-   Identidade Visual: Montserrat + DM Mono
-   Paleta: #000 · #2D2D2D · #7C3AED · #10B691 · #FFF
+   landing.css — Ápice 2026
+   Requer: design-system.css + header.css
 ============================================= */
-
-/* =====================
-   RESET & VARIÁVEIS
-===================== */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  /* ── Paleta Ápice ── */
-  --bg:          #000000;           /* preto puro — fundo principal */
-  --bg-2:        #0a0a0a;           /* preto levemente elevado */
-  --bg-3:        #111111;           /* superfícies / cards */
-  --bg-4:        #1a1a1a;           /* bordas internas / inputs */
-  --border:      #2d2d2d;           /* cinza escuro da paleta */
-  --border-lite: #3a3a3a;           /* bordas visíveis */
-  --text:        #ffffff;           /* branco puro */
-  --muted:       #888888;           /* texto secundário */
-
-  /* ── Accent primário: roxo ── */
-  --accent:      #7c3aed;
-  --accent-hv:   #8b5cf6;           /* hover — tom mais claro */
-  --accent-dim:  rgba(124,58,237,.12);
-  --accent-glow: rgba(124,58,237,.25);
-
-  /* ── Accent secundário: verde-água ── */
-  --teal:        #10b691;
-  --teal-hv:     #0fd4a8;
-  --teal-dim:    rgba(16,182,145,.12);
-  --teal-glow:   rgba(16,182,145,.2);
-
-  /* ── Outros ── */
-  --yellow:      #f59e0b;
-  --red:         #f85149;
-
-  --radius-sm:   5px;
-  --radius-md:   10px;
-  --radius-lg:   16px;
-  --radius-xl:   24px;
-
-  /* ── Tipografia Ápice ── */
-  --font-display: 'Montserrat', sans-serif;   /* títulos — SemiBold/Bold */
-  --font-body:    'DM Mono', monospace;        /* textos — Regular */
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  line-height: 1.7;
-  overflow-x: hidden;
-}
-
-a { color: inherit; text-decoration: none; }
-img, svg { display: block; max-width: 100%; }
-ol, ul { list-style: none; }
-
-/* =====================
-   HEADER
-===================== */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40px;
-  height: 60px;
-  background: rgba(0,0,0,.9);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text);
-}
-
-/* Destaque verde-água no ícone do logo */
-.logo span { color: var(--teal); }
-
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  font-size: 0.82rem;
-  font-family: var(--font-body);
-  letter-spacing: 0.01em;
-}
-
-.header-nav a { color: var(--muted); transition: color 0.15s; }
-.header-nav a:hover { color: var(--text); }
-
-.nav-link-login { color: var(--text) !important; }
-
-.nav-cta {
-  background: var(--accent) !important;
-  color: #fff !important;
-  font-weight: 600;
-  font-family: var(--font-display);
-  padding: 7px 18px;
-  border-radius: var(--radius-sm);
-  transition: background 0.15s, box-shadow 0.15s !important;
-  font-size: 0.82rem;
-  letter-spacing: 0.02em;
-}
-
-.nav-cta:hover {
-  background: var(--accent-hv) !important;
-  box-shadow: 0 0 20px var(--accent-glow);
-}
-
-.mobile-menu-btn {
-  display: none;
-  background: none;
-  border: 1px solid var(--border-lite);
-  color: var(--text);
-  border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  cursor: pointer;
-  font-size: 1.1rem;
-}
-
-/* Menu mobile */
-.mobile-menu[hidden] { display: none !important; }
-
-.mobile-menu {
-  position: fixed;
-  top: 60px;
-  left: 0; right: 0;
-  z-index: 99;
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 16px 24px;
-  gap: 4px;
-}
-
-.mobile-menu a {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 0.9rem;
-  font-family: var(--font-body);
-}
-
-.mobile-menu a:last-child { border-bottom: none; }
-.mobile-menu .nav-cta {
-  margin-top: 8px;
-  text-align: center;
-  padding: 12px !important;
-  border-radius: var(--radius-md) !important;
-}
 
 /* =====================
    HERO
@@ -183,7 +16,6 @@ ol, ul { list-style: none; }
   overflow: hidden;
 }
 
-/* Grade de fundo — mantida, cor ajustada para o preto da Ápice */
 .hero::before {
   content: "";
   position: absolute;
@@ -196,7 +28,6 @@ ol, ul { list-style: none; }
   pointer-events: none;
 }
 
-/* Brilho central — roxo Ápice */
 .hero::after {
   content: "";
   position: absolute;
@@ -231,14 +62,13 @@ ol, ul { list-style: none; }
 .hero h1 {
   font-family: var(--font-display);
   font-size: clamp(2.8rem, 7vw, 5.2rem);
-  font-weight: 700;                         /* Montserrat SemiBold */
+  font-weight: 700;
   line-height: 1.08;
   letter-spacing: -0.02em;
   margin-bottom: 24px;
   animation: fadeUp 0.5s 0.1s ease both;
 }
 
-/* Destaque em verde-água — cor secundária da Ápice */
 .hero h1 em {
   font-style: normal;
   color: var(--teal);
@@ -329,7 +159,6 @@ ol, ul { list-style: none; }
 
 /* =====================
    TERMINAL ANIMADO
-   Mantém DM Mono — já é a fonte de texto da Ápice
 ===================== */
 .terminal {
   width: 100%;
@@ -369,7 +198,7 @@ ol, ul { list-style: none; }
 
 .terminal-body {
   padding: 20px 22px;
-  font-family: var(--font-body);    /* DM Mono — fonte de texto da Ápice */
+  font-family: var(--font-body);
   font-size: 0.82rem;
   line-height: 1.85;
   overflow-x: auto;
@@ -379,8 +208,8 @@ ol, ul { list-style: none; }
 .terminal-body code { display: block; white-space: pre; }
 
 .t-dim    { color: var(--muted); }
-.t-green  { color: var(--teal); }       /* verde-água Ápice */
-.t-blue   { color: var(--accent-hv); }  /* roxo claro Ápice */
+.t-green  { color: var(--teal); }
+.t-blue   { color: var(--accent-hv); }
 .t-yellow { color: var(--yellow); }
 
 .t-cursor {
@@ -408,7 +237,6 @@ ol, ul { list-style: none; }
   margin-bottom: 56px;
 }
 
-/* Label de seção em verde-água */
 .section-label {
   font-size: 0.72rem;
   font-weight: 600;
@@ -444,7 +272,7 @@ ol, ul { list-style: none; }
 .steps {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;                               /* gap de 1px + border cria grade entre cards */
+  gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -473,7 +301,6 @@ ol, ul { list-style: none; }
 
 .step-card:hover { background: var(--bg-3); }
 
-/* Linha lateral roxa no hover */
 .step-card::before {
   content: "";
   position: absolute;
@@ -570,7 +397,6 @@ ol, ul { list-style: none; }
   transform: translateY(-2px);
 }
 
-/* Card destaque — span 2 colunas, gradiente roxo */
 .diff-featured {
   grid-column: span 2;
   background: linear-gradient(135deg, var(--bg-3) 50%, rgba(124,58,237,.08));
@@ -600,7 +426,6 @@ ol, ul { list-style: none; }
   line-height: 1.7;
 }
 
-/* Badge "exclusivo" em verde-água */
 .diff-badge {
   position: absolute;
   top: 16px;
@@ -614,7 +439,7 @@ ol, ul { list-style: none; }
   letter-spacing: 0.1em;
   padding: 3px 10px;
   border-radius: 99px;
-  border: 1px solid rgba(16,182,145,.3);
+  border: 1px solid rgba(83,223,62,.3);
 }
 
 /* =====================
@@ -660,7 +485,6 @@ ol, ul { list-style: none; }
 .comp-table tbody tr:last-child td { border-bottom: none; }
 .comp-table tbody tr:hover td     { background: rgba(255,255,255,.02); }
 
-/* Coluna Ápice — destaque roxo */
 .col-us {
   background: rgba(124,58,237,.06);
   color: var(--text);
@@ -685,14 +509,13 @@ thead .col-us { color: var(--accent) !important; }
   overflow: hidden;
 }
 
-/* Brilho roxo + verde-água sobrepostos */
 .cta-final::before {
   content: "";
   position: absolute;
   inset: 0;
   background:
     radial-gradient(ellipse at 30% 50%, rgba(124,58,237,.12) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 50%, rgba(16,182,145,.08) 0%, transparent 60%);
+    radial-gradient(ellipse at 70% 50%, rgba(83,223,62,.08) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -746,6 +569,13 @@ thead .col-us { color: var(--accent) !important; }
   color: var(--text);
 }
 
+.footer-logo-img {
+  height: 28px;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+}
+
 /* =====================
    ANIMAÇÕES
 ===================== */
@@ -768,8 +598,6 @@ thead .col-us { color: var(--accent) !important; }
 
 @media (max-width: 640px) {
   .site-header { padding: 0 20px; }
-  .header-nav  { display: none; }
-  .mobile-menu-btn { display: block; }
 
   .hero { padding: 64px 20px 48px; }
 

@@ -20,11 +20,11 @@ module.exports = {
     return result.insertId;
   },
 
-  createDevProfile: async ({ userId, nome, sobrenome, githubLogin, nivel }) => {
+  createDevProfile: async ({ userId, nome, sobrenome, githubLogin, nivel, cpf, telefone, rg }) => {
     await db.query(
-      `INSERT INTO user_dev_profiles (user_id, nome, sobrenome, github_login, nivel)
-       VALUES (?, ?, ?, ?, ?)`,
-      [userId, nome, sobrenome, githubLogin, nivel]
+      `INSERT INTO user_dev_profiles (user_id, nome, sobrenome, github_login, nivel, cpf, telefone, rg)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [userId, nome, sobrenome ?? null, githubLogin ?? null, nivel, cpf ?? null, telefone ?? null, rg ?? null]
     );
   },
 

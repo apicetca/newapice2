@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Configurações da sua conta Ápice: segurança, senha e gerenciamento de conta." />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Ápice — Configurações</title>
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/perfil.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <style>
+    /* ── Seção hero da página ── */
+    .cfg-hero {
+      position: relative;
+      z-index: 1;
+      padding: 40px 24px 0;
+      max-width: 900px;
+      margin: 0 auto;
+      animation: fadeUp .4s ease both;
+    }
+    .cfg-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 3px 12px;
+      border-radius: 99px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      font-size: .7rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      font-family: var(--font-body);
+    }
+    .cfg-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -.03em;
+      margin-bottom: 4px;
+    }
+    .cfg-sub {
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    /* ── Info da conta ── */
+    .account-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .account-row:last-child { border-bottom: none; }
+    .account-row-label {
+      font-size: .77rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      min-width: 110px;
+    }
+    .account-row-value {
+      flex: 1;
+      font-size: .88rem;
+      color: var(--text);
+      min-width: 0;
+    }
+    .account-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+    .account-badge.github {
+      background: rgba(96,165,250,.12);
+      border: 1px solid rgba(96,165,250,.25);
+      color: var(--blue);
+    }
+    .account-badge.email {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      color: var(--accent);
+    }
+    .account-badge.dev {
+      background: var(--teal-dim);
+      border: 1px solid var(--teal-border);
+      color: var(--teal);
+    }
+    .account-badge.empresa {
+      background: var(--yellow-dim);
+      border: 1px solid rgba(251,191,36,.2);
+      color: var(--yellow);
+    }
+
+    /* ── Divisor de seção com label ── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+    .section-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Força password field ── */
+    .pwd-strength {
+      height: 3px;
+      border-radius: 99px;
+      background: var(--border);
+      overflow: hidden;
+      margin-top: 4px;
+      transition: all .2s;
+    }
+    .pwd-strength-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .3s, background .3s;
+    }
+    .pwd-hint {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* ── Zona de perigo ── */
+    .danger-zone {
+      border-color: rgba(248,113,113,.25) !important;
+    }
+    .danger-zone .card-title { color: var(--red); }
+
+    .danger-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .danger-item:last-child { border-bottom: none; }
+    .danger-item-info { flex: 1; min-width: 200px; }
+    .danger-item-info strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: .88rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+      color: var(--text);
+    }
+    .danger-item-info p {
+      font-size: .8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Modal de confirmação ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn .2s ease;
+    }
+    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+
+    .modal {
+      background: var(--bg-2);
+      border: 1px solid var(--border-lite);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      max-width: 420px;
+      width: 100%;
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { transform:translateY(20px);opacity:0 } to { transform:translateY(0);opacity:1 } }
+
+    .modal-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--red-dim);
+      border: 1px solid rgba(248,113,113,.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 18px;
+      color: var(--red);
+    }
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .modal-sub {
+      font-size: .85rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .modal-sub strong { color: var(--red); }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .modal-actions > * { flex: 1; }
+
+    /* ── Sessão ativa ── */
+    .session-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      flex-wrap: wrap;
+    }
+    .session-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+      flex-shrink: 0;
+      box-shadow: 0 0 6px var(--teal-glow);
+      animation: pulse-dot 2s ease infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity:1 }
+      50%      { opacity:.4 }
+    }
+    .session-text { flex: 1; min-width: 0; }
+    .session-text strong { display:block; font-size:.85rem; color:var(--text); }
+    .session-text span   { font-size:.75rem; color:var(--muted); }
+  </style>
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <!-- ── Hero ── -->
+  <div class="cfg-hero">
+    <div class="cfg-eyebrow" aria-hidden="true">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Configurações
+    </div>
+    <h1 class="cfg-title">Configurações</h1>
+    <p class="cfg-sub">Gerencie segurança, sessão e preferências da sua conta.</p>
+  </div>
+
+  <main id="main-content" hidden>
+
+    <!-- ══ 1. INFORMAÇÕES DA CONTA ══ -->
+    <section class="card" aria-labelledby="account-title">
+      <h2 class="card-title" id="account-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Informações da conta
+      </h2>
+      <div id="account-info-rows">
+        <div class="account-row">
+          <span class="account-row-label">E-mail</span>
+          <span class="account-row-value" id="info-email">—</span>
+        </div>
+        <div class="account-row">
+          <span class="account-row-label">Tipo</span>
+          <span class="account-row-value" id="info-type">—</span>
+        </div>
+        <div class="account-row">
+          <span class="account-row-label">Autenticação</span>
+          <span class="account-row-value" id="info-auth">—</span>
+        </div>
+        <div class="account-row">
+          <span class="account-row-label">Membro desde</span>
+          <span class="account-row-value" id="info-since">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 2. SEGURANÇA ══ -->
+    <section class="card" aria-labelledby="security-title">
+      <h2 class="card-title" id="security-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Segurança
+      </h2>
+
+      <!-- Aviso: conta GitHub sem senha -->
+      <div id="github-security-notice" hidden style="display:flex;align-items:flex-start;gap:11px;padding:14px 16px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:var(--radius-md);margin-bottom:4px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--blue);flex-shrink:0;margin-top:2px" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>
+          <strong style="display:block;font-size:.85rem;color:var(--blue);margin-bottom:3px">Conta conectada via GitHub</strong>
+          <span style="font-size:.8rem;color:var(--muted)">Sua autenticação é gerenciada pelo GitHub. A alteração de senha não está disponível para contas OAuth.</span>
+        </div>
+      </div>
+
+      <!-- Formulário de troca de senha -->
+      <div id="password-form-wrap">
+        <p class="section-divider">Alterar senha</p>
+        <div class="alert" id="pwd-alert" role="alert"></div>
+        <form id="password-form" novalidate>
+          <div class="field">
+            <label for="inp-current">Senha atual</label>
+            <input type="password" id="inp-current" name="current_password"
+                   placeholder="••••••••" autocomplete="current-password" />
+            <span class="field-error" id="err-current">Senha atual é obrigatória.</span>
+          </div>
+          <div class="field">
+            <label for="inp-new">Nova senha</label>
+            <input type="password" id="inp-new" name="new_password"
+                   placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+            <div class="pwd-strength" aria-hidden="true">
+              <div class="pwd-strength-fill" id="pwd-fill" style="width:0%"></div>
+            </div>
+            <span class="pwd-hint" id="pwd-hint"></span>
+            <span class="field-error" id="err-new">Nova senha deve ter pelo menos 8 caracteres.</span>
+          </div>
+          <div class="field">
+            <label for="inp-confirm">Confirmar nova senha</label>
+            <input type="password" id="inp-confirm" name="confirm_password"
+                   placeholder="Repita a nova senha" autocomplete="new-password" />
+            <span class="field-error" id="err-confirm">As senhas não coincidem.</span>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="btn-change-pwd">Alterar senha</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ══ 3. SESSÃO ══ -->
+    <section class="card" aria-labelledby="session-title">
+      <h2 class="card-title" id="session-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Sessão ativa
+      </h2>
+
+      <div class="session-info" aria-label="Sessão atual">
+        <div class="session-dot" aria-hidden="true"></div>
+        <div class="session-text">
+          <strong>Sessão atual</strong>
+          <span id="session-email">—</span>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top:20px">
+        <a href="/auth/logout" class="btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;justify-content:center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Encerrar sessão
+        </a>
+      </div>
+    </section>
+
+    <!-- ══ 4. ZONA DE PERIGO ══ -->
+    <section class="card danger-zone" aria-labelledby="danger-title">
+      <h2 class="card-title" id="danger-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Zona de perigo
+      </h2>
+
+      <div class="danger-item">
+        <div class="danger-item-info">
+          <strong>Excluir minha conta</strong>
+          <p>Remove permanentemente sua conta, perfil, vagas salvas e todo o progresso de roadmaps. Esta ação é <strong style="color:var(--red)">irreversível</strong>.</p>
+        </div>
+        <button class="btn-danger" id="btn-delete-account" style="padding:8px 16px;font-size:.82rem;align-self:flex-start">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Excluir conta
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Loading ── -->
+  <div id="loading-screen" style="display:flex;align-items:center;justify-content:center;min-height:50vh;gap:12px;color:var(--muted);font-size:.9rem" role="status" aria-live="polite">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+    Carregando...
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+  <!-- ── Modal de exclusão ── -->
+  <div class="modal-overlay" id="delete-modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </div>
+      <h2 class="modal-title" id="modal-title">Excluir conta permanentemente?</h2>
+      <p class="modal-sub">
+        Todos os seus dados serão apagados — perfil, vagas salvas, skills e progresso de roadmaps.<br><br>
+        Digite <strong>EXCLUIR</strong> abaixo para confirmar.
+      </p>
+      <div class="field">
+        <input type="text" id="confirm-input" placeholder="EXCLUIR"
+               autocomplete="off" spellcheck="false"
+               style="text-align:center;letter-spacing:.1em;font-weight:700;font-size:.95rem" />
+        <span class="field-error" id="err-confirm-modal">Digite exatamente: EXCLUIR</span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btn-cancel-modal">Cancelar</button>
+        <button class="btn-danger" id="btn-confirm-delete"
+                style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;font-size:.85rem;border-radius:var(--radius-sm);background:var(--red-dim);border:1px solid rgba(248,113,113,.3);color:var(--red)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Excluir definitivamente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <footer>
+    <p>&copy; 2025 Dev Estágios. Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    // ── Toast ─────────────────────────────────────────────
+    const toastEl = document.getElementById("toast");
+    let toastTimer = null;
+    function showToast(msg, type = "success") {
+      toastEl.textContent = msg;
+      toastEl.className   = `toast ${type} show`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3000);
+    }
+
+    // ── Indicador de força de senha ───────────────────────
+    const inpNew  = document.getElementById("inp-new");
+    const pwdFill = document.getElementById("pwd-fill");
+    const pwdHint = document.getElementById("pwd-hint");
+
+    function pwdStrength(pwd) {
+      let score = 0;
+      if (pwd.length >= 8)  score++;
+      if (pwd.length >= 12) score++;
+      if (/[A-Z]/.test(pwd)) score++;
+      if (/[0-9]/.test(pwd)) score++;
+      if (/[^A-Za-z0-9]/.test(pwd)) score++;
+      return score;
+    }
+
+    const STRENGTH_LABEL = ["", "Muito fraca", "Fraca", "Razoável", "Boa", "Excelente"];
+    const STRENGTH_COLOR = ["", "#f87171", "#fbbf24", "#fbbf24", "#53df3e", "#53df3e"];
+
+    inpNew?.addEventListener("input", function () {
+      const score = pwdStrength(this.value);
+      const pct   = this.value.length ? Math.max(score * 20, 8) : 0;
+      pwdFill.style.width      = `${pct}%`;
+      pwdFill.style.background = STRENGTH_COLOR[score] ?? "#7c3aed";
+      pwdHint.textContent      = this.value.length ? STRENGTH_LABEL[score] : "";
+      pwdHint.style.color      = STRENGTH_COLOR[score] ?? "var(--muted)";
+    });
+
+    // ── Formulário: alterar senha ─────────────────────────
+    document.getElementById("password-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const current  = document.getElementById("inp-current").value;
+      const newPwd   = document.getElementById("inp-new").value;
+      const confirm  = document.getElementById("inp-confirm").value;
+      const alertEl  = document.getElementById("pwd-alert");
+      alertEl.className = "alert"; alertEl.textContent = "";
+
+      // Limpa erros
+      ["err-current","err-new","err-confirm"].forEach(id =>
+        document.getElementById(id).classList.remove("visible"));
+
+      let valid = true;
+      if (!current)        { document.getElementById("err-current").classList.add("visible"); valid = false; }
+      if (newPwd.length < 8){ document.getElementById("err-new").classList.add("visible");    valid = false; }
+      if (newPwd !== confirm){ document.getElementById("err-confirm").classList.add("visible"); valid = false; }
+      if (!valid) return;
+
+      const btn = document.getElementById("btn-change-pwd");
+      btn.disabled = true; btn.textContent = "Salvando...";
+
+      try {
+        const res  = await fetch("/api/user/password", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ current_password: current, new_password: newPwd }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        this.reset();
+        pwdFill.style.width = "0%";
+        pwdHint.textContent = "";
+        showToast("Senha alterada com sucesso!");
+      } catch (err) {
+        alertEl.textContent = err.message;
+        alertEl.className   = "alert error visible";
+      } finally {
+        btn.disabled = false; btn.textContent = "Alterar senha";
+      }
+    });
+
+    // ── Modal: excluir conta ──────────────────────────────
+    const modal         = document.getElementById("delete-modal");
+    const confirmInput  = document.getElementById("confirm-input");
+    const errModal      = document.getElementById("err-confirm-modal");
+
+    document.getElementById("btn-delete-account").addEventListener("click", () => {
+      confirmInput.value = "";
+      errModal.classList.remove("visible");
+      modal.hidden = false;
+      setTimeout(() => confirmInput.focus(), 80);
+    });
+
+    document.getElementById("btn-cancel-modal").addEventListener("click", () => {
+      modal.hidden = true;
+    });
+
+    // Fecha ao clicar fora do modal
+    modal.addEventListener("click", e => {
+      if (e.target === modal) modal.hidden = true;
+    });
+
+    // Fecha com Escape
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && !modal.hidden) modal.hidden = true;
+    });
+
+    document.getElementById("btn-confirm-delete").addEventListener("click", async () => {
+      const value = confirmInput.value.trim();
+      errModal.classList.remove("visible");
+
+      if (value !== "EXCLUIR") {
+        errModal.classList.add("visible");
+        confirmInput.focus();
+        return;
+      }
+
+      const btn = document.getElementById("btn-confirm-delete");
+      btn.disabled = true; btn.textContent = "Excluindo...";
+
+      try {
+        const res  = await fetch("/api/user/account", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirm: "EXCLUIR" }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        window.location.href = data.redirect ?? "/";
+      } catch (err) {
+        modal.hidden = true;
+        showToast(err.message || "Erro ao excluir conta.", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // ── Bootstrap ─────────────────────────────────────────
+    async function init() {
+      try {
+        const userRes = await fetch("/api/user");
+        if (!userRes.ok) { window.location.href = "/login?next=/configuracoes"; return; }
+        const user = await userRes.json();
+
+        const accountRes = await fetch("/api/user/account");
+        const account    = accountRes.ok ? await accountRes.json() : {};
+
+        // Preenche informações da conta
+        document.getElementById("info-email").textContent = account.email ?? user.email ?? "—";
+        document.getElementById("session-email").textContent = account.email ?? user.email ?? "—";
+
+        const typeMap = { dev: "Desenvolvedor", empresa: "Empresa" };
+        const typeKey = account.type ?? user.type;
+        document.getElementById("info-type").innerHTML =
+          `<span class="account-badge ${typeKey}">${typeMap[typeKey] ?? typeKey}</span>`;
+
+        const isEmail = account.is_email_account ?? false;
+        document.getElementById("info-auth").innerHTML = isEmail
+          ? `<span class="account-badge email">E-mail e senha</span>`
+          : `<span class="account-badge github">
+               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+               GitHub OAuth
+             </span>`;
+
+        if (account.created_at) {
+          document.getElementById("info-since").textContent =
+            new Date(account.created_at).toLocaleDateString("pt-BR", {
+              day: "2-digit", month: "long", year: "numeric"
+            });
+        }
+
+        // Mostra/esconde form de senha
+        if (!isEmail) {
+          document.getElementById("github-security-notice").hidden = false;
+          document.getElementById("password-form-wrap").hidden = true;
+        }
+
+        document.getElementById("loading-screen").remove();
+        document.getElementById("main-content").hidden = false;
+
+      } catch {
+        document.getElementById("loading-screen").innerHTML = `
+          <div style="text-align:center;color:var(--red)">
+            <p>Erro ao carregar configurações.</p>
+            <a href="/login" style="color:var(--blue);font-size:.85rem">Fazer login novamente</a>
+          </div>`;
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

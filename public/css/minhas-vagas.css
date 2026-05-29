@@ -1,0 +1,48 @@
+/* =============================================
+   minhas-vagas.css
+   Requer: design-system.css + vagas.css + header.css
+============================================= */
+
+/* ── Tabs ─────────────────────────────────────────── */
+.mv-tabs{position:relative;z-index:1;max-width:1100px;margin:0 auto 8px;padding:0 24px;display:flex;gap:6px;flex-wrap:wrap;animation:fadeUp .4s .12s ease both}
+.mv-tab{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius-lg);border:1px solid var(--border-lite);background:transparent;color:var(--muted);font-family:var(--font-body);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.mv-tab:hover{color:var(--text);border-color:var(--muted)}
+.mv-tab.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent)}
+.mv-tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--bg-3);font-size:.68rem;font-weight:700;color:var(--muted);line-height:1;transition:all .15s}
+.mv-tab.active .mv-tab-count{background:var(--accent);color:#fff}
+.mv-tab-count:empty{display:none}
+
+/* ── Barra de progresso ───────────────────────────── */
+.mv-progress{display:flex;flex-direction:column;gap:5px;margin-top:2px}
+.mv-progress-header{display:flex;align-items:center;justify-content:space-between;font-size:.7rem;color:var(--muted)}
+.mv-progress-pct{font-weight:700;color:var(--text)}
+.mv-progress-bar{height:5px;border-radius:99px;background:var(--bg-3);overflow:hidden}
+.mv-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--teal));transition:width .5s ease}
+.mv-progress-done{background:linear-gradient(90deg,var(--teal),var(--teal))}
+
+/* ── Mini stats (concluídas / em progresso) ───────── */
+.mv-stats-row{display:flex;align-items:center;gap:10px;font-size:.72rem;color:var(--muted)}
+.mv-stats-row strong{color:var(--text)}
+.mv-stat-sep{width:1px;height:12px;background:var(--border-lite)}
+
+/* ── Badge concluído ──────────────────────────────── */
+.mv-badge-done{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:.68rem;font-weight:700;background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal-border);flex-shrink:0}
+
+/* ── Botão bookmark ───────────────────────────────── */
+.btn-bookmark{display:flex;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;background:var(--bg-3);border:1px solid var(--border-lite);border-radius:var(--radius-sm);color:var(--muted);cursor:pointer;transition:all .15s}
+.btn-bookmark:hover{color:var(--accent);border-color:var(--accent-border)}
+.btn-bookmark.saved{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent)}
+
+/* ── Empty state ──────────────────────────────────── */
+.mv-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;padding:64px 24px;text-align:center;border:1px dashed var(--border-lite);border-radius:var(--radius-xl);color:var(--muted)}
+.mv-empty-icon{color:var(--border-lite);margin-bottom:16px}
+.mv-empty-title{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.mv-empty-sub{font-size:.83rem;max-width:360px;line-height:1.5;margin-bottom:22px}
+.mv-empty-cta{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--accent);color:#fff;border-radius:var(--radius-sm);font-family:var(--font-display);font-size:.84rem;font-weight:700;text-decoration:none;transition:background .15s}
+.mv-empty-cta:hover{background:var(--accent-hv)}
+
+/* ── Responsive ───────────────────────────────────── */
+@media(max-width:680px){
+  .mv-tabs{padding:0 14px}
+  .mv-tab{padding:7px 13px;font-size:.78rem}
+}

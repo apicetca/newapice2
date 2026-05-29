@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Seu perfil na Ápice: edite seus dados, gerencie skills e veja as vagas salvas." />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Ápice — Meu Perfil</title>
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/perfil.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <main id="main-content" hidden>
+
+    <!-- ══ 1. HERO ══ -->
+    <section class="card" aria-label="Informações do perfil">
+      <div class="profile-hero">
+        <div class="avatar-wrap">
+          <div id="avatar-el"></div>
+        </div>
+        <div class="profile-meta">
+          <h1 class="profile-name" id="profile-name">—</h1>
+          <p class="profile-email" id="profile-email"></p>
+          <div class="profile-badges" id="profile-badges"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 2. EDITAR DADOS ══ -->
+    <section class="card" aria-labelledby="edit-title">
+      <h2 class="card-title" id="edit-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Editar perfil
+      </h2>
+      <div class="alert" id="edit-alert" role="alert"></div>
+      <form id="edit-form" novalidate>
+        <div class="field-row">
+          <div class="field">
+            <label for="inp-nome">Nome</label>
+            <input type="text" id="inp-nome" name="nome" placeholder="Seu nome" autocomplete="given-name" />
+            <span class="field-error" id="err-nome">Nome é obrigatório.</span>
+          </div>
+          <div class="field">
+            <label for="inp-sobrenome">Sobrenome <span class="opt">(opcional)</span></label>
+            <input type="text" id="inp-sobrenome" name="sobrenome" placeholder="Seu sobrenome" autocomplete="family-name" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="inp-github">Usuário do GitHub <span class="opt">(opcional)</span></label>
+          <input type="text" id="inp-github" name="github_login" placeholder="seu-usuario" autocomplete="off" />
+          <span class="field-error" id="err-github">Usuário inválido. Use apenas letras, números e hífens.</span>
+        </div>
+        <div class="field">
+          <label for="inp-nivel">Nível de experiência</label>
+          <select id="inp-nivel" name="nivel">
+            <option value="iniciante">Iniciante</option>
+            <option value="intermediario">Intermediário</option>
+            <option value="avancado">Avançado</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" id="btn-save">Salvar alterações</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ══ 3. SKILLS ══ -->
+    <section class="card" aria-labelledby="skills-title">
+      <h2 class="card-title" id="skills-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Minhas skills
+        <span id="skills-count"></span>
+      </h2>
+
+      <div class="reanalyze-bar" id="reanalyze-bar" hidden>
+        <div>
+          <strong>Análise do GitHub</strong>
+          <p>Re-analise seus repositórios para atualizar as skills detectadas automaticamente.</p>
+        </div>
+        <button class="btn-secondary" id="btn-reanalyze">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Re-analisar GitHub
+        </button>
+      </div>
+
+      <div class="skills-grid" id="skills-grid" aria-label="Suas skills"></div>
+
+      <div class="add-skill-row">
+        <div class="field">
+          <label for="skill-select">Adicionar skill manualmente</label>
+          <select id="skill-select">
+            <option value="">Selecione uma skill...</option>
+          </select>
+        </div>
+        <button type="button" class="btn-secondary" id="btn-add-skill">Adicionar</button>
+      </div>
+    </section>
+
+    <!-- ══ 4. VAGAS SALVAS ══ -->
+    <section class="card" aria-labelledby="saved-title">
+      <h2 class="card-title" id="saved-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+        Vagas salvas
+        <span id="saved-count"></span>
+      </h2>
+      <div id="saved-jobs-list" aria-label="Vagas salvas" role="list"></div>
+    </section>
+
+  </main>
+
+  <!-- Estado de carregamento -->
+  <div id="loading-screen" style="display:flex;align-items:center;justify-content:center;min-height:60vh;gap:12px;color:var(--muted);font-size:.9rem" role="status" aria-live="polite">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+    Carregando perfil...
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <footer>
+    <p>&copy; 2025 Dev Estágios. Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    // ── Estado ───────────────────────────────────────────
+    let currentUser  = null;
+    let userSkills   = [];
+    let skillCatalog = [];
+    let savedJobs    = [];
+
+    // ── Toast ─────────────────────────────────────────────
+    const toastEl = document.getElementById("toast");
+    let toastTimer = null;
+    function showToast(msg, type = "success") {
+      toastEl.textContent = msg;
+      toastEl.className   = `toast ${type} show`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toastEl.classList.remove("show"); }, 2800);
+    }
+
+    // ── Renderiza hero ────────────────────────────────────
+    function renderHero(user) {
+      document.getElementById("profile-name").textContent  = user.nome
+        ? `${user.nome} ${user.sobrenome ?? ""}`.trim()
+        : user.email;
+      document.getElementById("profile-email").textContent = user.email;
+
+      // Avatar
+      const avatarEl = document.getElementById("avatar-el");
+      if (user.avatar) {
+        avatarEl.innerHTML = `<img class="avatar-img" src="${user.avatar}" alt="Avatar de ${user.nome ?? ""}" />`;
+      } else {
+        const initials = (user.nome ?? user.email ?? "?")[0].toUpperCase();
+        avatarEl.innerHTML = `<div class="avatar-placeholder">${initials}</div>`;
+      }
+
+      // Badges
+      const badges = document.getElementById("profile-badges");
+      const nivelMap = { iniciante:"Iniciante", intermediario:"Intermediário", avancado:"Avançado" };
+      badges.innerHTML = [
+        user.nivel
+          ? `<span class="badge badge-nivel">${nivelMap[user.nivel] ?? user.nivel}</span>`
+          : "",
+        user.github_login || user.login
+          ? `<span class="badge badge-github">GitHub: @${user.github_login ?? user.login}</span>`
+          : "",
+        `<span class="badge badge-tipo">${user.type === "empresa" ? "Empresa" : "Desenvolvedor"}</span>`,
+      ].join("");
+    }
+
+    // ── Preenche formulário ───────────────────────────────
+    function fillForm(user) {
+      document.getElementById("inp-nome").value      = user.nome      ?? "";
+      document.getElementById("inp-sobrenome").value = user.sobrenome ?? "";
+      document.getElementById("inp-github").value    = user.github_login ?? user.login ?? "";
+      document.getElementById("inp-nivel").value     = user.nivel     ?? "iniciante";
+    }
+
+    // ── Renderiza skills ──────────────────────────────────
+    function renderSkills() {
+      const grid = document.getElementById("skills-grid");
+      document.getElementById("skills-count").textContent = `(${userSkills.length})`;
+
+      if (!userSkills.length) {
+        grid.innerHTML = `<p class="skills-empty">Nenhuma skill detectada ainda. Conecte seu GitHub ou adicione manualmente.</p>`;
+        return;
+      }
+
+      grid.innerHTML = userSkills.map(s => `
+        <span class="skill-tag ${s.type}" data-id="${s.skill_id}">
+          ${s.name}
+          <span class="skill-source">${s.source === "github" ? "GH" : "manual"}</span>
+          ${s.source === "manual" ? `
+            <button onclick="removeSkill(${s.skill_id})" aria-label="Remover skill ${s.name}" title="Remover">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>` : ""}
+        </span>`).join("");
+    }
+
+    // ── Renderiza vagas salvas ────────────────────────────
+    function renderSavedJobs() {
+      const list = document.getElementById("saved-jobs-list");
+      const count = document.getElementById("saved-count");
+      count.textContent = savedJobs.length ? `(${savedJobs.length})` : "";
+
+      if (!savedJobs.length) {
+        list.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;padding:32px 20px;text-align:center;border:1px dashed var(--border-lite);border-radius:var(--radius-lg);gap:10px">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--border-lite)" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            <p style="font-family:var(--font-display);font-weight:700;color:var(--text)">Nenhuma vaga salva</p>
+            <p style="font-size:.82rem;color:var(--muted)">Salve vagas enquanto navega pela listagem.</p>
+            <a href="/vagas" style="display:inline-flex;align-items:center;gap:5px;margin-top:4px;padding:8px 18px;background:var(--accent);color:#fff;border-radius:var(--radius-sm);font-family:var(--font-display);font-size:.82rem;font-weight:700;text-decoration:none;transition:background .15s" onmouseover="this.style.background='var(--accent-hv)'" onmouseout="this.style.background='var(--accent)'">
+              Explorar vagas
+            </a>
+          </div>`;
+        return;
+      }
+
+      const LEVEL_LABEL = { estagio:"Estágio", junior:"Júnior", pleno:"Pleno" };
+      const LEVEL_COLOR = { estagio:"var(--teal)", junior:"var(--accent)", pleno:"var(--yellow)" };
+
+      list.innerHTML = savedJobs.map(job => `
+        <div class="saved-job-row" role="listitem" data-id="${job.id}">
+          <div class="saved-job-info">
+            <div class="saved-job-title">${job.title}</div>
+            <div class="saved-job-meta">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/></svg>
+              ${job.company ?? "Empresa"}
+              <span class="saved-job-level" style="color:${LEVEL_COLOR[job.level] ?? "var(--muted)"}">
+                · ${LEVEL_LABEL[job.level] ?? job.level}
+              </span>
+            </div>
+          </div>
+          <div class="saved-job-actions">
+            <a href="/roadmap?job=${job.id}" class="btn-primary" style="padding:7px 14px;font-size:.78rem">
+              Ver roadmap
+            </a>
+            <button class="btn-danger" onclick="unsaveJob(${job.id})" aria-label="Remover ${job.title} das vagas salvas">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+              Remover
+            </button>
+          </div>
+        </div>`).join("");
+    }
+
+    // ── Remover vaga salva ────────────────────────────────
+    async function unsaveJob(jobId) {
+      try {
+        const res = await fetch(`/api/user/saved-jobs/${jobId}`, { method: "DELETE" });
+        if (!res.ok) throw new Error();
+        savedJobs = savedJobs.filter(j => j.id !== jobId);
+        const row = document.querySelector(`.saved-job-row[data-id="${jobId}"]`);
+        if (row) {
+          row.style.transition = "opacity .25s, transform .2s";
+          row.style.opacity = "0";
+          row.style.transform = "translateX(10px)";
+          setTimeout(renderSavedJobs, 250);
+        }
+        showToast("Vaga removida das salvas.");
+      } catch {
+        showToast("Erro ao remover. Tente novamente.", "error");
+      }
+    }
+
+    // ── Adicionar skill ───────────────────────────────────
+    async function addSkill() {
+      const sel    = document.getElementById("skill-select");
+      const skillId= parseInt(sel.value, 10);
+      if (!skillId) return showToast("Selecione uma skill.", "error");
+      if (userSkills.some(s => s.skill_id === skillId)) return showToast("Skill já adicionada.", "error");
+
+      try {
+        const res = await fetch("/api/user/skills", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ skill_id: skillId }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        const data = await res.json();
+        userSkills.push({ skill_id: data.skill.id, name: data.skill.name, type: "hard", source: "manual", confidence: 70 });
+        sel.value = "";
+        renderSkills();
+        showToast(`Skill "${data.skill.name}" adicionada.`);
+      } catch (e) {
+        showToast(e.message || "Erro ao adicionar skill.", "error");
+      }
+    }
+
+    // ── Remover skill ─────────────────────────────────────
+    async function removeSkill(skillId) {
+      try {
+        const res = await fetch(`/api/user/skills/${skillId}`, { method: "DELETE" });
+        if (!res.ok) throw new Error();
+        userSkills = userSkills.filter(s => s.skill_id !== skillId);
+        renderSkills();
+        showToast("Skill removida.");
+      } catch {
+        showToast("Erro ao remover skill.", "error");
+      }
+    }
+
+    // ── Re-analisar GitHub ────────────────────────────────
+    async function reanalyze() {
+      const btn = document.getElementById("btn-reanalyze");
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> Analisando...`;
+      try {
+        const res = await fetch("/api/user/reanalyze", { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        // Recarrega skills
+        const profileRes  = await fetch("/api/user/profile");
+        const profileData = await profileRes.json();
+        userSkills = profileData.skills ?? [];
+        renderSkills();
+        showToast(data.message ?? "Análise concluída!");
+      } catch (e) {
+        showToast(e.message || "Erro na análise. Conecte seu GitHub.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Re-analisar GitHub`;
+      }
+    }
+
+    // ── Submit do formulário ──────────────────────────────
+    document.getElementById("edit-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const alertEl = document.getElementById("edit-alert");
+      alertEl.className = "alert"; alertEl.textContent = "";
+
+      const nome         = document.getElementById("inp-nome").value.trim();
+      const sobrenome    = document.getElementById("inp-sobrenome").value.trim();
+      const github_login = document.getElementById("inp-github").value.trim();
+      const nivel        = document.getElementById("inp-nivel").value;
+
+      // Validação client-side
+      let valid = true;
+      const errNome   = document.getElementById("err-nome");
+      const errGithub = document.getElementById("err-github");
+      errNome.classList.remove("visible");
+      errGithub.classList.remove("visible");
+
+      if (!nome) { errNome.classList.add("visible"); valid = false; }
+      if (github_login && !/^[a-zA-Z0-9-]+$/.test(github_login)) {
+        errGithub.classList.add("visible"); valid = false;
+      }
+      if (!valid) return;
+
+      const btn = document.getElementById("btn-save");
+      btn.disabled = true; btn.textContent = "Salvando...";
+
+      try {
+        const res = await fetch("/api/user/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome, sobrenome: sobrenome || null, github_login: github_login || null, nivel }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        // Atualiza hero com novos dados
+        currentUser.nome      = nome;
+        currentUser.sobrenome = sobrenome;
+        currentUser.github_login = github_login;
+        currentUser.nivel     = nivel;
+        renderHero(currentUser);
+        showToast("Perfil atualizado com sucesso!");
+      } catch (e) {
+        alertEl.textContent = e.message || "Erro ao salvar. Tente novamente.";
+        alertEl.className = "alert error visible";
+      } finally {
+        btn.disabled = false; btn.textContent = "Salvar alterações";
+      }
+    });
+
+    // ── Bootstrap ─────────────────────────────────────────
+    document.getElementById("btn-add-skill").addEventListener("click", addSkill);
+    document.getElementById("btn-reanalyze")?.addEventListener("click", reanalyze);
+
+    async function init() {
+      try {
+        const userRes = await fetch("/api/user");
+        if (!userRes.ok) { window.location.href = "/login?next=/perfil"; return; }
+        currentUser = await userRes.json();
+
+        const [profileRes, savedRes, catalogRes] = await Promise.all([
+          fetch("/api/user/profile"),
+          fetch("/api/user/saved-jobs"),
+          fetch("/api/user/skills/catalog"),
+        ]);
+
+        const profile = profileRes.ok ? await profileRes.json() : {};
+        savedJobs     = savedRes.ok   ? await savedRes.json()   : [];
+        skillCatalog  = catalogRes.ok ? await catalogRes.json() : [];
+        userSkills    = profile.skills ?? [];
+
+        // Mescla dados da sessão com os do perfil
+        currentUser = { ...currentUser, ...profile };
+
+        renderHero(currentUser);
+        fillForm(currentUser);
+        renderSkills();
+        renderSavedJobs();
+
+        // Exibe botão de re-análise apenas para quem tem GitHub OAuth
+        if (currentUser.avatar || currentUser.login) {
+          document.getElementById("reanalyze-bar").hidden = false;
+        }
+
+        // Preenche catálogo de skills (exclui as que o usuário já tem)
+        const ownIds = new Set(userSkills.map(s => s.skill_id));
+        const sel = document.getElementById("skill-select");
+        sel.innerHTML = `<option value="">Selecione uma skill...</option>`;
+        skillCatalog
+          .filter(s => !ownIds.has(s.id))
+          .forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s.id;
+            opt.textContent = `${s.name} (${s.type === "hard" ? "Técnica" : "Comportamental"})`;
+            sel.appendChild(opt);
+          });
+
+        document.getElementById("loading-screen").remove();
+        document.getElementById("main-content").hidden = false;
+
+      } catch (err) {
+        document.getElementById("loading-screen").innerHTML = `
+          <div style="text-align:center;color:var(--red)">
+            <p>Erro ao carregar o perfil.</p>
+            <a href="/login" style="color:var(--blue);font-size:.88rem">Fazer login novamente</a>
+          </div>`;
+      }
+    }
+
+    init();
+  </script>
+
+  <style>
+    /* ── Vagas salvas: lista compacta ── */
+    .saved-job-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .saved-job-row:last-child { border-bottom: none; }
+    .saved-job-info { flex: 1; min-width: 0; }
+    .saved-job-title {
+      font-family: var(--font-display);
+      font-size: .92rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .saved-job-meta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .77rem;
+      color: var(--muted);
+    }
+    .saved-job-level { font-weight: 600; }
+    .saved-job-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    @media (max-width: 480px) {
+      .saved-job-row { flex-direction: column; align-items: flex-start; }
+      .saved-job-actions { width: 100%; justify-content: flex-end; }
+    }
+  </style>
+
+</body>
+</html>

@@ -9,6 +9,7 @@
 // ============================================
 const express  = require("express");
 const axios    = require("axios");
+const bcrypt   = require("bcrypt");
 const router   = express.Router();
 const db       = require("../database/db");
 const { matchSkillsFromGitHub } = require("../services/githubAnalyzer");
@@ -251,6 +252,180 @@ router.get("/skills/catalog", isAuth, async (req, res) => {
     res.json(skills);
   } catch (err) {
     res.status(500).json({ error: "Erro interno." });
+  }
+});
+
+// ============================================
+// GET /api/user/account
+// Metadados da conta (email, tipo, data, se tem senha)
+// ============================================
+router.get("/account", isAuth, async (req, res) => {
+  const userId = req.session.user.id;
+  try {
+    const [rows] = await db.query(
+      "SELECT email, type, created_at, (password_hash IS NOT NULL) AS is_email_account FROM users WHERE id = ?",
+      [userId]
+    );
+    if (!rows.length) return res.status(404).json({ error: "Usuário não encontrado." });
+    res.json({
+      email:            rows[0].email,
+      type:             rows[0].type,
+      created_at:       rows[0].created_at,
+      is_email_account: Boolean(rows[0].is_email_account),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================
+// PATCH /api/user/password
+// Altera a senha (somente contas com email/senha)
+// Body: { current_password, new_password }
+// ============================================
+router.patch("/password", isAuth, async (req, res) => {
+  const { current_password, new_password } = req.body;
+  const userId = req.session.user.id;
+
+  if (!current_password || !new_password)
+    return res.status(400).json({ error: "Campos obrigatórios ausentes." });
+  if (new_password.length < 8)
+    return res.status(400).json({ error: "Nova senha deve ter no mínimo 8 caracteres." });
+  if (new_password.length > 128)
+    return res.status(400).json({ error: "Nova senha deve ter no máximo 128 caracteres." });
+  if (/^\s|\s$/.test(new_password))
+    return res.status(400).json({ error: "A senha não pode começar ou terminar com espaços." });
+
+  try {
+    const [rows] = await db.query("SELECT password_hash FROM users WHERE id = ?", [userId]);
+    if (!rows.length || !rows[0].password_hash)
+      return res.status(400).json({ error: "Esta conta usa login pelo GitHub e não possui senha." });
+
+    if (!(await bcrypt.compare(current_password, rows[0].password_hash)))
+      return res.status(401).json({ error: "Senha atual incorreta." });
+
+    const newHash = await bcrypt.hash(new_password, 10);
+    await db.query("UPDATE users SET password_hash = ? WHERE id = ?", [newHash, userId]);
+    res.json({ success: true, message: "Senha alterada com sucesso." });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================
+// DELETE /api/user/account
+// Exclui a conta permanentemente
+// Body: { confirm: "EXCLUIR" }
+// ============================================
+router.delete("/account", isAuth, async (req, res) => {
+  const { confirm } = req.body;
+  const userId = req.session.user.id;
+
+  if (confirm !== "EXCLUIR")
+    return res.status(400).json({ error: "Digite EXCLUIR para confirmar." });
+
+  try {
+    await db.query("DELETE FROM users WHERE id = ?", [userId]);
+    req.session.destroy(() => {
+      res.json({ success: true, redirect: "/" });
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================
+// GET /api/user/saved-jobs
+// Lista vagas salvas do usuário com skills
+// ============================================
+router.get("/saved-jobs", isAuth, async (req, res) => {
+  const userId = req.session.user.id;
+  try {
+    const [jobs] = await db.query(`
+      SELECT j.id, j.title, j.company, j.description, j.level
+      FROM user_saved_jobs usj
+      JOIN jobs j ON j.id = usj.job_id
+      WHERE usj.user_id = ?
+      ORDER BY usj.saved_at DESC
+    `, [userId]);
+
+    if (!jobs.length) return res.json([]);
+
+    const jobIds = jobs.map(j => j.id);
+    const [jobSkills] = await db.query(`
+      SELECT js.job_id, js.importance, s.id AS skill_id, s.name, s.type, s.category
+      FROM job_skills js
+      JOIN skills s ON s.id = js.skill_id
+      WHERE js.job_id IN (?)
+      ORDER BY js.importance DESC, js.learn_order
+    `, [jobIds]);
+
+    const skillsByJob = {};
+    for (const row of jobSkills) {
+      if (!skillsByJob[row.job_id]) skillsByJob[row.job_id] = [];
+      skillsByJob[row.job_id].push({
+        id: row.skill_id, name: row.name, type: row.type,
+        category: row.category, importance: row.importance,
+      });
+    }
+
+    res.json(jobs.map(j => ({ ...j, skills: skillsByJob[j.id] ?? [] })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================
+// GET /api/user/saved-job-ids
+// Retorna IDs das vagas salvas (para marcar na listagem)
+// ============================================
+router.get("/saved-job-ids", isAuth, async (req, res) => {
+  const userId = req.session.user.id;
+  try {
+    const [rows] = await db.query(
+      "SELECT job_id FROM user_saved_jobs WHERE user_id = ?",
+      [userId]
+    );
+    res.json(rows.map(r => r.job_id));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================
+// POST /api/user/saved-jobs/:jobId
+// Salva uma vaga
+// ============================================
+router.post("/saved-jobs/:jobId", isAuth, async (req, res) => {
+  const userId = req.session.user.id;
+  const jobId  = parseInt(req.params.jobId, 10);
+  if (!jobId) return res.status(400).json({ error: "jobId inválido." });
+  try {
+    await db.query(
+      "INSERT IGNORE INTO user_saved_jobs (user_id, job_id) VALUES (?, ?)",
+      [userId, jobId]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================
+// DELETE /api/user/saved-jobs/:jobId
+// Remove vaga salva
+// ============================================
+router.delete("/saved-jobs/:jobId", isAuth, async (req, res) => {
+  const userId = req.session.user.id;
+  const jobId  = parseInt(req.params.jobId, 10);
+  try {
+    await db.query(
+      "DELETE FROM user_saved_jobs WHERE user_id = ? AND job_id = ?",
+      [userId, jobId]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

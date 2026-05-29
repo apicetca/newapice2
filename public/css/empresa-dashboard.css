@@ -1,100 +1,7 @@
 /* =============================================
    empresa-dashboard.css
-   Identidade Visual: Ápice 2026
+   Requer: design-system.css + header.css
 ============================================= */
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg:          #0a0a0f;
-  --bg-2:        #0f0f17;
-  --bg-3:        #16161f;
-  --border:      #1e1e2e;
-  --border-lite: #2a2a3d;
-  --text:        #e8e8f0;
-  --muted:       #6b6b8a;
-  --accent:      #7C3AED;
-  --accent-hv:   #9461f7;
-  --accent-dim:  rgba(124,58,237,.13);
-  --teal:        #10B691;
-  --teal-hv:     #0ed4a8;
-  --teal-dim:    rgba(16,182,145,.12);
-  --teal-border: rgba(16,182,145,.28);
-  --accent-dim:  rgba(124,58,237,.13);
-  --accent-border: rgba(124,58,237,.30);
-  --blue:        #60a5fa;
-  --blue-dim:    rgba(96,165,250,.12);
-  --yellow:      #fbbf24;
-  --yellow-dim:  rgba(251,191,36,.12);
-  --red:         #f87171;
-  --red-dim:     rgba(248,113,113,.10);
-  --purple:      #bc8cff;
-  --purple-dim:  rgba(188,140,255,.12);
-  --radius-sm:   5px;
-  --radius-md:   9px;
-  --radius-lg:   14px;
-  --radius-xl:   20px;
-  --font-display: 'Montserrat', sans-serif;
-  --font-body:    'DM Mono', monospace;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg); color: var(--text);
-  font-family: var(--font-body); font-size: 1rem;
-  line-height: 1.65; min-height: 100vh; overflow-x: hidden;
-}
-
-a { color: inherit; text-decoration: none; }
-
-body::before {
-  content: ""; position: fixed; inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 44px 44px; opacity: .30; pointer-events: none; z-index: 0;
-}
-
-body::after {
-  content: ""; position: fixed; top: -80px; left: 50%;
-  transform: translateX(-50%); width: 900px; height: 520px;
-  background: radial-gradient(ellipse, rgba(124,58,237,.10) 0%, transparent 65%);
-  pointer-events: none; z-index: 0;
-}
-
-/* ── Header ── */
-.site-header {
-  position: sticky; top: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 40px; height: 58px;
-  background: rgba(10,10,15,.90); backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  font-family: var(--font-display); font-size: 1.05rem;
-  font-weight: 700; letter-spacing: -.02em;
-  color: var(--text); display: flex; align-items: center; gap: 8px;
-}
-
-.header-nav { display: flex; align-items: center; gap: 6px; }
-
-.nav-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 14px; border-radius: var(--radius-sm);
-  font-size: .85rem; font-family: var(--font-body); font-weight: 500;
-  color: var(--muted); background: transparent; border: 1px solid transparent;
-  cursor: pointer; transition: all .15s; text-decoration: none;
-}
-.nav-btn:hover { color: var(--text); background: var(--bg-3); border-color: var(--border); }
-.nav-btn.active { color: var(--text); background: var(--bg-3); border-color: var(--border-lite); }
-.nav-btn.danger:hover { color: var(--red); background: var(--red-dim); border-color: rgba(248,113,113,.20); }
-.nav-btn-cta {
-  background: var(--accent); color: #fff;
-  border-color: transparent; font-weight: 700; font-family: var(--font-display);
-}
-.nav-btn-cta:hover { background: var(--accent-hv); color: #fff; border-color: transparent; }
 
 /* ── Layout ── */
 .page-wrapper {
@@ -265,7 +172,6 @@ body::after {
 .job-title-cell { font-weight: 600; color: var(--text); }
 .job-company-level { font-size: .75rem; color: var(--muted); margin-top: 2px; }
 
-/* Mini barra de progresso médio */
 .mini-bar-wrap { display: flex; align-items: center; gap: 8px; }
 .mini-bar-track {
   width: 72px; height: 4px; background: var(--bg-3);
@@ -278,7 +184,6 @@ body::after {
 }
 .mini-bar-val { font-size: .75rem; color: var(--muted); white-space: nowrap; }
 
-/* Ações da vaga */
 .job-actions { display: flex; align-items: center; gap: 6px; }
 
 .btn-icon {
@@ -292,7 +197,6 @@ body::after {
 .btn-icon.btn-toggle-on  { color: var(--accent); border-color: rgba(124,58,237,.30); }
 .btn-icon.btn-toggle-off { color: var(--muted); }
 
-/* Empty state da tabela */
 .table-empty {
   padding: 48px 24px; text-align: center; color: var(--muted);
 }
@@ -384,7 +288,6 @@ body::after {
 .btn-save:hover { background: var(--accent-hv); }
 .btn-save:disabled { opacity: .45; cursor: not-allowed; }
 
-/* Modal de confirmação de exclusão */
 .confirm-modal {
   background: var(--bg-2); border: 1px solid rgba(248,81,73,.25);
   border-radius: var(--radius-lg); padding: 24px 28px;
@@ -437,7 +340,6 @@ body::after {
   .metrics-grid { grid-template-columns: 1fr 1fr; }
   .company-hero { flex-direction: column; align-items: flex-start; gap: 14px; }
 
-  /* Tabela vira cards em mobile */
   .jobs-table thead { display: none; }
   .jobs-table, .jobs-table tbody, .jobs-table tr, .jobs-table td { display: block; width: 100%; }
   .jobs-table tr {

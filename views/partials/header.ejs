@@ -1,7 +1,7 @@
 <!-- Partial: site header (shared) -->
 <header class="site-header">
-  <a href="/" class="logo" aria-label="Dev Estágios — início">
-    <span aria-hidden="true">🚀</span> Dev Estágios
+  <a href="/" class="logo" aria-label="Ápice — início">
+    <img src="/img/principal.webp" alt="Ápice" class="site-logo" />
   </a>
 
   <% if (typeof user !== 'undefined' && user) { %>
@@ -13,17 +13,16 @@
         <span class="header-username">Olá, <strong><%= user.name %></strong></span>
       <% } %>
       <a href="/dashboard" class="nav-btn">Painel</a>
+      <a href="/vagas" class="nav-btn">Vagas</a>
       <% if (user.type === 'empresa') { %>
         <a href="/empresa/dashboard" class="nav-btn">Área da empresa</a>
       <% } %>
 
-      <!-- User dropdown -->
       <div class="user-menu">
         <button class="user-menu-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userMenuList">
           <span class="user-menu-label"><%= user.name ? user.name.split(' ')[0] : 'Você' %></span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
-
         <ul class="user-menu-list" id="userMenuList" role="menu" hidden>
           <li role="none"><a role="menuitem" href="/perfil">Perfil</a></li>
           <li role="none"><a role="menuitem" href="/minhas-vagas">Minhas vagas</a></li>
@@ -41,46 +40,97 @@
       <a href="/cadastro" class="nav-cta">Criar conta grátis</a>
     </nav>
   <% } %>
-
-  <button class="mobile-menu-btn" aria-label="Abrir menu" onclick="toggleMenu()">☰</button>
 </header>
 
-<nav class="mobile-menu" id="mobile-menu" aria-label="Menu mobile" hidden>
+<!-- Bottom navigation — visível apenas em mobile -->
+<nav class="bottom-nav" aria-label="Navegação principal">
   <% if (typeof user !== 'undefined' && user) { %>
-    <a href="/dashboard">Painel</a>
-    <% if (user.type === 'empresa') { %>
-      <a href="/empresa/dashboard">Área da empresa</a>
-    <% } %>
-    <a href="/auth/logout">Sair</a>
+
+    <a href="/dashboard" class="bottom-nav-item" data-path="/dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>Painel</span>
+    </a>
+
+    <a href="/vagas" class="bottom-nav-item" data-path="/vagas">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+      <span>Vagas</span>
+    </a>
+
+    <a href="/minhas-vagas" class="bottom-nav-item" data-path="/minhas-vagas">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+      <span>Minhas</span>
+    </a>
+
+    <a href="/roadmap" class="bottom-nav-item" data-path="/roadmap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h4l3 10 4-14 3 8 2-4h2"/></svg>
+      <span>Roadmap</span>
+    </a>
+
+    <a href="/perfil" class="bottom-nav-item" data-path="/perfil">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span>Perfil</span>
+    </a>
+
   <% } else { %>
-    <a href="#como-funciona" onclick="toggleMenu()">Como funciona</a>
-    <a href="#diferenciais"  onclick="toggleMenu()">Diferenciais</a>
-    <a href="/vagas">Vagas</a>
-    <a href="/login">Entrar</a>
-    <a href="/cadastro" class="nav-cta">Criar conta grátis</a>
+
+    <a href="#como-funciona" class="bottom-nav-item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
+      <span>Como funciona</span>
+    </a>
+
+    <a href="/vagas" class="bottom-nav-item" data-path="/vagas">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      <span>Vagas</span>
+    </a>
+
+    <a href="/login" class="bottom-nav-item" data-path="/login">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      <span>Entrar</span>
+    </a>
+
+    <a href="/cadastro" class="bottom-nav-item bottom-nav-cta" data-path="/cadastro">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+      <span>Criar conta</span>
+    </a>
+
   <% } %>
 </nav>
 
 <script>
-  (function(){
-    const btn = document.getElementById('userMenuBtn');
-    const menu = document.getElementById('userMenuList');
-    if (!btn || !menu) return;
-
-    function closeMenu(){ btn.setAttribute('aria-expanded','false'); menu.hidden = true; }
-    function openMenu(){ btn.setAttribute('aria-expanded','true'); menu.hidden = false; menu.querySelector('a')?.focus(); }
-
-    btn.addEventListener('click', (e)=>{
-      const expanded = btn.getAttribute('aria-expanded') === 'true';
-      if (expanded) closeMenu(); else openMenu();
-    });
-
-    document.addEventListener('click', (e)=>{
-      if (!btn.contains(e.target) && !menu.contains(e.target)) closeMenu();
-    });
-
-    document.addEventListener('keydown', (e)=>{
-      if (e.key === 'Escape') closeMenu();
-    });
+(function () {
+  /* Inject favicon (principal(gradiente) primary, principal.webp fallback) */
+  (function addFavicon(){
+    try{
+      var head = document.getElementsByTagName('head')[0] || document.documentElement;
+      var link = document.createElement('link');
+      link.rel = 'icon';
+      link.type = 'image/webp';
+      link.href = '/img/principal%28gradiente%29%20%281%29.webp';
+      head.appendChild(link);
+      var link2 = document.createElement('link');
+      link2.rel = 'alternate icon';
+      link2.href = '/img/principal.webp';
+      head.appendChild(link2);
+    }catch(e){/* noop */}
   })();
+  /* ── User dropdown ── */
+  const dropBtn  = document.getElementById('userMenuBtn');
+  const dropList = document.getElementById('userMenuList');
+  if (dropBtn && dropList) {
+    const closeD = () => { dropBtn.setAttribute('aria-expanded','false'); dropList.hidden = true; };
+    const openD  = () => { dropBtn.setAttribute('aria-expanded','true');  dropList.hidden = false; dropList.querySelector('a')?.focus(); };
+    dropBtn.addEventListener('click', () => dropBtn.getAttribute('aria-expanded') === 'true' ? closeD() : openD());
+    document.addEventListener('click', e => { if (!dropBtn.contains(e.target) && !dropList.contains(e.target)) closeD(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeD(); });
+  }
+
+  /* ── Bottom nav: marca item ativo pelo pathname ── */
+  const path  = window.location.pathname;
+  document.querySelectorAll('.bottom-nav-item[data-path]').forEach(link => {
+    if (link.dataset.path === path) {
+      link.setAttribute('aria-current', 'page');
+      link.classList.add('is-active');
+    }
+  });
+})();
 </script>

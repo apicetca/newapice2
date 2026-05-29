@@ -51,6 +51,21 @@ app.get("/roadmap", (req, res) => res.render("roadmap"));
 // Área da empresa
 app.get("/empresa/dashboard", (req, res) => res.render("empresa-dashboard"));
 
+app.get("/minhas-vagas", (req, res) => {
+  if (!req.session.user) return res.redirect("/login?next=/minhas-vagas");
+  res.render("minhas-vagas");
+});
+
+app.get("/perfil", (req, res) => {
+  if (!req.session.user) return res.redirect("/login?next=/perfil");
+  res.render("perfil");
+});
+
+app.get("/configuracoes", (req, res) => {
+  if (!req.session.user) return res.redirect("/login?next=/configuracoes");
+  res.render("configuracoes");
+});
+
 // ============================================
 // API
 // ============================================
@@ -64,12 +79,23 @@ const authRoutes    = require("./routes/auth");
 const userRoutes    = require("./routes/users");
 const roadmapRoutes = require("./routes/roadmap");
 const empresaRoutes = require("./routes/empresa");
+const profileRoutes = require("./routes/profile");
 
 app.use("/auth",        authRoutes);
 app.use("/api/auth",    userRoutes);
 app.use("/api",         roadmapRoutes);
 app.use("/api/empresa", empresaRoutes);
+app.use("/api/user",    profileRoutes);
 
 // ============================================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));
+app.listen(PORT, async () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  // Roda migration automaticamente ao iniciar (seguro de repetir)
+  try {
+    const { execSync } = require("child_process");
+    execSync("node database/migration.js", { stdio: "inherit" });
+  } catch (e) {
+    console.warn("Migration automática falhou — rode manualmente: node database/migration.js");
+  }
+});

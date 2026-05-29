@@ -28,10 +28,10 @@
   --accent-border: rgba(124,58,237,.30);
 
   /* Accent secundário — teal */
-  --teal:        #10B691;
-  --teal-hv:     #0ed4a8;
-  --teal-dim:    rgba(16,182,145,.12);
-  --teal-border: rgba(16,182,145,.28);
+  --teal:        #53df3e;
+  --teal-hv:     #6ee857;
+  --teal-dim:    rgba(83,223,62,.12);
+  --teal-border: rgba(83,223,62,.28);
 
   /* Semânticas */
   --blue:        #60a5fa;
@@ -55,8 +55,7 @@
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:.92rem;line-height:1.7;min-height:100vh;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:44px 44px;opacity:.30;pointer-events:none;z-index:0}
-body::after{content:"";position:fixed;top:-100px;left:50%;transform:translateX(-50%);width:920px;height:540px;background:radial-gradient(ellipse,rgba(124,58,237,.10) 0%,transparent 62%);pointer-events:none;z-index:0}
+/* Quadriculado movido para public/css/landing.css; removido daqui para evitar duplicação */
 .site-header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:58px;background:rgba(10,10,15,.90);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
 .logo{font-family:var(--font-display);font-size:1rem;font-weight:700;letter-spacing:-.01em;color:var(--text);display:flex;align-items:center;gap:8px}
 .header-nav{display:flex;align-items:center;gap:6px}
@@ -107,7 +106,17 @@ body::after{content:"";position:fixed;top:-100px;left:50%;transform:translateX(-
 .lvl-estagio{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal-border)}
 .lvl-junior{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border)}
 .lvl-pleno{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(251,191,36,.2)}
-.job-desc{font-size:.8rem;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.job-desc{
+   font-size: .8rem;
+   color: var(--muted);
+   line-height: 1.6;
+   display: -webkit-box;
+   -webkit-box-orient: vertical;
+   -webkit-line-clamp: 2;
+   /* Standard property for compatibility (lint) */
+   line-clamp: 2;
+   overflow: hidden;
+}
 .skill-block{display:flex;flex-direction:column;gap:6px}
 .skill-block-label{font-size:.67rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:6px}
 .skill-block-label::after{content:"";flex:1;height:1px;background:var(--border)}

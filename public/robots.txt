@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /vagas
+Allow: /cadastro
+Allow: /login
+
+Disallow: /dashboard
+Disallow: /meu-progresso
+Disallow: /roadmap
+Disallow: /perfil
+Disallow: /empresa/
+Disallow: /api/
+
+Sitemap: https://apice.dev.br/sitemap.xml

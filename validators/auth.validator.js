@@ -17,6 +17,24 @@ const TAMANHOS = ["micro","pequena","media","grande"];
 const NIVEIS   = ["iniciante","intermediario","avancado"];
 
 // ──────────────────────────────────────────────────────────
+// Algoritmo real de validação de CPF
+// ──────────────────────────────────────────────────────────
+function isValidCPF(raw) {
+  const c = raw.replace(/\D/g, "");
+  if (c.length !== 11 || /^(\d)\1+$/.test(c)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(c[i]) * (10 - i);
+  let rem = (sum * 10) % 11;
+  if (rem === 10 || rem === 11) rem = 0;
+  if (rem !== parseInt(c[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(c[i]) * (11 - i);
+  rem = (sum * 10) % 11;
+  if (rem === 10 || rem === 11) rem = 0;
+  return rem === parseInt(c[10]);
+}
+
+// ──────────────────────────────────────────────────────────
 // Algoritmo real de validação de CNPJ
 // ──────────────────────────────────────────────────────────
 function calcDigitoCNPJ(nums, len) {
@@ -127,6 +145,25 @@ const registerDevRules = [
       .withMessage("Usuário GitHub deve ter no máximo 39 caracteres.")
     .matches(/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/)
       .withMessage("Usuário GitHub inválido: use apenas letras, números e hífens (sem hífen no início/fim)."),
+
+  body("cpf")
+    .optional({ nullable: true, checkFalsy: true })
+    .custom(val => {
+      if (val && !isValidCPF(val)) throw new Error("CPF inválido. Verifique os dígitos informados.");
+      return true;
+    }),
+
+  body("telefone")
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .isLength({ max: 15 })
+      .withMessage("Telefone inválido."),
+
+  body("rg")
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .isLength({ max: 12 })
+      .withMessage("RG inválido."),
 
   body("nivel")
     .if(body("type").equals("dev"))

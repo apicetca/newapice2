@@ -32,8 +32,16 @@ router.post("/register", validateRegister, async (req, res) => {
     const userId       = await User.create({ email, passwordHash, type });
 
     if (type === "dev") {
-      const { nome, sobrenome, github_login, nivel } = req.body;
-      await User.createDevProfile({ userId, nome, sobrenome: sobrenome ?? null, githubLogin: github_login ?? null, nivel: nivel ?? "iniciante" });
+      const { nome, sobrenome, github_login, nivel, cpf, telefone, rg } = req.body;
+      await User.createDevProfile({
+        userId, nome,
+        sobrenome:   sobrenome    ?? null,
+        githubLogin: github_login ?? null,
+        nivel:       nivel        ?? "iniciante",
+        cpf:         cpf          ? cpf.replace(/\D/g, "") : null,
+        telefone:    telefone     ? telefone.replace(/\D/g, "") : null,
+        rg:          rg           ?? null,
+      });
       req.session.user = buildSession(userId, email, type, {
         name: `${nome} ${sobrenome ?? ""}`.trim(),
         github_login: github_login ?? null,

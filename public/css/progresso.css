@@ -1,113 +1,7 @@
 /* =============================================
    progresso.css — Meu Progresso
-   Identidade Visual: Apice 2026
-   Identidade Visual: Apice 2026
+   Requer: design-system.css + header.css
 ============================================= */
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700\&family=DM+Mono:wght@400;500\&display=swap');
-
-:root {
-  --bg:          #0a0a0f;
-  --bg-2:        #0f0f17;
-  --bg-3:        #16161f;
-  --border:      #1e1e2e;
-  --border-lite: #2a2a3d;
-  --text:        #e8e8f0;
-  --muted:       #6b6b8a;
-  --accent:      #7C3AED;
-  --accent-hv:   #9461f7;
-  --accent:      #7C3AED;
-  --accent-hv:   #9461f7;
-  --accent-dim:  rgba(124,58,237,.13);
-  --accent-border: rgba(124,58,237,.30);
-  --teal:        #10B691;
-  --teal-hv:     #0ed4a8;
-  --teal-dim:    rgba(16,182,145,.12);
-  --teal-border: rgba(16,182,145,.28);
-  --blue:        #60a5fa;
-  --blue-dim:    rgba(96,165,250,.12);
-  --yellow:      #fbbf24;
-  --yellow-dim:  rgba(251,191,36,.12);
-  --red:         #f87171;
-  --red-dim:     rgba(248,113,113,.10);
-  --purple:      #c084fc;
-  --purple-dim:  rgba(192,132,252,.12);
-  --radius-sm:   5px;
-  --radius-md:   9px;
-  --radius-lg:   14px;
-  --radius-xl:   20px;
-  --font-display: 'Montserrat', sans-serif;
-  --font-body:    'DM Mono', monospace;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 1rem;
-  line-height: 1.65;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-a { color: inherit; text-decoration: none; }
-
-body::before {
-  content: "";
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 44px 44px;
-  opacity: .30; pointer-events: none; z-index: 0;
-}
-
-body::after {
-  content: "";
-  position: fixed; top: -100px; left: 50%;
-  transform: translateX(-50%);
-  width: 900px; height: 520px;
-  background: radial-gradient(ellipse, rgba(124,58,237,.09) 0%, transparent 65%);
-  pointer-events: none; z-index: 0;
-}
-
-/* ── Header ── */
-.site-header {
-  position: sticky; top: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 40px; height: 58px;
-  background: rgba(10,10,15,.90);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  font-family: var(--font-display);
-  font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em;
-  color: var(--text); display: flex; align-items: center; gap: 8px;
-}
-
-.header-nav { display: flex; align-items: center; gap: 6px; }
-
-.nav-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 14px; border-radius: var(--radius-sm);
-  font-size: .85rem; font-family: var(--font-body); font-weight: 500;
-  color: var(--muted); background: transparent; border: 1px solid transparent;
-  cursor: pointer; transition: all .15s; text-decoration: none;
-}
-.nav-btn:hover { color: var(--text); background: var(--bg-3); border-color: var(--border); }
-.nav-btn.active { color: var(--text); background: var(--bg-3); border-color: var(--border-lite); }
-.nav-btn.danger:hover { color: var(--red); background: var(--red-dim); border-color: rgba(248,113,113,.20); }
-
-.header-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  border: 2px solid var(--border-lite); object-fit: cover; display: none;
-}
 
 /* ── Layout ── */
 .page-wrapper {
@@ -256,7 +150,6 @@ body::after {
 }
 .roadmap-card:hover { border-color: var(--border-lite); box-shadow: 0 6px 24px rgba(0,0,0,.25); }
 
-/* Stripe lateral colorida por status */
 .roadmap-card-inner {
   display: flex; align-items: stretch;
 }
@@ -274,7 +167,6 @@ body::after {
   display: flex; flex-direction: column; gap: 12px;
 }
 
-/* Linha principal: título + badge + botão */
 .card-top {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
 }
@@ -304,7 +196,6 @@ body::after {
 .badge-blue   { background: var(--blue-dim);   color: var(--blue);    border: 1px solid rgba(88,166,255,.2); }
 .badge-muted  { background: var(--bg-3);       color: var(--muted);   border: 1px solid var(--border-lite); }
 
-/* Barra de progresso do card */
 .card-progress { display: flex; flex-direction: column; gap: 5px; }
 
 .card-prog-header {
@@ -325,7 +216,6 @@ body::after {
 .fill-progress { background: var(--yellow); }
 .fill-todo     { background: var(--border-lite); }
 
-/* Linha de stats do card */
 .card-stats {
   display: flex; gap: 16px; flex-wrap: wrap;
 }
@@ -336,7 +226,6 @@ body::after {
 .card-stat svg { flex-shrink: 0; }
 .card-stat strong { color: var(--text); font-weight: 600; }
 
-/* Botão do card */
 .card-cta {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 14px;

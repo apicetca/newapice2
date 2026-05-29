@@ -1,121 +1,12 @@
 /* =============================================
    auth.css — Login & Cadastro
-   Identidade Visual: Ápice 2026
+   Requer: design-system.css + header.css
 ============================================= */
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-/* =============================================
-   design-system.css
-   Identidade Visual — Ápice 2026
-   Importar em todos os arquivos CSS do projeto
-============================================= */
-
-/* Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-
-:root {
-  /* ── Paleta Ápice ──────────────────────────── */
-  --bg:          #0a0a0f;          /* preto quente — fundo principal   */
-  --bg-2:        #0f0f17;          /* fundo secundário                 */
-  --bg-3:        #16161f;          /* superfícies / cards              */
-  --border:      #1e1e2e;          /* bordas sutis (grade)             */
-  --border-lite: #2a2a3d;          /* bordas visíveis                  */
-  --text:        #e8e8f0;          /* texto principal                  */
-  --muted:       #6b6b8a;          /* texto secundário                 */
-
-  /* Accent primário — roxo elétrico */
-  --accent:      #7C3AED;
-  --accent-hv:   #9461f7;
-  --accent-dim:  rgba(124,58,237,.13);
-  --accent-border: rgba(124,58,237,.30);
-
-  /* Accent secundário — teal */
-  --teal:        #10B691;
-  --teal-hv:     #0ed4a8;
-  --teal-dim:    rgba(16,182,145,.12);
-  --teal-border: rgba(16,182,145,.28);
-
-  /* Semânticas */
-  --blue:        #60a5fa;
-  --blue-dim:    rgba(96,165,250,.12);
-  --red:         #f87171;
-  --red-dim:     rgba(248,113,113,.10);
-  --yellow:      #fbbf24;
-  --yellow-dim:  rgba(251,191,36,.12);
-
-  /* ── Tipografia ────────────────────────────── */
-  --font-display: 'Montserrat', sans-serif;   /* títulos SemiBold 600 */
-  --font-body:    'DM Mono', monospace;        /* corpo Regular 400    */
-
-  /* ── Shape ─────────────────────────────────── */
-  --radius-sm:   5px;
-  --radius-md:   9px;
-  --radius-lg:   14px;
-  --radius-xl:   20px;
-}
-
-
-html { scroll-behavior: smooth; }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: .95rem;
-  line-height: 1.7;
-  min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  overflow-x: hidden;
 }
-
-a { color: inherit; text-decoration: none; }
-
-/* ── Grade de fundo tech ── */
-body::before {
-  content: "";
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 44px 44px;
-  opacity: .30;
-  pointer-events: none; z-index: 0;
-}
-
-/* ── Brilho radial roxo no topo ── */
-body::after {
-  content: "";
-  position: fixed; top: -100px; left: 50%;
-  transform: translateX(-50%);
-  width: 760px; height: 520px;
-  background: radial-gradient(ellipse, rgba(124,58,237,.14) 0%, transparent 62%);
-  pointer-events: none; z-index: 0;
-}
-
-/* ── Header ── */
-body > header {
-  position: relative; z-index: 10;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 40px; height: 58px;
-  background: rgba(10,10,15,.88);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  font-family: var(--font-display);
-  font-size: 1rem; font-weight: 700; letter-spacing: -.01em;
-  color: var(--text); display: flex; align-items: center; gap: 8px;
-}
-
-/* Ponto roxo no logo */
-.logo-dot { color: var(--accent); }
-
-.header-link { font-size: .82rem; color: var(--muted); transition: color .15s; }
-.header-link:hover  { color: var(--text); }
-.header-link strong { color: var(--teal); font-weight: 600; }
 
 /* ── Layout ── */
 main {
@@ -138,7 +29,6 @@ main {
 
 .auth-card--wide { max-width: 520px; }
 
-/* Linha de acento no topo do card */
 .auth-card::before {
   content: "";
   display: block; height: 2px; width: 56px;
@@ -327,7 +217,6 @@ footer.site-footer {
 
 /* ── Responsivo ── */
 @media (max-width: 520px) {
-  body > header { padding: 0 20px; }
   footer.site-footer { padding: 16px 20px; }
   main { padding: 0 0 48px; align-items: flex-start; }
   .auth-card { border-left: none; border-right: none; border-radius: 0; padding: 28px 20px; max-width: 100%; box-shadow: none; }

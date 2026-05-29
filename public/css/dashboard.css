@@ -1,116 +1,7 @@
 /* =============================================
    dashboard.css — Painel do desenvolvedor
-   Identidade Visual: Ápice 2026
+   Requer: design-system.css + header.css
 ============================================= */
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-/* =============================================
-   design-system.css
-   Identidade Visual — Ápice 2026
-   Importar em todos os arquivos CSS do projeto
-============================================= */
-
-/* Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-
-:root {
-  /* ── Paleta Ápice ──────────────────────────── */
-  --bg:          #0a0a0f;          /* preto quente — fundo principal   */
-  --bg-2:        #0f0f17;          /* fundo secundário                 */
-  --bg-3:        #16161f;          /* superfícies / cards              */
-  --border:      #1e1e2e;          /* bordas sutis (grade)             */
-  --border-lite: #2a2a3d;          /* bordas visíveis                  */
-  --text:        #e8e8f0;          /* texto principal                  */
-  --muted:       #6b6b8a;          /* texto secundário                 */
-
-  /* Accent primário — roxo elétrico */
-  --accent:      #7C3AED;
-  --accent-hv:   #9461f7;
-  --accent-dim:  rgba(124,58,237,.13);
-  --accent-border: rgba(124,58,237,.30);
-
-  /* Accent secundário — teal */
-  --teal:        #10B691;
-  --teal-hv:     #0ed4a8;
-  --teal-dim:    rgba(16,182,145,.12);
-  --teal-border: rgba(16,182,145,.28);
-
-  /* Semânticas */
-  --blue:        #60a5fa;
-  --blue-dim:    rgba(96,165,250,.12);
-  --red:         #f87171;
-  --red-dim:     rgba(248,113,113,.10);
-  --yellow:      #fbbf24;
-  --yellow-dim:  rgba(251,191,36,.12);
-
-  /* ── Tipografia ────────────────────────────── */
-  --font-display: 'Montserrat', sans-serif;   /* títulos SemiBold 600 */
-  --font-body:    'DM Mono', monospace;        /* corpo Regular 400    */
-
-  /* ── Shape ─────────────────────────────────── */
-  --radius-sm:   5px;
-  --radius-md:   9px;
-  --radius-lg:   14px;
-  --radius-xl:   20px;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg); color: var(--text);
-  font-family: var(--font-body); font-size: .92rem;
-  line-height: 1.7; min-height: 100vh; overflow-x: hidden;
-}
-
-a { color: inherit; text-decoration: none; }
-
-body::before {
-  content: ""; position: fixed; inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 44px 44px; opacity: .30; pointer-events: none; z-index: 0;
-}
-
-body::after {
-  content: ""; position: fixed; top: -100px; left: 50%;
-  transform: translateX(-50%); width: 820px; height: 520px;
-  background: radial-gradient(ellipse, rgba(124,58,237,.11) 0%, transparent 62%);
-  pointer-events: none; z-index: 0;
-}
-
-/* ── Header ── */
-.site-header {
-  position: sticky; top: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 40px; height: 58px;
-  background: rgba(10,10,15,.90); backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
-  letter-spacing: -.01em; color: var(--text);
-  display: flex; align-items: center; gap: 8px;
-}
-
-.header-nav { display: flex; align-items: center; gap: 7px; }
-
-.nav-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 13px; border-radius: var(--radius-sm);
-  font-size: .8rem; font-family: var(--font-body); font-weight: 500;
-  color: var(--muted); background: transparent; border: 1px solid transparent;
-  cursor: pointer; transition: all .15s; text-decoration: none;
-}
-.nav-btn:hover { color: var(--text); background: var(--bg-3); border-color: var(--border-lite); }
-.nav-btn.danger:hover { color: var(--red); background: rgba(248,113,113,.08); border-color: rgba(248,113,113,.2); }
-
-.header-avatar {
-  width: 28px; height: 28px; border-radius: 50%;
-  border: 2px solid var(--border-lite); object-fit: cover; display: none;
-}
 
 /* ── Layout ── */
 .page-wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
@@ -138,7 +29,6 @@ body::after {
   animation: fadeUp .4s ease both;
 }
 
-/* Linha accent à esquerda do hero */
 .user-hero::before {
   content: ""; position: absolute; left: 0; top: 16px; bottom: 16px;
   width: 3px; background: linear-gradient(180deg, var(--accent), var(--teal));
