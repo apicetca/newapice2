@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
+  <script src="/js/api.js"></script>
   <link rel="stylesheet" href="/css/sidebar.css" />
   <link rel="stylesheet" href="/css/perfil.css" />
 </head>
@@ -211,7 +212,7 @@
     // ──────────────────────────────────────────────────────
     async function loadProfile() {
       try {
-        const res = await fetch("/api/empresa/profile");
+        const res = await apiFetch("/api/empresa/profile");
         if (res.status === 401 || res.status === 403) { window.location.href = "/login"; return; }
         if (!res.ok) throw new Error("Erro ao carregar perfil");
 
@@ -382,7 +383,7 @@
       btn.innerHTML = `<span class="spinner"></span> Salvando...`;
 
       try {
-        const res = await fetch("/api/empresa/profile", {
+        const res = await apiFetch("/api/empresa/profile", {
           method:  "PATCH",
           headers: { "Content-Type": "application/json" },
           body:    JSON.stringify({
@@ -449,6 +450,5 @@
     // ── Init ────────────────────────────────────────────────
     loadProfile();
   </script>
-
 </body>
 </html>

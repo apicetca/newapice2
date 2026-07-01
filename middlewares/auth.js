@@ -27,4 +27,12 @@ function isEmpresa(req, res, next) {
   next();
 }
 
-module.exports = { requireAuth, requireCompany, redirectIfAuth, isAuth, isEmpresa };
+function csrfProtect(req, res, next) {
+  const SAFE = ["GET", "HEAD", "OPTIONS"];
+  if (SAFE.includes(req.method)) return next();
+  const header = req.headers["x-requested-with"];
+  if (header === "XMLHttpRequest") return next();
+  return res.status(403).json({ error: "Requisição inválida (CSRF)." });
+}
+
+module.exports = { requireAuth, requireCompany, redirectIfAuth, isAuth, isEmpresa, csrfProtect };

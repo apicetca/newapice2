@@ -146,13 +146,13 @@ const empresaController = {
     const companyId = req.session.user.id;
     const jobId     = req.params.id;
 
-    const [rows] = await db.query(
-      "SELECT id FROM jobs WHERE id = ? AND company_id = ?",
-      [jobId, companyId]
-    );
-    if (!rows.length) return res.status(404).json({ error: "Vaga não encontrada." });
-
     try {
+      const [rows] = await db.query(
+        "SELECT id FROM jobs WHERE id = ? AND company_id = ?",
+        [jobId, companyId]
+      );
+      if (!rows.length) return res.status(404).json({ error: "Vaga não encontrada." });
+
       await db.query("DELETE FROM jobs WHERE id = ?", [jobId]);
       res.json({ success: true });
     } catch (err) {
@@ -290,6 +290,52 @@ const empresaController = {
       res.status(500).json({ error: "Erro interno." });
     }
   },
+
+  getDevProfile: async (req, res) => {
+    const devId = Number(req.params.id);
+    if (!devId || !Number.isInteger(devId) || devId < 1) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    try {
+      const [users] = await db.query(
+        "SELECT id, type FROM users WHERE id = ? AND type = 'dev'",
+        [devId]
+      );
+      if (!users.length) return res.status(404).json({ error: "Desenvolvedor não encontrado." });
+
+      const [profiles] = await db.query(
+        "SELECT nome, sobrenome, github_login, nivel, avatar_url FROM user_dev_profiles WHERE user_id = ?",
+        [devId]
+      );
+      const profile = profiles[0] ?? {};
+
+      const [skills] = await db.query(`
+        SELECT us.skill_id, us.confidence, s.name, s.type, s.category
+        FROM user_skills us
+        JOIN skills s ON s.id = us.skill_id
+        WHERE us.github_id = (
+          SELECT COALESCE(github_id, ?)
+          FROM user_dev_profiles WHERE user_id = ? LIMIT 1
+        )
+        ORDER BY us.confidence DESC, s.name ASC
+      `, [devId, devId]);
+
+      res.json({
+        id:           devId,
+        nome:         profile.nome         ?? "",
+        sobrenome:    profile.sobrenome     ?? "",
+        github_login: profile.github_login  ?? "",
+        nivel:        profile.nivel         ?? "iniciante",
+        avatar:       profile.avatar_url    ?? null,
+        skills,
+      });
+    } catch (err) {
+      console.error("[GET /api/empresa/dev/:id/perfil]", err.message);
+      res.status(500).json({ error: "Erro interno." });
+    }
+  },
 };
 
 module.exports = empresaController;
+

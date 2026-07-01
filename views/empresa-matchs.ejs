@@ -34,6 +34,7 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="/css/design-system.css" />
+  <script src="/js/api.js"></script>
   <link rel="stylesheet" href="/css/sidebar.css" />
   <link rel="stylesheet" href="/css/empresa-matchs.css" />
 </head>
@@ -332,7 +333,7 @@
       if (idx !== -1) { MOCK_MATCHS.splice(idx, 1); render(); renderMetrics(); showToast("Match recusado."); }
     }
 
-    function verPerfil(id) { showToast("Perfil (em breve — match #" + id + ")"); }
+    function verPerfil(id) { window.location.href = `/empresa/dev/${id}/perfil`; }
 
     let toastTimer = null;
     function showToast(msg, isErr = false) {
@@ -346,7 +347,7 @@
 
     async function init() {
       try {
-        const res = await fetch("/api/user");
+        const res = await apiFetch("/api/user");
         if (!res.ok) { window.location.href = "/login"; return; }
         const user = await res.json();
         if (user.type !== "empresa") { window.location.href = "/dashboard"; return; }
@@ -361,7 +362,6 @@
 
     init();
   </script>
-
   <script src="/js/sidebar.js" defer></script>
 </body>
 </html>

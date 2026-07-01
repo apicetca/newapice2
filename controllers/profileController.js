@@ -5,6 +5,7 @@ const axios = require("axios");
 const multer = require("multer");
 const db    = require("../database/db");
 const { matchSkillsFromGitHub } = require("../services/githubAnalyzer");
+const { getTokenStore } = require("./authController");
 
 // ── Avatar upload (multer) ────────────────────────────────
 const UPLOAD_DIR = path.join(__dirname, "../public/uploads/avatars");
@@ -188,7 +189,8 @@ const profileController = {
   },
 
   reanalyze: async (req, res) => {
-    const { accessToken, github_id } = req.session.user;
+    const { github_id } = req.session.user;
+    const accessToken   = getTokenStore().get(req.session.id);
 
     if (!accessToken) {
       return res.status(400).json({

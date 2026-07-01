@@ -2,10 +2,15 @@ require("dotenv").config();
 const express    = require("express");
 const session    = require("express-session");
 const path       = require("path");
+const helmet     = require("helmet");
 const MySQLStore = require("express-mysql-session")(session);
 const db         = require("./database/db");
 
 const app = express();
+
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -21,7 +26,12 @@ app.use(session({
   resave:            false,
   saveUninitialized: false,
   store:             new MySQLStore({}, db),
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
+  cookie: {
+    secure:   process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge:   24 * 60 * 60 * 1000,
+  },
 }));
 
 // Expõe `user` para todos os templates
@@ -31,7 +41,9 @@ app.use((req, res, next) => {
 });
 
 // ── Middlewares de auth ───────────────────────────────────
-const { requireAuth, requireCompany, redirectIfAuth } = require("./middlewares/auth");
+const { requireAuth, requireCompany, redirectIfAuth, csrfProtect } = require("./middlewares/auth");
+
+app.use("/api", csrfProtect);
 
 // ── Páginas públicas ──────────────────────────────────────
 app.get("/", async (req, res) => {
@@ -167,6 +179,10 @@ app.get("/empresa/perfil", requireCompany, (req, res) => {
   res.render("perfil-empresa", { currentPage: "perfil" });
 });
 
+app.get("/empresa/dev/:id/perfil", requireCompany, (req, res) => {
+  res.render("perfil-dev-publico", { devId: Number(req.params.id), currentPage: "empresa-devs" });
+});
+
 // ── Rotas modulares ───────────────────────────────────────
 const authRoutes    = require("./routes/auth");
 const userRoutes    = require("./routes/users");
@@ -179,6 +195,16 @@ app.use("/api/auth",    userRoutes);
 app.use("/api/user",    profileRoutes);
 app.use("/api",         roadmapRoutes);
 app.use("/api/empresa", empresaRoutes);
+
+// ── Erros ─────────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).render("404");
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).render("500");
+});
 
 // ── Start ─────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;

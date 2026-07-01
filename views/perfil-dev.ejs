@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
+  <script src="/js/api.js"></script>
   <link rel="stylesheet" href="/css/sidebar.css" />
   <link rel="stylesheet" href="/css/perfil.css" />
 </head>
@@ -236,8 +237,8 @@
     async function loadProfile() {
       try {
         const [profileRes, catalogRes] = await Promise.all([
-          fetch("/api/user/profile"),
-          fetch("/api/user/skills/catalog"),
+          apiFetch("/api/user/profile"),
+          apiFetch("/api/user/skills/catalog"),
         ]);
 
         if (profileRes.status === 401) { window.location.href = "/"; return; }
@@ -442,7 +443,7 @@
       btn.innerHTML   = `<span class="spinner"></span> Salvando...`;
 
       try {
-        const res = await fetch("/api/user/profile", {
+        const res = await apiFetch("/api/user/profile", {
           method:  "PATCH",
           headers: { "Content-Type": "application/json" },
           body:    JSON.stringify({
@@ -497,7 +498,7 @@
       btn.textContent = "Adicionando...";
 
       try {
-        const res = await fetch("/api/user/skills", {
+        const res = await apiFetch("/api/user/skills", {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
           body:    JSON.stringify({ skill_id: Number(skillId) }),
@@ -543,7 +544,7 @@
     async function removeSkill(skillId, btn) {
       btn.disabled = true;
       try {
-        const res = await fetch(`/api/user/skills/${skillId}`, { method: "DELETE" });
+        const res = await apiFetch(`/api/user/skills/${skillId}`, { method: "DELETE" });
         if (!res.ok) { showToast("Erro ao remover habilidade.", "error"); btn.disabled = false; return; }
 
         const tag = btn.closest(".skill-tag");
@@ -566,14 +567,14 @@
       btn.innerHTML = `<span class="spinner spinner--dark"></span> Analisando...`;
 
       try {
-        const res  = await fetch("/api/user/reanalyze", { method: "POST" });
+        const res  = await apiFetch("/api/user/reanalyze", { method: "POST" });
         const data = await res.json();
         if (!res.ok) { showToast(data.error ?? "Erro ao analisar.", "error"); return; }
 
         showToast(data.message, "success");
 
         // Refresh skills in place
-        const profileRes = await fetch("/api/user/profile");
+        const profileRes = await apiFetch("/api/user/profile");
         if (profileRes.ok) {
           const profile = await profileRes.json();
           renderSkills(profile.skills);
@@ -619,13 +620,13 @@
       formData.append("avatar", file);
 
       try {
-        const res  = await fetch("/api/user/avatar", { method: "POST", body: formData });
+        const res  = await apiFetch("/api/user/avatar", { method: "POST", body: formData });
         const data = await res.json();
 
         if (!res.ok) {
           showToast(data.error ?? "Erro ao enviar foto.", "error");
           // Restore previous avatar on error
-          const profileRes = await fetch("/api/user/profile");
+          const profileRes = await apiFetch("/api/user/profile");
           if (profileRes.ok) {
             const profile = await profileRes.json();
             updateAvatarEl(profile.avatar, profile.nome, profile.sobrenome);
@@ -671,6 +672,5 @@
     // ── Init ────────────────────────────────────────────────
     loadProfile();
   </script>
-
 </body>
 </html>

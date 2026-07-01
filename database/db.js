@@ -13,9 +13,8 @@ const pool = mysql.createPool({
 
   waitForConnections: true,
 
-  // Clever Cloud costuma ter limite baixo, então deixa bem baixo
-  connectionLimit: 1,
-  maxIdle: 1,
+  connectionLimit: 5,
+  maxIdle: 5,
   idleTimeout: 60000,
 
   queueLimit: 0,

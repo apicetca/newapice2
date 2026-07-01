@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Painel da empresa — Dev Estágios." />
+  <meta name="description" content="Painel da empresa — Ápice." />
   <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
-  <title>Dev Estágios — Painel da Empresa</title>
+  <title>Ápice — Painel da Empresa</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
+  <script src="/js/api.js"></script>
   <link rel="stylesheet" href="/css/empresa-dashboard.css" />
   <link rel="stylesheet" href="/css/sidebar.css" />
 </head>
@@ -540,7 +541,7 @@ document.getElementById("job-form").addEventListener("submit", async e => {
 // ── Pausar/reativar vaga ──────────────────────────────
 async function toggleActive(id, newActive) {
   try {
-    const res = await fetch(`/api/empresa/jobs/${id}`, {
+    const res = await apiFetch(`/api/empresa/jobs/${id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ active: newActive }),
     });
@@ -574,7 +575,7 @@ async function confirmDelete() {
   const btn = document.getElementById("btn-confirm-delete");
   btn.disabled = true; btn.textContent = "Excluindo...";
   try {
-    const res = await fetch(`/api/empresa/jobs/${deletingId}`, { method: "DELETE" });
+    const res = await apiFetch(`/api/empresa/jobs/${deletingId}`, { method: "DELETE" });
     if (!res.ok) throw new Error();
     closeDeleteModal();
     showToast("Vaga excluída.");
@@ -588,7 +589,7 @@ async function confirmDelete() {
 
 // ── Recarrega vagas do servidor ───────────────────────
 async function reloadJobs() {
-  const res = await fetch("/api/empresa/dashboard");
+  const res = await apiFetch("/api/empresa/dashboard");
   if (!res.ok) return;
   const data = await res.json();
   allJobs = data.jobs ?? [];
@@ -610,14 +611,14 @@ function showToast(msg, isErr = false) {
 // ── Bootstrap ─────────────────────────────────────────
 async function init() {
   try {
-    const userRes = await fetch("/api/user");
+    const userRes = await apiFetch("/api/user");
     if (!userRes.ok) { window.location.href = "/login"; return; }
     const user = await userRes.json();
     if (user.type !== "empresa") { window.location.href = "/dashboard"; return; }
   } catch { window.location.href = "/login"; return; }
 
   try {
-    const res = await fetch("/api/empresa/dashboard");
+    const res = await apiFetch("/api/empresa/dashboard");
     if (!res.ok) throw new Error("Falha ao carregar dados");
 
     const data = await res.json();

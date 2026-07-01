@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Entre na sua conta Dev Estágios." />
+  <meta name="description" content="Entre na sua conta Ápice." />
   <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
-  <title>Dev Estágios — Entrar</title>
+  <title>Ápice — Entrar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
   <link rel="stylesheet" href="/css/header.css" />
   <link rel="stylesheet" href="/css/auth.css" />
+  <script src="/js/api.js"></script>
   <style>
     /* ── Ícone de olho no toggle de senha ── */
     .toggle-pass { display: flex; align-items: center; justify-content: center; }
@@ -114,7 +115,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>&copy; 2025 Dev Estágios. Todos os direitos reservados.</p>
+    <p>&copy; 2025 Ápice. Todos os direitos reservados.</p>
   </footer>
 
   <script>
@@ -226,7 +227,7 @@
       btn.disabled    = true;
       btn.textContent = "Entrando...";
       try {
-        const res  = await fetch("/api/auth/login", {
+        const res  = await apiFetch("/api/auth/login", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password: pass }),
         });
@@ -255,6 +256,5 @@
       showAlert(msgs[urlErr] ?? `Erro inesperado: ${urlErr}`);
     }
   </script>
-
 </body>
 </html>
