@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Crie sua conta Dev Estágios como desenvolvedor ou empresa." />
+  <meta name="description" content="Crie sua conta Ápice como desenvolvedor ou empresa." />
   <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
-  <title>Dev Estágios — Criar conta</title>
+  <title>Ápice — Criar conta</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
   <link rel="stylesheet" href="/css/header.css" />
   <link rel="stylesheet" href="/css/auth.css" />
+  <script src="/js/api.js"></script>
   <style>
     .toggle-pass { display: flex; align-items: center; justify-content: center; }
     .toggle-pass svg { display: block; }
@@ -250,7 +251,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>&copy; 2025 Dev Estágios. Todos os direitos reservados.</p>
+    <p>&copy; 2025 Ápice. Todos os direitos reservados.</p>
   </footer>
 
   <script>
@@ -403,7 +404,7 @@
 
       const btn = $("btn"); btn.disabled = true; btn.textContent = "Criando conta...";
       try {
-        const res = await fetch("/api/auth/register", {
+        const res = await apiFetch("/api/auth/register", {
           method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
         });
         const data = await res.json();
@@ -420,6 +421,5 @@
     // Auto-seleciona aba empresa se vier de /cadastro#empresa
     if (window.location.hash === "#empresa") switchTab("empresa");
   </script>
-
 </body>
 </html>

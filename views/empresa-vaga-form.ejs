@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
+  <script src="/js/api.js"></script>
   <link rel="stylesheet" href="/css/empresa-vaga-form.css" />
   <link rel="stylesheet" href="/css/sidebar.css" />
 </head>
@@ -253,29 +254,29 @@
   <script src="/js/sidebar.js" defer></script>
   <script>
   // ── Dados injetados pelo servidor (SSR) ───────────────
-  const allSkills    = <%- JSON.stringify(allSkills) %>;
+  const allSkills    = JSON.parse('<%- JSON.stringify(allSkills).replace(/\//g, "\\/") %>');
   const isEdit       = <%- isEdit ? 'true' : 'false' %>;
   const editJobId    = <%- isEdit ? job.id : 'null' %>;
 
-  let requiredSkills = <%- JSON.stringify(
+  let requiredSkills = JSON.parse('<%- JSON.stringify(
     isEdit
-      ? jobSkills.filter(s => s.importance === 'obrigatoria')
+      ? jobSkills.filter(s => s.importance === "obrigatoria")
                  .map(s => ({ id: s.skill_id, name: s.name, type: s.type, category: s.category }))
       : []
-  ) %>;
+  ).replace(/\//g, "\\/") %>');
 
-  let desiredSkills  = <%- JSON.stringify(
+  let desiredSkills  = JSON.parse('<%- JSON.stringify(
     isEdit
-      ? jobSkills.filter(s => s.importance === 'desejavel')
+      ? jobSkills.filter(s => s.importance === "desejavel")
                  .map(s => ({ id: s.skill_id, name: s.name, type: s.type, category: s.category }))
       : []
-  ) %>;
+  ).replace(/\//g, "\\/") %>');
 
-  let formTags = <%- JSON.stringify(
+  let formTags = JSON.parse('<%- JSON.stringify(
     isEdit && job.tags
-      ? job.tags.split(',').map(t => t.trim()).filter(Boolean)
+      ? job.tags.split(",").map(t => t.trim()).filter(Boolean)
       : []
-  ) %>;
+  ).replace(/\//g, "\\/") %>');
 
   // ── Render: Chips de skill ────────────────────────────
   function renderSkillChips(type) {
@@ -463,7 +464,7 @@
         ...requiredSkills.map(s => ({ skill_id: s.id, importance: "obrigatoria" })),
         ...desiredSkills.map(s =>  ({ skill_id: s.id, importance: "desejavel" })),
       ];
-      await fetch(`/api/empresa/jobs/${jobId}/skills`, {
+      await apiFetch(`/api/empresa/jobs/${jobId}/skills`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ skills }),
@@ -502,6 +503,5 @@
   setupSkillAutocomplete("required");
   setupSkillAutocomplete("desired");
   </script>
-
 </body>
 </html>

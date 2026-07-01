@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Perfil do desenvolvedor — Ápice." />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <title>Ápice — Perfil do Desenvolvedor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <script src="/js/api.js"></script>
+  <link rel="stylesheet" href="/css/sidebar.css" />
+  <link rel="stylesheet" href="/css/perfil.css" />
+</head>
+
+<body class="app-shell">
+
+  <%- include('partials/sidebar-company', { currentPage: 'empresa-devs' }) %>
+
+  <div class="app-main">
+    <%- include('partials/topbar', { topbarVariant: 'empresa' }) %>
+
+    <main class="app-content" id="main-content">
+      <div class="perfil-layout">
+
+        <!-- Loading -->
+        <div id="state-loading" aria-label="Carregando perfil" aria-live="polite">
+          <div class="skeleton-block skel-hero"></div>
+          <div class="skeleton-block skel-card" style="margin-top:1.25rem"></div>
+        </div>
+
+        <!-- Erro -->
+        <div id="state-error" hidden style="text-align:center;padding:3rem 1rem">
+          <p style="color:var(--red);font-size:1.1rem;font-weight:600">Desenvolvedor não encontrado.</p>
+          <a href="/empresa/desenvolvedores" style="color:var(--accent);margin-top:1rem;display:inline-block">← Voltar à lista</a>
+        </div>
+
+        <!-- Conteúdo -->
+        <div id="state-content" hidden>
+
+          <!-- Hero -->
+          <section class="profile-hero-card" aria-label="Resumo do perfil">
+            <div class="profile-hero-inner">
+
+              <div class="avatar-wrap">
+                <div class="avatar-ring">
+                  <div class="avatar-placeholder" id="avatar-el" aria-hidden="true">?</div>
+                </div>
+              </div>
+
+              <div class="profile-meta">
+                <h1 class="profile-name" id="hero-name">—</h1>
+                <p  class="profile-sub"  id="hero-github"></p>
+                <div class="profile-chips" id="hero-chips" aria-label="Nível"></div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Skills -->
+          <section class="card" aria-labelledby="title-skills">
+            <h2 class="card-title" id="title-skills">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              Skills detectadas
+              <span class="badge" id="skills-count"></span>
+            </h2>
+
+            <div id="skills-empty" hidden style="color:var(--muted);font-size:.9rem">Nenhuma skill cadastrada.</div>
+            <div class="skills-grid" id="skills-grid" aria-label="Lista de skills"></div>
+          </section>
+
+          <!-- Voltar -->
+          <div style="margin-top:1.5rem">
+            <a href="/empresa/desenvolvedores" class="btn btn--secondary">← Voltar à lista de desenvolvedores</a>
+          </div>
+
+        </div><!-- /state-content -->
+      </div><!-- /perfil-layout -->
+    </main>
+  </div>
+
+  <script src="/js/sidebar.js" defer></script>
+  <script>
+  const DEV_ID = <%= devId %>;
+
+  const NIVEL_LABELS = {
+    iniciante:     "Iniciante",
+    intermediario: "Intermediário",
+    avancado:      "Avançado",
+  };
+
+  function show(id) {
+    ["state-loading","state-error","state-content"].forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.hidden = (s !== id);
+    });
+  }
+
+  function setAvatar(avatar, name) {
+    const el = document.getElementById("avatar-el");
+    if (avatar) {
+      el.style.backgroundImage = `url('${avatar}')`;
+      el.style.backgroundSize  = "cover";
+      el.textContent = "";
+    } else {
+      el.textContent = (name || "?")[0].toUpperCase();
+    }
+  }
+
+  function renderSkills(skills) {
+    const grid  = document.getElementById("skills-grid");
+    const empty = document.getElementById("skills-empty");
+    const count = document.getElementById("skills-count");
+
+    const hard  = skills.filter(s => s.type === "hard");
+    const soft  = skills.filter(s => s.type === "soft");
+
+    count.textContent = skills.length ? `(${skills.length})` : "";
+
+    if (!skills.length) { empty.hidden = false; grid.hidden = true; return; }
+    empty.hidden = true; grid.hidden = false;
+
+    function section(title, list) {
+      if (!list.length) return "";
+      return `
+        <div class="skills-section">
+          <h3 class="skills-section-title">${title}</h3>
+          <div class="skills-chips">
+            ${list.map(s => `
+              <span class="skill-chip skill-chip--${s.type}" title="${s.category ?? ""}">
+                ${s.name}
+                ${s.confidence ? `<span class="skill-conf">${s.confidence}%</span>` : ""}
+              </span>`).join("")}
+          </div>
+        </div>`;
+    }
+
+    grid.innerHTML = section("Hard Skills", hard) + section("Soft Skills", soft);
+  }
+
+  async function load() {
+    show("state-loading");
+    try {
+      const res = await apiFetch(`/api/empresa/dev/${DEV_ID}/perfil`);
+      if (!res.ok) { show("state-error"); return; }
+      const dev = await res.json();
+
+      const fullName = [dev.nome, dev.sobrenome].filter(Boolean).join(" ") || "Desenvolvedor";
+      document.title = `Ápice — ${fullName}`;
+
+      setAvatar(dev.avatar, fullName);
+      document.getElementById("hero-name").textContent = fullName;
+
+      const ghEl = document.getElementById("hero-github");
+      if (dev.github_login) {
+        ghEl.innerHTML = `<a href="https://github.com/${dev.github_login}" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">@${dev.github_login}</a>`;
+      } else {
+        ghEl.textContent = "Sem GitHub cadastrado";
+      }
+
+      const chips = document.getElementById("hero-chips");
+      chips.innerHTML = `<span class="chip chip--nivel">${NIVEL_LABELS[dev.nivel] ?? dev.nivel}</span>`;
+
+      renderSkills(dev.skills ?? []);
+      show("state-content");
+    } catch {
+      show("state-error");
+    }
+  }
+
+  load();
+  </script>
+</body>
+</html>

@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
+  <script src="/js/api.js"></script>
   <link rel="stylesheet" href="/css/vaga-publica.css" />
   <% if (locals.user) { %>
   <link rel="stylesheet" href="/css/sidebar.css" />
@@ -122,7 +123,7 @@ function renderHero(job) {
     </div>
     <div class="vaga-badges">${badges.join("")}</div>`;
 
-  document.title = `${job.title} — Dev Estágios`;
+  document.title = `${job.title} — Ápice`;
 }
 
 function renderMatch(match, isLoggedIn) {
@@ -314,8 +315,8 @@ function renderSideCol(job, isLoggedIn) {
 async function init() {
   try {
     const [jobRes, userRes] = await Promise.all([
-      fetch(`/api/vagas/${JOB_ID}`),
-      fetch("/api/user").catch(() => null),
+      apiFetch(`/api/vagas/${JOB_ID}`),
+      apiFetch("/api/user").catch(() => null),
     ]);
 
     if (!jobRes.ok) throw new Error("Vaga não encontrada");
@@ -340,6 +341,5 @@ async function init() {
 
 init();
 </script>
-
 </body>
 </html>

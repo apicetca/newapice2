@@ -2,6 +2,9 @@ const axios = require("axios");
 const db    = require("../database/db");
 const { matchSkillsFromGitHub } = require("../services/githubAnalyzer");
 
+// Guarda accessTokens em memória (nunca persistidos no banco de sessões)
+const tokenStore = new Map();
+
 const authController = {
   githubLogin: (req, res) => {
     const url =
@@ -81,9 +84,6 @@ const authController = {
         followers:   githubUser.followers,
         following:   githubUser.following,
         githubUrl:   githubUser.html_url,
-        accessToken,
-        // repos removidos da sessão — dados grandes que podem estourar o store;
-        // o dashboard os busca via /api/user que já tem os dados no banco
         repos: repos.slice(0, 12).map(repo => ({
           name:        repo.name,
           description: repo.description,
@@ -93,6 +93,11 @@ const authController = {
         })),
       };
 
+      // Guarda token fora da sessão persistida
+      req.session.save((err) => {
+        if (!err) tokenStore.set(req.session.id, accessToken);
+      });
+
       res.redirect("/dashboard");
     } catch (error) {
       console.error("Erro no callback:", error.message);
@@ -101,9 +106,15 @@ const authController = {
   },
 
   logout: (req, res) => {
-    req.session.destroy();
-    res.redirect("/");
+    const sid = req.session.id;
+    req.session.destroy((err) => {
+      if (err) console.error("Erro ao destruir sessão:", err);
+      tokenStore.delete(sid);
+      res.redirect("/");
+    });
   },
+
+  getTokenStore: () => tokenStore,
 };
 
 module.exports = authController;

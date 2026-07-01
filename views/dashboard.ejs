@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
+  <script src="/js/api.js"></script>
   <link rel="stylesheet" href="/css/sidebar.css" />
   <link rel="stylesheet" href="/css/dashboard.css" />
 </head>
@@ -148,8 +149,8 @@
 
     // ── Carrega dados ──────────────────────────────────────
     const [userRes, jobsRes] = await Promise.all([
-      fetch("/api/user/profile"),
-      fetch("/api/jobs/detalhes"),
+      apiFetch("/api/user/profile"),
+      apiFetch("/api/jobs/detalhes"),
     ]);
 
     const user = userRes.ok ? await userRes.json() : null;
@@ -162,7 +163,7 @@
     // Usa a API existente /api/roadmap/:jobId que já retorna matchPercent
     const matchResults = await Promise.allSettled(
       jobs.map(job =>
-        fetch(`/api/roadmap/${job.id}`)
+        apiFetch(`/api/roadmap/${job.id}`)
           .then(r => r.ok ? r.json() : null)
           .catch(() => null)
       )
@@ -380,9 +381,9 @@
     });
 
     // ── REPOS (só se tem GitHub na sessão) ────────────────
-    const sessionRepos = <%- JSON.stringify(user && user.github_login ? [] : []) %>;
+    const sessionRepos = [];
     // Busca repos da sessão via API user
-    const fullUser = await fetch("/api/user").then(r => r.ok ? r.json() : null);
+    const fullUser = await apiFetch("/api/user").then(r => r.ok ? r.json() : null);
     const repos = fullUser?.repos ?? [];
 
     if (repos.length > 0) {
@@ -411,6 +412,5 @@
 
   })();
   </script>
-
 </body>
 </html>

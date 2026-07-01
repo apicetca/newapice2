@@ -64,6 +64,29 @@ async function migrate() {
       console.log("✅ Coluna created_at adicionada");
     }
 
+    // ── Colunas extras do jobs ────────────────────────
+    const extraCols = [
+      ["modality",         "VARCHAR(50)  DEFAULT 'remoto'"],
+      ["contract_type",    "VARCHAR(50)  DEFAULT 'estagio'"],
+      ["salary_min",       "DECIMAL(10,2) NULL"],
+      ["salary_max",       "DECIMAL(10,2) NULL"],
+      ["location",         "VARCHAR(255) NULL"],
+      ["years_experience", "INT          DEFAULT 0"],
+      ["english_level",    "VARCHAR(50)  DEFAULT 'nenhum'"],
+      ["responsibilities", "TEXT         NULL"],
+      ["benefits",         "TEXT         NULL"],
+      ["max_candidates",   "INT          DEFAULT 100"],
+      ["tags",             "VARCHAR(500) NULL"],
+    ];
+    for (const [col, def] of extraCols) {
+      if (await columnExists("jobs", col)) {
+        console.log(`⏭  ${col} já existe — pulando`);
+      } else {
+        await db.query(`ALTER TABLE jobs ADD COLUMN ${col} ${def}`);
+        console.log(`✅ Coluna ${col} adicionada`);
+      }
+    }
+
     // ── Foreign key ──────────────────────────────────
     if (await constraintExists("fk_jobs_company")) {
       console.log("⏭  FK fk_jobs_company já existe — pulando");

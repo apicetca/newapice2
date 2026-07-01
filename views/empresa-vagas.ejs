@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
+  <script src="/js/api.js"></script>
   <link rel="stylesheet" href="/css/empresa-dashboard.css" />
   <link rel="stylesheet" href="/css/empresa-vagas.css" />
   <link rel="stylesheet" href="/css/sidebar.css" />
@@ -135,7 +136,7 @@
   // ── Init ──────────────────────────────────────────────
   async function init() {
     try {
-      const res = await fetch("/api/empresa/dashboard");
+      const res = await apiFetch("/api/empresa/dashboard");
       if (!res.ok) throw new Error("Falha ao carregar dados");
 
       const data = await res.json();
@@ -269,7 +270,7 @@
   // ── Toggle ativo / pausado ────────────────────────────
   async function toggleActive(id, newActive) {
     try {
-      const res = await fetch(`/api/empresa/jobs/${id}`, {
+      const res = await apiFetch(`/api/empresa/jobs/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ active: newActive }),
@@ -304,7 +305,7 @@
     const btn = document.getElementById("btn-confirm-delete");
     btn.disabled = true; btn.textContent = "Excluindo...";
     try {
-      const res = await fetch(`/api/empresa/jobs/${deletingId}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/empresa/jobs/${deletingId}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       closeDeleteModal();
       showToast("Vaga excluída.");
@@ -317,7 +318,7 @@
   }
 
   async function reloadJobs() {
-    const res = await fetch("/api/empresa/dashboard");
+    const res = await apiFetch("/api/empresa/dashboard");
     if (!res.ok) return;
     const data = await res.json();
     allJobs = data.jobs ?? [];
@@ -341,6 +342,5 @@
 
   init();
   </script>
-
 </body>
 </html>
