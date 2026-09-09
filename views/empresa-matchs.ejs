@@ -121,6 +121,7 @@
           <ul class="match-list" id="match-list" role="list">
             <!-- preenchido via JS -->
           </ul>
+          <div class="matchs-empty" id="match-empty" role="status" hidden></div>
         </section>
 
       </article>
@@ -259,22 +260,26 @@
 
     function render() {
       const filtered = getFiltered();
-      const list = document.getElementById("match-list");
+      const list  = document.getElementById("match-list");
+      const empty = document.getElementById("match-empty");
 
       document.getElementById("match-count").textContent = `(${filtered.length})`;
 
       if (!filtered.length) {
-        list.innerHTML = `
-          <li class="matchs-empty" role="status">
-            <span class="matchs-empty-icon" aria-hidden="true">
-              <svg width="38" height="38" viewBox="0 0 18 18" fill="none"><path d="M9 15L3.5 9.5C2.12 8.12 2.12 5.88 3.5 4.5C4.88 3.12 7.12 3.12 8.5 4.5L9 5L9.5 4.5C10.88 3.12 13.12 3.12 14.5 4.5C15.88 5.88 15.88 8.12 14.5 9.5L9 15Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
-            </span>
-            <p class="matchs-empty-title">Nenhum match encontrado</p>
-            <p class="matchs-empty-sub">Tente ajustar os filtros ou publique mais vagas para atrair candidatos.</p>
-          </li>`;
+        list.hidden  = true;
+        list.innerHTML = "";
+        empty.hidden = false;
+        empty.innerHTML = `
+          <span class="matchs-empty-icon" aria-hidden="true">
+            <svg width="38" height="38" viewBox="0 0 18 18" fill="none"><path d="M9 15L3.5 9.5C2.12 8.12 2.12 5.88 3.5 4.5C4.88 3.12 7.12 3.12 8.5 4.5L9 5L9.5 4.5C10.88 3.12 13.12 3.12 14.5 4.5C15.88 5.88 15.88 8.12 14.5 9.5L9 15Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+          </span>
+          <p class="matchs-empty-title">Nenhum match encontrado</p>
+          <p class="matchs-empty-sub">Tente ajustar os filtros ou publique mais vagas para atrair candidatos.</p>`;
         return;
       }
 
+      empty.hidden = true;
+      list.hidden  = false;
       list.innerHTML = filtered.map(renderCard).join("");
 
       requestAnimationFrame(() => requestAnimationFrame(() => {
