@@ -137,11 +137,11 @@
        inicial (título, empresa, nível, descrição, link) — sem isso, um
        crawler sem JS só via os skeletons de "carregando". O JS ainda roda
        e substitui #jobs-grid pela versão interativa (filtros, skills). -->
-  <main class="jobs-section" aria-label="Lista de vagas">
+  <main class="jobs-section" id="main-content" aria-label="Lista de vagas">
     <% if (jobs.length) { %>
     <div class="jobs-grid" id="jobs-grid" role="list">
       <% jobs.forEach(job => { %>
-      <article class="job-card" role="listitem">
+      <div class="job-card" role="listitem">
         <div class="job-card-accent" aria-hidden="true"></div>
         <div class="job-card-body">
           <div class="job-card-top">
@@ -153,7 +153,7 @@
           </div>
           <% if (job.description) { %><p class="job-desc"><%= job.description %></p><% } %>
         </div>
-      </article>
+      </div>
       <% }) %>
     </div>
     <% } else { %>
@@ -293,7 +293,7 @@
       }
 
       jobs.forEach((job, idx) => {
-        const card = document.createElement("article");
+        const card = document.createElement("div");
         card.className = "job-card";
         card.setAttribute("role", "listitem");
         card.style.animationDelay = `${idx * 0.04}s`;

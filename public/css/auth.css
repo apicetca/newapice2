@@ -54,6 +54,16 @@ main {
   padding: 56px clamp(24px, 5vw, 48px);
 }
 
+/* Entrada animada */
+.lp-left-inner > * { animation: fadeUp 0.5s ease both; }
+.lp-left-inner > *:nth-child(1) { animation-delay: 0.05s; }
+.lp-left-inner > *:nth-child(2) { animation-delay: 0.12s; }
+.lp-left-inner > *:nth-child(3) { animation-delay: 0.19s; }
+.lp-left-inner > *:nth-child(4) { animation-delay: 0.26s; }
+.lp-left-inner > *:nth-child(5) { animation-delay: 0.33s; }
+.lp-left-inner > *:nth-child(6) { animation-delay: 0.4s; }
+.lp-left-inner > *:nth-child(7) { animation-delay: 0.47s; }
+
 .lp-left-footer {
   padding: 20px clamp(24px, 5vw, 48px);
   font-size: 0.73rem;
@@ -218,6 +228,15 @@ main {
   flex-direction: column;
   gap: 12px;
 }
+
+/* Entrada animada */
+.lp-preview > * { animation: fadeUp 0.55s ease both; }
+.lp-preview > *:nth-child(1) { animation-delay: 0.2s; }
+.lp-preview > *:nth-child(2) { animation-delay: 0.3s; }
+.lp-preview > *:nth-child(3) { animation-delay: 0.4s; }
+.lp-preview > *:nth-child(4) { animation-delay: 0.5s; }
+
+.lp-right-label { animation: fadeUp 0.55s 0.6s ease both; }
 
 /* Status bar */
 .lp-status-bar {
@@ -681,4 +700,23 @@ footer.site-footer {
   }
   .auth-card::before { margin-left: 0; }
   .field-row { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════
+   REDUCED MOTION
+══════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .lp-left-inner > *,
+  .lp-preview > *,
+  .lp-right-label,
+  .lp-deco-ring-1,
+  .lp-deco-ring-2,
+  .lp-status-dot {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

@@ -118,7 +118,7 @@
 
 <%# ═══ Mobile Drawer (empresa — teal) ════════ %>
 <div class="mobile-drawer mobile-drawer--company" id="mobileDrawer"
-     role="dialog" aria-modal="true" aria-label="Menu de navegação" aria-hidden="true">
+     role="dialog" aria-modal="true" aria-label="Menu de navegação" aria-hidden="true" inert>
 
   <div class="drawer-head">
     <a href="/empresa/dashboard" class="site-logo" tabindex="-1" aria-hidden="true">
@@ -326,6 +326,7 @@
     hamburgerBtn.classList.add('is-active');
     hamburgerBtn.setAttribute('aria-expanded', 'true');
     drawer.setAttribute('aria-hidden', 'false');
+    drawer.inert = false;
     document.body.style.overflow = 'hidden';
     closeBtn?.focus();
   }
@@ -337,6 +338,7 @@
     hamburgerBtn?.classList.remove('is-active');
     hamburgerBtn?.setAttribute('aria-expanded', 'false');
     drawer.setAttribute('aria-hidden', 'true');
+    drawer.inert = true;
     document.body.style.overflow = '';
   }
 

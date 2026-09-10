@@ -21,6 +21,7 @@
   /* Accent — roxo */
   --accent:        #7C3AED;
   --accent-hv:     #8B5CF6;
+  --accent-text:   #A78BFA;
   --accent-dim:    rgba(124,58,237,.13);
   --accent-border: rgba(124,58,237,.30);
   --accent-glow:   rgba(124,58,237,.28);

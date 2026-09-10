@@ -15,8 +15,8 @@
 
   <%# ── Desktop Nav ────────────────────────────────────── %>
   <nav class="header-nav" aria-label="Navegação principal">
-    <a href="/"                   class="header-link">Início</a>
-    <a href="/vagas"               class="header-link">Vagas</a>
+    <a href="/"                   class="header-link" data-path="/">Início</a>
+    <a href="/vagas"               class="header-link" data-path="/vagas">Vagas</a>
     <a href="#como-funciona"       class="header-link">Para Devs</a>
     <a href="/login?tipo=empresa" class="header-link header-link--empresa">Para Empresas</a>
     <a href="#como-funciona"       class="header-link">Sobre</a>
@@ -75,7 +75,7 @@
 (function () {
   /* Marca item ativo pelo pathname */
   const path = window.location.pathname;
-  document.querySelectorAll('.bottom-nav-item[data-path]').forEach(link => {
+  document.querySelectorAll('.bottom-nav-item[data-path], .header-link[data-path]').forEach(link => {
     if (link.dataset.path === path) {
       link.classList.add('is-active');
       link.setAttribute('aria-current', 'page');

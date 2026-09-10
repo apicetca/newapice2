@@ -127,7 +127,7 @@
   cursor: pointer; transition: all .15s;
 }
 .filter-chip:hover { color: var(--text); border-color: var(--muted); }
-.filter-chip.active { background: var(--accent-dim); border-color: rgba(124,58,237,.30); color: var(--accent); }
+.filter-chip.active { background: var(--accent-dim); border-color: rgba(124,58,237,.30); color: var(--accent-text); }
 
 /* ── Botão nova vaga ── */
 .btn-nova-vaga {
