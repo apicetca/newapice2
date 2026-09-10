@@ -117,6 +117,7 @@
         </div>
 
         <div class="roadmap-list" id="roadmap-list" role="list"></div>
+        <div class="empty-state" id="roadmap-empty" role="status" hidden></div>
       </section>
 
     </div><%# /content %>
@@ -197,23 +198,27 @@
 
     // ── Renderiza os cards de roadmap ─────────────────────
     function renderCards(roadmaps) {
-      const list = document.getElementById("roadmap-list");
+      const list  = document.getElementById("roadmap-list");
+      const empty = document.getElementById("roadmap-empty");
       list.innerHTML = "";
 
       if (!roadmaps.length) {
-        list.innerHTML = `
-          <div class="empty-state" role="status">
-            <div class="empty-icon">${IC.target}</div>
-            <p class="empty-title">${activeFilter === "todos" ? "Nenhum roadmap iniciado ainda" : "Nenhum roadmap nesta categoria"}</p>
-            <p class="empty-sub">${activeFilter === "todos"
-              ? "Explore as vagas disponíveis e comece a trilha de carreira."
-              : "Tente outro filtro ou explore mais vagas."}</p>
-            <a href="/vagas" class="btn-explore">
-              Explorar vagas ${IC.arrow}
-            </a>
-          </div>`;
+        list.hidden  = true;
+        empty.hidden = false;
+        empty.innerHTML = `
+          <div class="empty-icon">${IC.target}</div>
+          <p class="empty-title">${activeFilter === "todos" ? "Nenhum roadmap iniciado ainda" : "Nenhum roadmap nesta categoria"}</p>
+          <p class="empty-sub">${activeFilter === "todos"
+            ? "Explore as vagas disponíveis e comece a trilha de carreira."
+            : "Tente outro filtro ou explore mais vagas."}</p>
+          <a href="/vagas" class="btn-explore">
+            Explorar vagas ${IC.arrow}
+          </a>`;
         return;
       }
+
+      empty.hidden = true;
+      list.hidden  = false;
 
       roadmaps.forEach((r, idx) => {
         const pct      = Math.round(Number(r.progress_percent ?? 0));
