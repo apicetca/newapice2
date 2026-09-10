@@ -137,7 +137,7 @@
        inicial (título, empresa, nível, descrição, link) — sem isso, um
        crawler sem JS só via os skeletons de "carregando". O JS ainda roda
        e substitui #jobs-grid pela versão interativa (filtros, skills). -->
-  <main class="jobs-section" aria-label="Lista de vagas">
+  <main class="jobs-section" id="main-content" aria-label="Lista de vagas">
     <% if (jobs.length) { %>
     <div class="jobs-grid" id="jobs-grid" role="list">
       <% jobs.forEach(job => { %>
