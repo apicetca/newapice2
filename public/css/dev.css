@@ -149,7 +149,7 @@
 .filter-chip[aria-pressed="true"] {
   background: var(--accent-dim);
   border-color: var(--accent-border);
-  color: var(--accent-hv);
+  color: var(--accent-text);
 }
 
 /* ─────────────────────────────────────────────────
