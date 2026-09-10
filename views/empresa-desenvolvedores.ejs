@@ -199,14 +199,14 @@
           <footer class="dev-stats" aria-label="Progresso de ${escapeHtml(dev.name)}">
             <p class="dev-stat-row">
               <span class="dev-stat-label">Roadmap</span>
-              <span class="dev-stat-bar" role="progressbar" aria-valuenow="${dev.progress}" aria-valuemin="0" aria-valuemax="100">
+              <span class="dev-stat-bar" role="progressbar" aria-valuenow="${dev.progress}" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso do roadmap">
                 <span class="dev-stat-fill dev-stat-fill--teal" style="width:0%" data-w="${dev.progress}%"></span>
               </span>
               <span class="dev-stat-pct">${dev.progress}%</span>
             </p>
             <p class="dev-stat-row">
               <span class="dev-stat-label">Match</span>
-              <span class="dev-stat-bar" role="progressbar" aria-valuenow="${dev.match}" aria-valuemin="0" aria-valuemax="100">
+              <span class="dev-stat-bar" role="progressbar" aria-valuenow="${dev.match}" aria-valuemin="0" aria-valuemax="100" aria-label="Compatibilidade com a vaga">
                 <span class="dev-stat-fill dev-stat-fill--purple" style="width:0%" data-w="${dev.match}%"></span>
               </span>
               <span class="dev-stat-pct">${dev.match}%</span>
