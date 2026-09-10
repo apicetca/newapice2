@@ -80,7 +80,7 @@
 .filter-chips { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 .filter-chip { padding: 5px 13px; border-radius: 99px; font-size: .75rem; font-weight: 600; font-family: var(--font-body); border: 1px solid var(--border-lite); background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; }
 .filter-chip:hover { color: var(--text); border-color: var(--muted); }
-.filter-chip.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); }
+.filter-chip.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-text); }
 
 .results-info { font-size: .75rem; color: var(--muted); margin-bottom: 12px; min-height: 1.2em; }
 
