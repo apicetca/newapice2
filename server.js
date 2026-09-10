@@ -23,7 +23,7 @@ app.use(helmet({
       styleSrc:    ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc:     ["'self'", "https://fonts.gstatic.com"],
       imgSrc:      ["'self'", "data:", "https://avatars.githubusercontent.com"],
-      connectSrc:  ["'self'"],
+      connectSrc:  ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
     },
   },
   crossOriginEmbedderPolicy: false,
