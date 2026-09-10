@@ -7,7 +7,7 @@
 // ideal seria agendar isso, ex: 1x por dia).
 // ============================================
 const db = require("../database/db");
-const { askClaudeJSON } = require("./anthropicClient");
+const { askGeminiJSON } = require("./geminiClient");
 
 const SYSTEM_PROMPT = `Você analisa dados agregados do mercado de vagas de tecnologia e
 escreve um resumo curto (3-5 frases, em português) sobre quais tecnologias estão mais em
@@ -55,10 +55,10 @@ async function doGenerateInsights() {
 
   const tecnologiasTop = rows.map(r => ({ nome: r.name, tipo: r.type, vagas: r.total_vagas }));
 
-  const result = await askClaudeJSON({
+  const result = await askGeminiJSON({
     system: SYSTEM_PROMPT,
     prompt: `Tecnologias mais demandadas nas vagas ativas (ordenado por frequência):\n${JSON.stringify(tecnologiasTop)}`,
-    maxTokens: 512,
+    maxTokens: 1536,
   });
 
   const resumo = result.resumo ?? "";

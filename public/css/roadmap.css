@@ -188,21 +188,76 @@ progress.bar-low::-moz-progress-bar       { background: var(--red); }
 .summary-stats li.has    { color: var(--teal); }
 .summary-stats li.missing { color: var(--accent-hv); }
 
-/* ── Seções (já sabe / trilha) ── */
+/* ── Seções (já sabe / trilha / linguagens) ── */
 #section-known,
-#section-learn {
+#section-learn,
+#section-languages {
   margin-bottom: 48px;
   animation: fadeUp .4s .1s ease both;
 }
 
 #section-known h2,
-#section-learn h2 {
+#section-learn h2,
+#section-languages h2 {
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 700;
   margin-bottom: 6px;
   color: var(--text);
 }
+
+/* ── Distribuição de linguagens ── */
+.language-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 0;
+}
+
+.language-item {
+  display: grid;
+  grid-template-columns: 120px 1fr 44px;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--border-lite);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.language-name {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.language-bar {
+  width: 100%;
+  height: 8px;
+}
+
+.language-bar::-webkit-progress-bar,
+.language-bar::-webkit-meter-bar { background: var(--border-lite); border-radius: 4px; }
+.language-bar::-webkit-meter-optimum-value { background: var(--accent); border-radius: 4px; }
+.language-bar::-moz-meter-bar { background: var(--accent); border-radius: 4px; }
+
+.language-percent {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
+}
+
+.language-list .empty {
+  color: var(--muted);
+  font-size: .85rem;
+  padding: 12px 0;
+}
+
+.language-list .empty a { color: var(--accent-hv); }
 
 .section-subtitle {
   font-size: .8rem;

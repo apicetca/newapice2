@@ -60,6 +60,13 @@
         <li class="missing">📚 <strong id="count-missing"></strong> para aprender</li>
       </ul>
 
+      <!-- Distribuição de linguagens do perfil (baseado nos repos importados) -->
+      <section id="section-languages" aria-labelledby="title-languages">
+        <h2 id="title-languages">💻 Linguagens do seu perfil</h2>
+        <p class="section-subtitle">Com base nos repositórios importados no seu perfil</p>
+        <ul class="language-list" id="list-languages" aria-label="Distribuição de linguagens"></ul>
+      </section>
+
       <!-- O que o usuário JÁ SABE -->
       <section id="section-known" aria-labelledby="title-known">
         <h2 id="title-known">✅ O que você já sabe</h2>
@@ -126,6 +133,9 @@
 
         renderRoadmap(data, job);
         showState("content");
+
+        // Distribuição de linguagens — não bloqueia o resto da página se falhar
+        loadLanguages();
 
       } catch (err) {
         console.error(err);
@@ -243,6 +253,42 @@
 
           listLearn.appendChild(li);
         });
+      }
+    }
+
+    // --------------------------------------------
+    // Carrega e renderiza a distribuição de linguagens do perfil
+    // --------------------------------------------
+    async function loadLanguages() {
+      const section = document.getElementById("section-languages");
+      const list     = document.getElementById("list-languages");
+
+      try {
+        const res = await fetchWithTimeout("/api/user/languages");
+        if (!res.ok) throw new Error("Erro ao buscar linguagens");
+
+        const { languages } = await res.json();
+
+        if (!languages.length) {
+          list.innerHTML = `<li class="empty">Nenhum repositório com linguagem detectada. <a href="/repositorios">Importe seus repositórios</a> para ver a distribuição aqui.</li>`;
+          return;
+        }
+
+        list.innerHTML = languages.map(l => `
+          <li class="language-item">
+            <span class="language-name">${l.language}</span>
+            <meter class="language-bar"
+              min="0" max="100" value="${l.percent}"
+              low="0" high="100" optimum="100"
+              title="${l.percent}% dos repositórios"
+              aria-label="${l.language}: ${l.percent}%">
+            </meter>
+            <span class="language-percent">${l.percent}%</span>
+          </li>
+        `).join("");
+      } catch (err) {
+        console.error("Erro ao carregar linguagens:", err);
+        section.hidden = true;
       }
     }
 

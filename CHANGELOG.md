@@ -330,6 +330,120 @@ Documentação das melhorias realizadas no projeto após auditoria técnica comp
 ### Testado de ponta a ponta contra o banco real
 Cadastro → dev busca vaga → inicia conversa → manda mensagem → empresa vê badge de não lida → empresa abre o painel do dev → dev abre o painel da empresa (com descrição/cidade/vagas abertas de verdade) → confirmado que o boot não aceita mais requisição antes da hora. Contas de teste removidas depois.
 
+## Fase 7 — Integração de IA generativa (Gemini) + distribuição de linguagens no roadmap
+
+> Foco: adicionar IA generativa a funcionalidades já existentes (análise de repositório, compatibilidade, trilha de estudos, portfólio) e criar quatro funcionalidades novas (mentor de carreira, simulador de entrevista, resumo de candidatos, insights de mercado), reaproveitando a identidade visual e os padrões técnicos já estabelecidos no projeto — sem quebrar cadastro, login, importação de repositórios ou o cálculo de compatibilidade existente.
+
+### Client de IA centralizado
+
+**`services/geminiClient.js`** — ponto único de configuração para toda chamada de IA, no mesmo espírito de `services/subscriptionService.js` ser o ponto único para planos
+- Usa a **Interactions API** do Gemini (`POST /v1beta/interactions`, Google AI Studio, nível gratuito) — não a `generateContent` mais antiga
+- Modelo configurável via `GEMINI_MODEL` (nunca hardcoded), padrão `gemini-3.6-flash`
+- `askGeminiJSON({ system, prompt, maxTokens })` sempre pede e faz parse de JSON estruturado, no mesmo espírito de como a resposta da API do GitHub já era tratada
+- **Descobertas só visíveis testando contra a API real** (documentado aqui porque não tinha como prever sem uma chave de verdade):
+  - O campo correto é `generation_config.max_output_tokens`, não `max_tokens`
+  - O texto gerado vem em `steps[].content[].text` (no step do tipo `"model_output"`), não em `output_text` como a documentação sugeria
+  - O Gemini soma os tokens de "thinking" interno dentro do próprio teto de `max_output_tokens` — nos testes, ~400-450 tokens de raciocínio antes mesmo de começar a gerar a resposta, mesmo com `thinking_level: "low"`. Os valores herdados de uma tentativa anterior com Claude (512-1024) truncavam a resposta no meio do JSON; todos os serviços foram recalibrados para 1536-3072
+  - `gemini-3.7-flash` (modelo mais novo disponível) apresentou alta latência e um erro de indisponibilidade temporária nos testes (17-35s para uma pergunta trivial); `gemini-3.6-flash` respondeu de forma consistente em 3-9s e foi o modelo mantido como padrão
+- **Migração anterior:** o client já tinha sido implementado uma vez sobre a Messages API da Anthropic (Claude), a pedido inicial, e depois totalmente substituído pelo Gemini a pedido do usuário — `services/anthropicClient.js` foi removido, sem deixar código morto
+
+### Melhorias em funcionalidades já existentes
+
+**1. Análise de repositórios com IA** — `services/aiProfileAnalyzer.js`
+- Além da extração estática já existente (linguagem por extensão, dependências), envia README + estrutura de cada repositório pra IA e recebe de volta proficiência estimada, boas práticas identificadas e pontos de melhoria
+- Nova tabela `perfil_tecnico_ia`, vinculada ao usuário — resultado é cacheado, não reprocessa a cada acesso
+- `GET /api/ai/perfil-tecnico` (`routes/ai.js`)
+- `fetchRepoReadme`/`fetchRepoLanguages` de `services/githubAnalyzer.js` passaram a ser exportadas para reuso, em vez de duplicar a lógica de busca de README
+
+**2. Compatibilidade semântica com vagas** — `services/matchCalculator.js`
+- Nova função `getMatchExplanation(githubId, jobId)`: reaproveita `calculateJobMatch` como única fonte de verdade do percentual numérico (não substitui, só complementa), envia o breakdown de skills pra IA e recebe de volta uma explicação textual curta de por que aquele número saiu daquele jeito
+- Nova tabela `match_ia_cache`, cacheada por par candidato-vaga
+- `GET /api/ai/jobs/:id/match-explicacao`
+
+**3. Trilha de estudos personalizada** — `services/roadmapGenerator.js`
+- Quando o plano já libera a trilha personalizada (`hasFeature('roadmap_personalizado')`, feature PRO que já existia), cada skill faltante ganha `ia_motivo`/`ia_tipo_recurso` gerados por IA a partir do gap de skills, além dos recursos estáticos do banco
+- Uma única chamada de IA para todo o gap de skills de uma vez (não uma por skill), decisão de custo/latência
+- Falha graciosamente: se a IA não responder, a trilha continua funcionando só com os recursos estáticos, sem quebrar nada
+
+**4. Portfólio com descrições geradas** — `services/portfolioDescriber.js`
+- Funcionalidade nova por completo (não existia geração de portfólio no projeto antes desta fase)
+- Para cada repositório, gera uma descrição profissional a partir do README e da linguagem, sob demanda
+- Nova coluna `ai_description` em `user_repositories`
+- `POST /api/user/repos/:id/gerar-descricao` (`routes/repositorios.js`)
+- Botão "Gerar com IA" no modal de edição já existente em `views/repositorios.ejs` — preenche o campo, usuário revisa e salva pelo fluxo que já existia
+
+### Funcionalidades novas
+
+**5. Mentor de carreira (chat)** — exclusivo plano PRO
+- `services/mentorChat.js`: usa skills + nível do usuário como contexto de sistema, mantém histórico de conversa
+- Nova tabela `mentor_conversas`
+- `GET /api/ai/mentor/historico`, `POST /api/ai/mentor/mensagem`, gate 402 no mesmo padrão já usado em `empresaController.createJob`
+- Nova página `/mentor` + `views/mentor.ejs`, clonando a estrutura visual de `views/mensagens.ejs` (bolhas de conversa, `escapeHtml`, toast)
+
+**6. Simulador de entrevista técnica** — exclusivo plano PRO
+- `services/interviewSimulator.js`: gera pergunta técnica a partir do nível/skills do candidato (e, opcionalmente, dos requisitos de uma vaga), recebe resposta em texto e devolve feedback específico
+- Nova tabela `entrevista_simulacoes`
+- `POST /api/ai/entrevista/iniciar`, `POST /api/ai/entrevista/:id/responder`
+- Nova página `/entrevista` + `views/entrevista.ejs`, reaproveitando `.dev-card`/`.repos-empty`/`.btn-primary-dev` já existentes em `dev.css`
+
+**7. Resumo inteligente de candidatos** — exclusivo empresa Premium
+- Não existia endpoint de listagem de candidaturas recebidas (`job_applications` só era contado, nunca listado) — `getJobApplications` e `getApplicationSummary` foram criados em `controllers/empresaController.js`, reaproveitando o controller/estilo já usado ali
+- `services/candidateSummarizer.js`: gera resumo curto (pontos fortes, projetos relevantes) a partir de skills + repositórios públicos do candidato
+- Nova coluna `resumo_ia` em `job_applications`
+- `GET /api/empresa/jobs/:id/candidaturas`, `POST /api/empresa/candidaturas/:id/resumo-ia`
+
+**8. Insights de mercado** — página pública, sem gate de plano
+- `services/marketInsights.js`: agrega quantas vagas ativas pedem cada skill, gera resumo textual das tecnologias mais demandadas
+- Nova tabela `mercado_insights` — pensada como rotina periódica; como não há cron configurado no projeto ainda, gera sob demanda quando não há um insight salvo
+- `GET /api/ai/insights-mercado`
+- Nova página pública `/insights-mercado` + `views/insights-mercado.ejs`, com o mesmo condicional `<% if (locals.user) %>` de header dev/público já usado em `views/vagas.ejs`
+
+### LGPD
+
+Em todo ponto onde um payload é montado para envio à IA, um comentário explícito marca que só vão tecnologias, skills e trechos de README/descrição — nunca nome completo, e-mail ou outro dado pessoal do candidato. Vale para os 8 itens acima.
+
+### Distribuição de linguagens no roadmap
+
+Funcionalidade separada, pedida depois: a página `/roadmap` só mostrava a trilha de skills faltantes para uma vaga específica — não existia, em nenhuma tela do projeto, um resumo visual de "% de cada linguagem no perfil do usuário" (tipo o gráfico de linguagens de um perfil do GitHub). Não era uma regressão, era funcionalidade que nunca tinha sido construída.
+
+- Novo método `getLanguageDistribution` em `controllers/roadmapController.js`: agrega `user_repositories.language` por usuário (contagem de repositórios por linguagem, convertida em percentual)
+- `GET /api/user/languages` (`routes/roadmap.js`)
+- Nova seção "💻 Linguagens do seu perfil" em `views/roadmap.ejs`, logo abaixo do resumo numérico de skills — carregada em paralelo com o roadmap, sem bloquear o resto da página; se falhar, a seção se esconde sozinha
+- CSS em `public/css/roadmap.css`, reaproveitando as variáveis do design system (`--accent`, `--bg-3`, `--border-lite`) e o padrão visual das seções (`#section-known`/`#section-learn`) que já existiam
+
+### Configuração
+
+**`.env.example`** — nova seção:
+```
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-3.6-flash
+```
+Sem `GEMINI_API_KEY` definida, as funcionalidades de IA falham de forma isolada (erro logado no servidor, resposta HTTP 502) — o resto da plataforma continua funcionando normalmente, mesmo padrão de degradação graciosa já usado para `SMTP_*`.
+
+**Nenhuma dependência nova instalada** — todas as chamadas de IA usam `axios`, que já era dependência do projeto (mesmo padrão da integração com a API do GitHub).
+
+### Testado de ponta a ponta contra dados reais
+
+- **Insights de mercado**: gerou resumo real a partir das vagas cadastradas (27s na primeira chamada — sem cache —, 0.2s na segunda, já cacheado)
+- **Mentor de carreira**: conversa real com um usuário existente (skills reais do banco) — resposta contextualizada corretamente às skills que ele já tinha
+- **Simulador de entrevista**: gerou pergunta técnica real e avaliou uma resposta deliberadamente errada — o feedback identificou corretamente que a resposta não respondia à pergunta
+- **Distribuição de linguagens**: query testada contra repositórios reais de um usuário (2 repos HTML + 1 JavaScript → 67%/33%, soma 100% corretamente)
+- Regressão completa rodada depois de cada mudança: todas as rotas pré-existentes (`/`, `/dashboard`, `/repositorios`, `/roadmap`, `/mensagens`, `/api/jobs`, `/api/user/repos`, `/empresa/dashboard`) continuam respondendo exatamente como antes
+- Dados de teste (conversa do mentor, simulação de entrevista) removidos do banco depois dos testes
+- **Não testado**: análise de repositório e descrição de portfólio via IA — ambas dependem de um token OAuth do GitHub numa sessão de navegador real, que não é simulável por script. O código reaproveita `fetchRepoReadme`, que já existia e funcionava antes desta fase, então o risco é concentrado só na chamada à IA em si (já testada em outros três fluxos)
+
+### Não alterado (decisão consciente, não é bug)
+
+- **Segredos reais que apareceram no `.env.example` local durante o trabalho**: em determinado ponto o `.env.example` do working tree continha valores reais de banco/GitHub OAuth em vez de placeholders (não estavam no histórico do git ainda). Foram substituídos por placeholders vazios antes do primeiro commit desta fase, então nunca chegaram a ser publicados no `origin/main`.
+
+### Arquivos da Fase 7
+
+**Novos:** `services/geminiClient.js`, `services/aiProfileAnalyzer.js`, `services/portfolioDescriber.js`, `services/mentorChat.js`, `services/interviewSimulator.js`, `services/candidateSummarizer.js`, `services/marketInsights.js`, `routes/ai.js`, `views/mentor.ejs`, `views/entrevista.ejs`, `views/insights-mercado.ejs`
+
+**Alterados:** `.env.example`, `config/plans.js` (novas feature keys `mentor_carreira`/`simulador_entrevista`), `config/script_bd.sql`, `database/db.js` (7 tabelas novas + 2 colunas novas), `controllers/empresaController.js`, `controllers/roadmapController.js`, `routes/empresa.js`, `routes/repositorios.js`, `routes/roadmap.js`, `server.js` (rotas de página `/mentor`, `/entrevista`, `/insights-mercado`), `services/githubAnalyzer.js`, `services/matchCalculator.js`, `services/roadmapGenerator.js`, `views/repositorios.ejs`, `views/roadmap.ejs`, `public/css/roadmap.css`
+
+**Removido:** `services/anthropicClient.js` (substituído por `geminiClient.js`)
+
 ## Arquivos modificados por fase
 
 | Arquivo | Fase 1 | Fase 2 | Fase 3 | Fase 4 |
@@ -430,3 +544,14 @@ O sistema de planos já limita vagas por plano e libera/restringe recursos do de
 ### 8. Revisar o protótipo de Mensagens quando estiver pronto (Fase 5)
 
 O banco e a API (`/api/messages/*`) já funcionam ponta a ponta. Falta só a tela — me manda o protótipo que eu volto com o design certo em vez de inventar uma UI própria.
+
+### 9. Configurar `GEMINI_API_KEY` no ambiente de produção (Fase 7)
+
+Sem essa variável, as 8 funcionalidades de IA generativa (análise de repositório, compatibilidade semântica, trilha personalizada, descrições de portfólio, mentor de carreira, simulador de entrevista, resumo de candidatos, insights de mercado) falham de forma isolada — erro logado no servidor, resposta HTTP 502 — mas o resto da plataforma continua funcionando normalmente.
+
+| Variável | Descrição |
+|---|---|
+| `GEMINI_API_KEY` | Gerada em [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — nível gratuito |
+| `GEMINI_MODEL` | Padrão `gemini-3.6-flash`; ajustável sem alterar código |
+
+Configurar no `.env` local e nas variáveis de ambiente de produção (Clever Cloud).

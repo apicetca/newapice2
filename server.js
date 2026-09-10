@@ -1,4 +1,14 @@
 require("dotenv").config();
+
+if (!process.env.APP_URL) {
+  console.error(
+    "[config] Variável de ambiente APP_URL não definida. Defina-a explicitamente " +
+    "(ex.: http://localhost:3000 em dev, https://newapice22.onrender.com em produção) " +
+    "— ela é usada para montar a redirect_uri do login GitHub OAuth."
+  );
+  process.exit(1);
+}
+
 const express      = require("express");
 const session      = require("express-session");
 const path         = require("path");

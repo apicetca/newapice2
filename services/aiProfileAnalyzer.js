@@ -8,7 +8,7 @@
 // reprocessa a cada acesso.
 // ============================================
 const db = require("../database/db");
-const { askClaudeJSON } = require("./anthropicClient");
+const { askGeminiJSON } = require("./geminiClient");
 const { fetchRepoReadme } = require("./githubAnalyzer");
 
 const SYSTEM_PROMPT = `Você é um avaliador técnico que analisa repositórios de código de
@@ -55,10 +55,10 @@ async function analyzeUserProfile(userId, accessToken) {
   );
 
   const payload = buildRepoPayload(repos, readmes);
-  const result = await askClaudeJSON({
+  const result = await askGeminiJSON({
     system: SYSTEM_PROMPT,
     prompt: `Analise estes repositórios e responda no formato JSON pedido:\n${JSON.stringify(payload)}`,
-    maxTokens: 1024,
+    maxTokens: 2048,
   });
 
   await db.query(

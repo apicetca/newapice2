@@ -5,7 +5,7 @@
 // contexto de sistema. Exclusivo do plano PRO.
 // ============================================
 const db = require("../database/db");
-const { askClaudeJSON } = require("./anthropicClient");
+const { askGeminiJSON } = require("./geminiClient");
 
 const MAX_HISTORY = 20; // últimas mensagens trazidas como contexto
 
@@ -55,16 +55,16 @@ async function sendMessage(userId, githubId, nivel, userMessage) {
   const recent  = history.slice(-MAX_HISTORY);
   const system  = await buildSystemPrompt(githubId, nivel);
 
-  // askClaudeJSON exige JSON estruturado — o mentor responde em
+  // askGeminiJSON exige JSON estruturado — o mentor responde em
   // { "resposta": "string" } pra manter o mesmo padrão do resto da app.
   const conversationText = recent
     .map(m => `${m.role === "user" ? "Candidato" : "Mentor"}: ${m.content}`)
     .join("\n");
 
-  const result = await askClaudeJSON({
+  const result = await askGeminiJSON({
     system: `${system}\n\nResponda SEMPRE em JSON puro (sem markdown) no formato exato: { "resposta": "string" }`,
     prompt: `Histórico da conversa até agora:\n${conversationText}\n\nResponda à última mensagem do candidato.`,
-    maxTokens: 1024,
+    maxTokens: 2048,
   });
 
   const resposta = result.resposta ?? "Desculpe, não consegui gerar uma resposta agora. Tente novamente.";

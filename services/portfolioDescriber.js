@@ -5,7 +5,7 @@
 // partir do README e da linguagem do repo.
 // ============================================
 const db = require("../database/db");
-const { askClaudeJSON } = require("./anthropicClient");
+const { askGeminiJSON } = require("./geminiClient");
 const { fetchRepoReadme } = require("./githubAnalyzer");
 
 const SYSTEM_PROMPT = `Você escreve descrições curtas e profissionais (2-3 frases, em
@@ -30,10 +30,10 @@ async function generateRepoDescription(userId, repoId, accessToken) {
     readme_excerpt: readme.slice(0, 2000),
   };
 
-  const result = await askClaudeJSON({
+  const result = await askGeminiJSON({
     system: SYSTEM_PROMPT,
     prompt: `Gere uma descrição de portfólio para este projeto:\n${JSON.stringify(payload)}`,
-    maxTokens: 512,
+    maxTokens: 1536,
   });
 
   const descricao = result.descricao ?? "";
