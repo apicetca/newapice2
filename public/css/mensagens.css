@@ -29,6 +29,12 @@
 .msg-thread      { animation-delay: .04s; }
 .msg-info-panel  { animation-delay: .08s; }
 
+/* .msg-thread tem display:flex explícito acima, que por especificidade
+   vence o display:none nativo do atributo hidden — sem esta regra, uma
+   página com múltiplas .msg-thread (ex: mentor.ejs, um estado por vez)
+   mostra todos os estados sobrepostos ao mesmo tempo. */
+.msg-thread[hidden] { display: none !important; }
+
 /* ── Sidebar (lista de conversas) ── */
 .msg-sidebar-head { padding: 14px; border-bottom: 1px solid var(--border); }
 
@@ -169,6 +175,27 @@
 }
 .msg-thread-input button:hover { background: var(--accent-hv); }
 .msg-thread-input button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Botão de anexo (mentor) — ghost, pra não competir visualmente com o
+   botão de enviar (accent, ação primária). */
+.msg-thread-input .mentor-anexo-btn {
+  background: transparent; border: 1px solid var(--border-lite); color: var(--muted);
+}
+.msg-thread-input .mentor-anexo-btn:hover { background: var(--bg-3); color: var(--text); }
+
+.mentor-anexo-preview {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 16px 8px; padding: 6px 10px;
+  background: var(--bg-3); border: 1px solid var(--border-lite); border-radius: var(--radius-sm);
+  font-size: .78rem; color: var(--muted);
+}
+.mentor-anexo-preview[hidden] { display: none !important; }
+.mentor-anexo-preview span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mentor-anexo-preview button {
+  background: transparent; border: none; color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; padding: 2px;
+}
+.mentor-anexo-preview button:hover { color: var(--text); }
 
 /* ── Painel de info (empresa / dev) ── */
 .msg-info-panel { padding: 16px; overflow-y: auto; position: relative; }

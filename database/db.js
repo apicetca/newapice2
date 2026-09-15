@@ -264,6 +264,12 @@ async function testarConexao() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
     `);
 
+    // ID da interação do Gemini que gerou essa resposta (só em linhas
+    // role='assistant') — permite encadear a próxima mensagem do
+    // usuário via previous_interaction_id em vez de reconstruir o
+    // histórico inteiro como texto a cada chamada.
+    await addColumn("mentor_conversas", "gemini_interaction_id", "VARCHAR(255) DEFAULT NULL");
+
     // ── Simulador de entrevista técnica — exclusivo plano PRO ─
     await pool.query(`
       CREATE TABLE IF NOT EXISTS entrevista_simulacoes (

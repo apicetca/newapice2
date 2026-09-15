@@ -186,6 +186,14 @@
               <!-- filled by JS -->
             </div>
             <p id="plan-features" style="color:var(--muted);font-size:.82rem;margin-top:10px"></p>
+
+            <!-- Troca de plano sem checkout — só aparece se o backend
+                 permitir (ALLOW_SELF_PLAN_SWITCH=true no ambiente).
+                 Usado pra testar funcionalidades PRO sem pagamento real. -->
+            <div id="plan-switch" hidden style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+              <button type="button" class="btn-secondary" id="btn-plan-free" style="font-size:.82rem">Usar plano Gratuito</button>
+              <button type="button" class="btn-primary-dev" id="btn-plan-pro" style="font-size:.82rem">Usar plano PRO</button>
+            </div>
           </section>
 
           <!-- ── Conta ─────────────────────────────────────────── -->
@@ -303,9 +311,42 @@
           : `<span style="color:var(--muted);font-size:.82rem">Fale com o suporte para virar PRO — R$ 19,90/mês.</span>`
         }`;
       $("plan-features").textContent = isPro
-        ? "Você tem acesso ao roadmap personalizado com recursos recomendados e destaque no perfil para empresas."
-        : "No plano gratuito, o roadmap mostra as skills que faltam, mas os cursos/vídeos recomendados são exclusivos do PRO.";
+        ? "Você tem acesso ao roadmap personalizado com recursos recomendados, mentor de carreira, simulador de entrevista e destaque no perfil para empresas."
+        : "No plano gratuito, o roadmap mostra as skills que faltam, mas o mentor de carreira, o simulador de entrevista e os cursos/vídeos recomendados são exclusivos do PRO.";
+
+      $("btn-plan-free").disabled = !isPro;
+      $("btn-plan-pro").disabled  = isPro;
     }
+
+    // Os botões ficam sempre visíveis (não há como saber de antemão se
+    // ALLOW_SELF_PLAN_SWITCH está ligada sem gastar uma chamada); se a
+    // troca não estiver habilitada no backend, o clique retorna 404 e
+    // mostramos um aviso claro em vez de simplesmente não fazer nada.
+    async function trySwitchPlan(planCode) {
+      try {
+        const res  = await fetch("/api/user/plano", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ plan_code: planCode }),
+        });
+        if (res.status === 404) {
+          showToast("Troca de plano não está habilitada neste ambiente.", "info");
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erro ao trocar de plano.");
+
+        renderPlan(data.plan);
+        showToast(`Plano alterado para ${data.plan.name}.`, "success");
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    $("btn-plan-free").addEventListener("click", () => trySwitchPlan("dev_free"));
+    $("btn-plan-pro").addEventListener("click",  () => trySwitchPlan("dev_pro"));
+
+    $("plan-switch").hidden = false;
 
     // ──────────────────────────────────────────────────────
     // Hero

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidaturas — Ápice</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/dev.css" />
+  <link rel="stylesheet" href="/css/empresa-desenvolvedores.css" />
+</head>
+<body>
+
+  <%- include('partials/header-company', { currentPage: 'empresa-vagas' }) %>
+
+  <main class="page-content" id="main-content">
+
+    <section class="loading-screen" id="loading" role="status" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Carregando candidaturas...</p>
+    </section>
+
+    <section id="state-error" hidden>
+      <p class="state-msg error">Não foi possível carregar as candidaturas. <a href="/empresa/vagas">Voltar</a></p>
+    </section>
+
+    <article id="content" hidden>
+
+      <header class="devs-header">
+        <hgroup class="devs-header-left">
+          <p class="page-subtitle" style="margin-bottom:4px"><a href="/empresa/vagas">← Vagas</a></p>
+          <h1 class="page-title" id="job-title">
+            Candidaturas
+            <span class="page-title-count" id="candidaturas-count"></span>
+          </h1>
+          <p class="page-subtitle" id="job-level"></p>
+        </hgroup>
+      </header>
+
+      <!-- Aviso de upgrade — plano não Premium -->
+      <div class="dev-card" id="premium-upsell" hidden style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <p style="font-size:.85rem;color:var(--muted);margin:0">✨ Resumos automáticos por IA (pontos fortes, projetos relevantes) são exclusivos do plano <strong>Premium</strong>.</p>
+        <a href="/perfil#plano" class="btn-primary-dev">Fazer upgrade</a>
+      </div>
+
+      <section aria-label="Lista de candidaturas">
+        <ul class="devs-grid" id="candidaturas-grid" role="list"></ul>
+      </section>
+
+    </article>
+
+  </main>
+
+  <output class="toast" id="toast" role="status" aria-live="polite"></output>
+
+  <script>
+    const JOB_ID = <%- jobId %>;
+    let APPLICATIONS = [];
+    let IS_PREMIUM   = false;
+
+    const LEVEL_LABEL = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str || "";
+      return div.innerHTML;
+    }
+
+    function initials(name) {
+      return (name || "?").split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
+    }
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+    }
+
+    function renderCard(app) {
+      const nome = app.dev_nome || app.github_login || "Candidato";
+      const resumoHtml = app.resumo_ia
+        ? `<p class="dev-card-resumo-ia">✨ ${escapeHtml(app.resumo_ia)}</p>`
+        : IS_PREMIUM
+        ? `<button type="button" class="btn-ghost js-gerar-resumo" data-id="${app.id}">Gerar resumo com IA</button>`
+        : "";
+
+      return `
+        <li class="dev-card" data-id="${app.id}">
+          <header class="dev-card-top">
+            <span class="dev-avatar" aria-hidden="true">${initials(nome)}</span>
+            <address class="dev-identity">
+              <p class="dev-name">${escapeHtml(nome)}</p>
+              ${app.github_login ? `
+                <a class="dev-github" href="https://github.com/${escapeHtml(app.github_login)}" target="_blank" rel="noopener noreferrer" aria-label="GitHub de ${escapeHtml(nome)}">
+                  @${escapeHtml(app.github_login)}
+                </a>` : ""}
+              ${app.nivel ? `<span class="badge badge-blue dev-level-badge">${escapeHtml(app.nivel)}</span>` : ""}
+            </address>
+          </header>
+
+          <p class="dev-stat-label" style="margin:8px 0">Candidatou-se em ${formatDate(app.created_at)}</p>
+
+          ${resumoHtml}
+
+          <nav class="dev-actions" aria-label="Ações para ${escapeHtml(nome)}">
+            ${app.dev_id ? `<a href="/empresa/dev/${app.dev_id}" class="dev-btn dev-btn--primary">Ver perfil</a>` : ""}
+          </nav>
+        </li>`;
+    }
+
+    function render() {
+      const grid = document.getElementById("candidaturas-grid");
+      document.getElementById("candidaturas-count").textContent = `(${APPLICATIONS.length})`;
+
+      if (!APPLICATIONS.length) {
+        grid.innerHTML = `
+          <li class="devs-empty">
+            <p class="devs-empty-title">Nenhuma candidatura ainda</p>
+            <p class="devs-empty-sub">Assim que alguém se candidatar a esta vaga, aparece aqui.</p>
+          </li>`;
+        return;
+      }
+
+      grid.innerHTML = APPLICATIONS.map(renderCard).join("");
+
+      grid.querySelectorAll(".js-gerar-resumo").forEach(btn => {
+        btn.addEventListener("click", () => gerarResumo(btn));
+      });
+    }
+
+    async function gerarResumo(btn) {
+      const id = btn.dataset.id;
+      btn.disabled = true;
+      btn.textContent = "Gerando...";
+
+      try {
+        const res  = await fetch(`/api/empresa/candidaturas/${id}/resumo-ia`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erro ao gerar resumo.");
+
+        const app = APPLICATIONS.find(a => String(a.id) === String(id));
+        if (app) app.resumo_ia = data.resumo_ia;
+        render();
+      } catch (err) {
+        showToast(err.message, true);
+        btn.disabled = false;
+        btn.textContent = "Gerar resumo com IA";
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(msg, isErr = false) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.style.borderColor = isErr ? "rgba(248,81,73,.35)" : "var(--border-lite)";
+      el.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+    }
+
+    async function init() {
+      try {
+        const res  = await fetch(`/api/empresa/jobs/${JOB_ID}/candidaturas`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        document.getElementById("job-title").innerHTML =
+          `Candidaturas — ${escapeHtml(data.job.title)} <span class="page-title-count" id="candidaturas-count"></span>`;
+        document.getElementById("job-level").textContent = LEVEL_LABEL[data.job.level] ?? data.job.level ?? "";
+
+        IS_PREMIUM = Boolean(data.premium);
+        document.getElementById("premium-upsell").hidden = IS_PREMIUM;
+
+        APPLICATIONS = data.applications;
+        render();
+
+        document.getElementById("loading").hidden = true;
+        document.getElementById("content").hidden = false;
+      } catch {
+        document.getElementById("loading").hidden = true;
+        document.getElementById("state-error").hidden = false;
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

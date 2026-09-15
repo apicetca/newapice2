@@ -171,6 +171,34 @@ const roadmapController = {
     }
   },
 
+  // Distribuição de linguagens do perfil, calculada a partir dos
+  // repositórios importados (user_repositories.language) — % de repos
+  // que usam cada linguagem, igual ao gráfico de linguagens do GitHub.
+  getLanguageDistribution: async (req, res) => {
+    try {
+      const userId = req.session.user.id;
+      const [rows] = await db.query(`
+        SELECT language, COUNT(*) AS total
+        FROM user_repositories
+        WHERE user_id = ? AND language IS NOT NULL AND language != ''
+        GROUP BY language
+        ORDER BY total DESC
+      `, [userId]);
+
+      const totalRepos = rows.reduce((sum, r) => sum + r.total, 0);
+      const languages = rows.map(r => ({
+        language: r.language,
+        count: r.total,
+        percent: totalRepos > 0 ? Math.round((r.total / totalRepos) * 100) : 0,
+      }));
+
+      res.json({ totalRepos, languages });
+    } catch (err) {
+      console.error("[GET /api/user/languages]", err.message);
+      res.status(500).json({ error: "Erro interno. Tente novamente." });
+    }
+  },
+
   getDashboard: async (req, res) => {
     try {
       const userId = getUserId(req);

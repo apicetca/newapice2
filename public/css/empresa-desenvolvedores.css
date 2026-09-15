@@ -308,6 +308,17 @@
   white-space: nowrap;
 }
 
+.dev-card-resumo-ia {
+  font-size: .8rem;
+  color: var(--text);
+  background: var(--teal-dim);
+  border: 1px solid var(--teal-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
 .dev-stat-bar {
   flex: 1;
   height: 5px;

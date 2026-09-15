@@ -36,6 +36,55 @@
       </button>
     </div>
 
+      <!-- ── Análise de perfil técnico via IA ────────────── -->
+      <section class="dev-card" id="ia-perfil-section" style="margin-bottom:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+          <div>
+            <h2 style="font-size:1rem;margin:0 0 2px">Análise de perfil técnico</h2>
+            <p style="font-size:.82rem;color:var(--muted);margin:0">Uma leitura qualitativa dos seus repositórios, gerada por IA.</p>
+          </div>
+          <button type="button" class="btn-ghost" id="btn-ia-perfil-reanalisar" hidden>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Reanalisar
+          </button>
+        </div>
+
+        <!-- Estado inicial: convite a gerar -->
+        <div id="ia-perfil-start">
+          <p style="font-size:.85rem;color:var(--muted);margin:0 0 12px">Ainda não geramos uma análise do seu perfil técnico.</p>
+          <button type="button" class="btn-primary-dev" id="btn-ia-perfil-gerar">Gerar análise com IA</button>
+        </div>
+
+        <!-- Estado de carregamento -->
+        <div id="ia-perfil-loading" hidden style="display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.85rem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" style="animation:spin 1s linear infinite">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+          Analisando repositórios com IA... isso pode levar alguns segundos.
+        </div>
+
+        <!-- Estado de erro -->
+        <div id="ia-perfil-error" hidden style="font-size:.85rem;color:var(--danger,#e5484d)"></div>
+
+        <!-- Resultado -->
+        <div id="ia-perfil-resultado" hidden>
+          <div style="margin-bottom:14px">
+            <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Proficiência estimada</span>
+            <p id="ia-perfil-proficiencia" style="font-size:1.05rem;font-weight:600;margin:2px 0 0;text-transform:capitalize"></p>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="ia-perfil-grid">
+            <div>
+              <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Boas práticas identificadas</span>
+              <ul id="ia-perfil-boas-praticas" style="margin:8px 0 0;padding-left:18px;font-size:.85rem;line-height:1.6"></ul>
+            </div>
+            <div>
+              <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Pontos de melhoria</span>
+              <ul id="ia-perfil-pontos-melhoria" style="margin:8px 0 0;padding-left:18px;font-size:.85rem;line-height:1.6"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ── Skeleton loading ──────────────────────────── -->
       <div id="state-loading" aria-label="Carregando repositórios" aria-live="polite">
         <div class="repos-skeleton">
@@ -177,6 +226,12 @@
 
     const modalEdit    = $('modal-edit');
     const editDesc     = $('edit-desc');
+
+    const iaStart      = $('ia-perfil-start');
+    const iaLoading    = $('ia-perfil-loading');
+    const iaError      = $('ia-perfil-error');
+    const iaResultado  = $('ia-perfil-resultado');
+    const iaReanalisar = $('btn-ia-perfil-reanalisar');
 
     let editingId      = null;
     let allGhRepos     = [];   // cache dos repos do GitHub
@@ -452,6 +507,55 @@
       }
     }
 
+    // ── Análise de perfil técnico via IA ───────────────────────
+    function showIaPerfilState(state) {
+      iaStart.hidden     = state !== 'start';
+      iaLoading.hidden   = state !== 'loading';
+      iaError.hidden     = state !== 'error';
+      iaResultado.hidden = state !== 'resultado';
+      iaReanalisar.hidden = state !== 'resultado' && state !== 'error';
+    }
+
+    function renderIaPerfil(perfil) {
+      $('ia-perfil-proficiencia').textContent = perfil.proficiencia_estimada || 'não informado';
+
+      const boasPraticasEl = $('ia-perfil-boas-praticas');
+      boasPraticasEl.innerHTML = (perfil.boas_praticas || []).length
+        ? perfil.boas_praticas.map(p => `<li>${escHtml(p)}</li>`).join('')
+        : '<li style="color:var(--muted)">Nenhum ponto identificado.</li>';
+
+      const pontosMelhoriaEl = $('ia-perfil-pontos-melhoria');
+      pontosMelhoriaEl.innerHTML = (perfil.pontos_melhoria || []).length
+        ? perfil.pontos_melhoria.map(p => `<li>${escHtml(p)}</li>`).join('')
+        : '<li style="color:var(--muted)">Nenhum ponto identificado.</li>';
+
+      showIaPerfilState('resultado');
+    }
+
+    // Busca a análise — na 1ª visita (sem cache ainda), o backend gera
+    // na hora; chamadas seguintes servem o cache. reanalisar:true força
+    // o backend a ignorar o cache e gerar de novo (botão "Reanalisar").
+    async function loadIaPerfil({ reanalisar = false } = {}) {
+      showIaPerfilState('loading');
+
+      try {
+        const url = '/api/ai/perfil-tecnico' + (reanalisar ? '?reanalisar=1' : '');
+        const res  = await fetch(url);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Erro ao gerar análise.');
+        renderIaPerfil(data);
+      } catch (err) {
+        // Sem repositórios importados ainda: não é erro, é o estado inicial
+        // esperado — deixa o botão "Gerar análise com IA" visível.
+        if (err.message.includes('Importe ao menos um repositório')) {
+          showIaPerfilState('start');
+          return;
+        }
+        iaError.textContent = err.message;
+        showIaPerfilState('error');
+      }
+    }
+
     // ── Abre modal de edição ──────────────────────────────────
     function openEdit(id, desc) {
       lastFocused = document.activeElement;
@@ -553,6 +657,8 @@
     $('btn-cancel-edit').addEventListener('click', closeModals);
     $('btn-save-edit').addEventListener('click', saveEdit);
     $('btn-generate-desc').addEventListener('click', generateDescription);
+    $('btn-ia-perfil-gerar').addEventListener('click', () => loadIaPerfil());
+    iaReanalisar.addEventListener('click', () => loadIaPerfil({ reanalisar: true }));
 
     // Fecha modal clicando no backdrop
     [modalAdd, modalEdit].forEach(m => {
@@ -571,6 +677,7 @@
 
     // ── Init ──────────────────────────────────────────────────
     loadRepos();
+    loadIaPerfil();
 
   })();
   </script>

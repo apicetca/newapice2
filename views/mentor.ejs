@@ -36,6 +36,15 @@
       </div>
     </section>
 
+    <!-- ══ Estado: erro (falha de rede/servidor, não gate de plano) ══ -->
+    <section class="msg-thread" aria-label="Mentor de carreira" id="mentorError" hidden>
+      <div class="msg-thread-empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p>Não foi possível carregar o mentor agora. Tente novamente em instantes.</p>
+        <button type="button" class="btn-primary-dev" id="btn-mentor-retry" style="margin-top:16px">Tentar de novo</button>
+      </div>
+    </section>
+
     <!-- ══ Conversa com o mentor ══ -->
     <section class="msg-thread" aria-label="Mentor de carreira" id="mentorChat" hidden>
       <header class="msg-thread-header">
@@ -50,8 +59,20 @@
 
       <div class="msg-thread-body" id="mentorBody" aria-live="polite"></div>
 
+      <div id="mentorAnexoPreview" class="mentor-anexo-preview" hidden>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        <span id="mentorAnexoNome"></span>
+        <button type="button" id="btn-mentor-anexo-remover" aria-label="Remover anexo">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
       <form class="msg-thread-input" id="mentorForm">
-        <textarea id="mentorInput" aria-label="Mensagem para o mentor" placeholder="Pergunte algo sobre sua carreira..." rows="1" maxlength="2000" required></textarea>
+        <input type="file" id="mentorAnexoInput" accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown" hidden />
+        <button type="button" id="btn-mentor-anexo" class="mentor-anexo-btn" aria-label="Anexar arquivo" title="Anexar PDF, .txt ou .md">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <textarea id="mentorInput" aria-label="Mensagem para o mentor" placeholder="Pergunte algo sobre sua carreira... (Enter envia, Shift+Enter quebra linha)" rows="1" maxlength="2000" required></textarea>
         <button type="submit" id="mentorSendBtn" aria-label="Enviar mensagem">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
@@ -100,47 +121,107 @@
     body.scrollTop = body.scrollHeight;
   }
 
+  function showMentorState(state) {
+    $("mentorLoading").hidden = state !== "loading";
+    $("mentorLocked").hidden  = state !== "locked";
+    $("mentorError").hidden   = state !== "error";
+    $("mentorChat").hidden    = state !== "chat";
+  }
+
   async function init() {
+    showMentorState("loading");
     try {
       const res = await fetch("/api/ai/mentor/historico");
       if (res.status === 402) {
-        $("mentorLoading").hidden = true;
-        $("mentorLocked").hidden = false;
+        showMentorState("locked");
         return;
       }
       if (!res.ok) throw new Error();
       const history = await res.json();
-      $("mentorLoading").hidden = true;
-      $("mentorChat").hidden = false;
+      showMentorState("chat");
       renderMessages(history);
     } catch {
-      $("mentorLoading").hidden = true;
-      $("mentorLocked").hidden = false;
+      // Erro genérico (rede, 500, etc.) — distinto do gate de plano (402),
+      // pra não dizer "exclusivo PRO" pra um usuário que já é PRO mas
+      // teve uma falha transitória.
+      showMentorState("error");
     }
   }
 
+  $("btn-mentor-retry").addEventListener("click", init);
+
+  // ── Anexo de arquivo ──────────────────────────────────
+  let anexoSelecionado = null;
+
+  function setAnexo(file) {
+    anexoSelecionado = file;
+    $("mentorAnexoNome").textContent = file.name;
+    $("mentorAnexoPreview").hidden = false;
+  }
+
+  function clearAnexo() {
+    anexoSelecionado = null;
+    $("mentorAnexoInput").value = "";
+    $("mentorAnexoPreview").hidden = true;
+  }
+
+  $("btn-mentor-anexo").addEventListener("click", () => $("mentorAnexoInput").click());
+
+  $("mentorAnexoInput").addEventListener("change", () => {
+    const file = $("mentorAnexoInput").files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("Arquivo muito grande. Envie até 2MB.", true);
+      $("mentorAnexoInput").value = "";
+      return;
+    }
+    setAnexo(file);
+  });
+
+  $("btn-mentor-anexo-remover").addEventListener("click", clearAnexo);
+
+  // ── Enter envia, Shift+Enter quebra linha ────────────
+  $("mentorInput").addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!$("mentorSendBtn").disabled) $("mentorForm").requestSubmit();
+    }
+  });
+
+  let mentorEnviando = false;
+
   $("mentorForm").addEventListener("submit", async e => {
     e.preventDefault();
+    if (mentorEnviando) return; // evita disparo duplicado (Enter repetido antes da resposta anterior)
+
     const input = $("mentorInput");
     const mensagem = input.value.trim();
     if (!mensagem) return;
 
+    mentorEnviando = true;
     const btn = $("mentorSendBtn");
     btn.disabled = true;
+    input.disabled = true;
 
+    const anexoNome = anexoSelecionado?.name;
     const body = $("mentorBody");
     body.innerHTML += `
       <div class="msg-bubble-row mine">
-        <span class="msg-bubble">${escapeHtml(mensagem)}</span>
+        <span class="msg-bubble">${escapeHtml(mensagem)}${anexoNome ? `<br><em>📎 ${escapeHtml(anexoNome)}</em>` : ""}</span>
       </div>
       <p class="msg-conv-loading" id="mentorTyping">Mentor está digitando...</p>`;
     body.scrollTop = body.scrollHeight;
     input.value = "";
 
+    const formData = new FormData();
+    formData.append("mensagem", mensagem);
+    if (anexoSelecionado) formData.append("anexo", anexoSelecionado);
+    clearAnexo();
+
     try {
       const res = await fetch("/api/ai/mentor/mensagem", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensagem }),
+        method: "POST",
+        body: formData,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao enviar mensagem.");
@@ -151,7 +232,9 @@
       document.getElementById("mentorTyping")?.remove();
       showToast(err.message, true);
     } finally {
+      mentorEnviando = false;
       btn.disabled = false;
+      input.disabled = false;
       input.focus();
     }
   });

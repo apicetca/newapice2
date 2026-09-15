@@ -1,19 +1,36 @@
-const axios = require("axios");
-const db    = require("../database/db");
+const axios  = require("axios");
+const crypto = require("crypto");
+const db     = require("../database/db");
 const { matchSkillsFromGitHub } = require("../services/githubAnalyzer");
+
+// APP_URL é validada em server.js na subida do processo — aqui já é garantida.
+const GITHUB_CALLBACK_PATH = "/auth/github/callback";
+const REDIRECT_URI = `${process.env.APP_URL}${GITHUB_CALLBACK_PATH}`;
 
 const authController = {
   githubLogin: (req, res) => {
+    const state = crypto.randomBytes(16).toString("hex");
+    req.session.oauthState = state;
+
     const url =
       `https://github.com/login/oauth/authorize` +
       `?client_id=${process.env.GITHUB_CLIENT_ID}` +
-      `&scope=read:user,user:email,public_repo`;
+      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+      `&scope=read:user,user:email,public_repo` +
+      `&state=${state}`;
     res.redirect(url);
   },
 
   githubCallback: async (req, res) => {
-    const { code } = req.query;
+    const { code, state } = req.query;
     if (!code) return res.redirect("/login?error=auth_failed");
+
+    const expectedState = req.session.oauthState;
+    delete req.session.oauthState;
+    if (!state || !expectedState || state !== expectedState) {
+      console.error("[github-oauth] state inválido ou ausente no callback");
+      return res.redirect("/login?error=invalid_state");
+    }
 
     try {
       const tokenResponse = await axios.post(
@@ -22,13 +39,18 @@ const authController = {
           client_id:     process.env.GITHUB_CLIENT_ID,
           client_secret: process.env.GITHUB_CLIENT_SECRET,
           code,
+          redirect_uri:  REDIRECT_URI,
         },
         { headers: { Accept: "application/json" } }
       );
 
       const accessToken = tokenResponse.data.access_token;
       if (!accessToken) {
-        console.error("[github-oauth] token exchange falhou:", tokenResponse.data);
+        console.error(
+          "[github-oauth] token exchange falhou:",
+          tokenResponse.data,
+          { client_id: process.env.GITHUB_CLIENT_ID, redirect_uri: REDIRECT_URI }
+        );
         return res.redirect("/login?error=token_failed");
       }
 

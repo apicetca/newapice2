@@ -5,7 +5,7 @@
 // sobre a resposta em texto. Exclusivo plano PRO.
 // ============================================
 const db = require("../database/db");
-const { askClaudeJSON } = require("./anthropicClient");
+const { askGeminiJSON } = require("./geminiClient");
 
 const QUESTION_SYSTEM_PROMPT = `Você é um entrevistador técnico. A partir dos requisitos de
 uma vaga e do nível do candidato, gere UMA pergunta técnica objetiva, adequada ao nível
@@ -48,10 +48,10 @@ async function gerarPergunta(userId, githubId, nivel, jobId = null) {
     requisitos_vaga: jobSkills,
   };
 
-  const result = await askClaudeJSON({
+  const result = await askGeminiJSON({
     system: QUESTION_SYSTEM_PROMPT,
     prompt: `Gere uma pergunta de entrevista técnica para:\n${JSON.stringify(payload)}`,
-    maxTokens: 512,
+    maxTokens: 1536,
   });
 
   const pergunta = result.pergunta ?? "Descreva um projeto seu e os desafios técnicos que enfrentou.";
@@ -71,10 +71,10 @@ async function avaliarResposta(userId, simulacaoId, respostaTexto) {
   );
   if (!simulacao) throw new Error("Simulação não encontrada.");
 
-  const result = await askClaudeJSON({
+  const result = await askGeminiJSON({
     system: FEEDBACK_SYSTEM_PROMPT,
     prompt: `Pergunta: ${simulacao.pergunta}\n\nResposta do candidato: ${respostaTexto}`,
-    maxTokens: 768,
+    maxTokens: 1792,
   });
 
   const feedback = result.feedback ?? "Não foi possível gerar feedback agora. Tente novamente.";

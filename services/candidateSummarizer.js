@@ -5,7 +5,7 @@
 // plano Premium de empresas.
 // ============================================
 const db = require("../database/db");
-const { askClaudeJSON } = require("./anthropicClient");
+const { askGeminiJSON } = require("./geminiClient");
 
 const SYSTEM_PROMPT = `Você ajuda recrutadores técnicos a avaliar candidatos rapidamente.
 A partir das skills e projetos de um candidato, escreva um resumo curto (2-4 frases,
@@ -43,10 +43,10 @@ async function getOrGenerateSummary(applicationId) {
     projetos: repos.map(r => ({ nome: r.repo_name, linguagem: r.language, descricao: r.description })),
   };
 
-  const result = await askClaudeJSON({
+  const result = await askGeminiJSON({
     system: SYSTEM_PROMPT,
     prompt: `Dados do candidato para resumo:\n${JSON.stringify(payload)}`,
-    maxTokens: 512,
+    maxTokens: 1536,
   });
 
   const resumo = result.resumo ?? "Não foi possível gerar o resumo agora.";

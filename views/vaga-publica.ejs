@@ -220,12 +220,35 @@ function renderMatch(match, isLoggedIn) {
         <span class="score-val">${match.scores.seniority}%</span>
         <span class="score-lbl">Senioridade</span>
       </div>
-    </div>`;
+    </div>
+    <p class="match-ia-explicacao" id="match-ia-explicacao" hidden></p>`;
 
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const fill = document.getElementById("match-fill");
     if (fill) { fill.style.transition = "width .8s ease"; fill.style.width = `${pct}%`; }
   }));
+
+  loadMatchExplanation();
+}
+
+// Busca a explicação textual do match gerada por IA — separado do
+// resto pra não bloquear a renderização da página numa chamada de IA
+// potencialmente lenta; aparece assim que (e se) chegar.
+async function loadMatchExplanation() {
+  const el = document.getElementById("match-ia-explicacao");
+  if (!el) return;
+
+  try {
+    const res  = await fetch(`/api/ai/jobs/${JOB_ID}/match-explicacao`);
+    if (!res.ok) return; // sem explicação disponível — card fica só com o %, sem erro visível
+    const data = await res.json();
+    if (!data.explicacao) return;
+
+    el.textContent = `✨ ${data.explicacao}`;
+    el.hidden = false;
+  } catch {
+    // Falha silenciosa — a explicação é um complemento, não essencial ao card.
+  }
 }
 
 function renderMainCol(job, match, isLoggedIn) {

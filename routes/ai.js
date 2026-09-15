@@ -1,4 +1,5 @@
 const express = require("express");
+const multer  = require("multer");
 const router  = express.Router();
 const { param, body } = require("express-validator");
 const { isAuth } = require("../middlewares/auth");
@@ -8,7 +9,21 @@ const { getCachedProfile, analyzeUserProfile } = require("../services/aiProfileA
 const { getMatchExplanation } = require("../services/matchCalculator");
 const { getHistory, sendMessage } = require("../services/mentorChat");
 const { gerarPergunta, avaliarResposta } = require("../services/interviewSimulator");
-const { getLatestInsights, generateInsights } = require("../services/marketInsights");
+const { getInsightsFreshOrCached } = require("../services/marketInsights");
+const { askGeminiJSON, MODEL } = require("../services/geminiClient");
+const { extractText, SUPPORTED_MIME_TYPES } = require("../services/fileTextExtractor");
+
+// Anexo do mentor: mantido só em memória (nunca gravado em disco) —
+// extraímos o texto e descartamos o buffer, então não precisa de
+// diretório de upload nem de limpeza posterior.
+const uploadMentorAnexo = multer({
+  storage: multer.memoryStorage(),
+  limits:  { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (SUPPORTED_MIME_TYPES[file.mimetype]) cb(null, true);
+    else cb(new Error("Formato inválido. Envie PDF, .txt ou .md."));
+  },
+});
 
 // Gate de plano PRO — mesmo padrão 402 usado em empresaController.createJob
 // quando o plano do usuário não permite a funcionalidade.
@@ -45,15 +60,38 @@ const intParam = name => [
   handleValidation,
 ];
 
+// GET /api/ai/health — checagem mínima de que a chave/modelo do Gemini
+// estão configurados corretamente. Protegida por sessão (não pública)
+// pra não virar um jeito barato de terceiros gastarem nossa cota de IA;
+// pensada pra ser chamada manualmente após configurar o Render, não em
+// loop/monitoramento automático.
+router.get("/health", isAuth, async (req, res) => {
+  try {
+    const result = await askGeminiJSON({
+      system: 'Responda SEMPRE em JSON puro no formato exato: { "ok": true }',
+      prompt: "ping",
+      maxTokens: 256,
+    });
+    res.json({ status: "ok", model: MODEL, respondeu: Boolean(result) });
+  } catch (err) {
+    console.error("[GET /api/ai/health]", err.message);
+    res.status(502).json({ status: "erro", model: MODEL, motivo: err.message });
+  }
+});
+
 // GET /api/ai/perfil-tecnico — análise de repositórios via IA
 // (proficiência estimada, boas práticas, pontos de melhoria).
-// Usa cache em perfil_tecnico_ia; só chama a IA se ainda não existir.
+// Usa cache em perfil_tecnico_ia; só chama a IA se ainda não existir,
+// a menos que ?reanalisar=1 seja passado (botão "Reanalisar" na tela).
 router.get("/perfil-tecnico", isAuth, async (req, res) => {
   const userId = req.session.user.id;
+  const forceReanalyze = req.query.reanalisar === "1";
 
   try {
-    const cached = await getCachedProfile(userId);
-    if (cached) return res.json(cached);
+    if (!forceReanalyze) {
+      const cached = await getCachedProfile(userId);
+      if (cached) return res.json(cached);
+    }
 
     const accessToken = req.session.user?.accessToken;
     if (!accessToken) {
@@ -105,6 +143,15 @@ router.post(
   isAuth,
   requireDevType,
   requireFeature("mentor_carreira", MENTOR_GATE_MSG),
+  (req, res, next) => {
+    uploadMentorAnexo.single("anexo")(req, res, err => {
+      if (!err) return next();
+      const msg = err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE"
+        ? "Arquivo muito grande. Envie até 2MB."
+        : err.message || "Erro ao processar o arquivo.";
+      res.status(400).json({ error: msg });
+    });
+  },
   body("mensagem").trim().isLength({ min: 1, max: 2000 }).withMessage("Mensagem deve ter entre 1 e 2000 caracteres."),
   handleValidation,
   async (req, res) => {
@@ -113,10 +160,18 @@ router.post(
     const nivel    = req.session.user.nivel;
 
     try {
-      const resposta = await sendMessage(userId, githubId, nivel, req.body.mensagem);
+      let anexoTexto;
+      if (req.file) {
+        anexoTexto = await extractText(req.file.buffer, req.file.mimetype);
+      }
+
+      const resposta = await sendMessage(userId, githubId, nivel, req.body.mensagem, anexoTexto);
       res.status(201).json({ resposta });
     } catch (err) {
       console.error("[POST /api/ai/mentor/mensagem]", err.message);
+      if (err.message.includes("Formato de arquivo não suportado") || err.message.includes("extrair texto")) {
+        return res.status(400).json({ error: err.message });
+      }
       res.status(502).json({ error: "Erro ao falar com o mentor. Tente novamente em instantes." });
     }
   }
@@ -171,14 +226,12 @@ router.post(
 );
 
 // ── Insights de mercado — página pública, sem gate de plano ──
-// Idealmente rodaria como rotina periódica (cron); por ora, gera sob
-// demanda quando não há um insight ainda salvo.
+// Sem cron separado: regenera sob demanda quando o cache passa de 24h
+// (getInsightsFreshOrCached), então o "atualizado periodicamente" da
+// UI é real, sem depender de um processo agendado à parte.
 router.get("/insights-mercado", async (req, res) => {
   try {
-    const cached = await getLatestInsights();
-    if (cached) return res.json(cached);
-
-    const insights = await generateInsights();
+    const insights = await getInsightsFreshOrCached();
     res.json(insights);
   } catch (err) {
     console.error("[GET /api/ai/insights-mercado]", err.message);
