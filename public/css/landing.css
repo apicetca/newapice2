@@ -783,7 +783,7 @@
   font-family: var(--font-display);
   font-size: 3rem;
   font-weight: 800;
-  color: var(--border-lite);
+  color: #808080;
   line-height: 1;
   user-select: none;
   letter-spacing: -0.04em;
