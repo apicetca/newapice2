@@ -126,7 +126,7 @@ const roadmapController = {
 
       let match   = null;
       let applied = false;
-      if (req.session?.user) {
+      if (req.session?.user?.type === "dev") {
         const uid = getUserId(req);
         const profileData = {
           nivel:    req.session.user.nivel,

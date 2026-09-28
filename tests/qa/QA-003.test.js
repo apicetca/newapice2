@@ -35,17 +35,11 @@ describe('QA-003 — campos auto-refletidos passam por escapeHtml()', () => {
     {
       file: 'dashboard.ejs',
       mustContain: [
-        'escapeHtml(user.avatar)',
-        'escapeHtml(user.name ?? user.login)',
-        'escapeHtml(user.login)',
-        'escapeHtml(user.email)',
-        'escapeHtml(user.github_login)',
-        'escapeHtml(user.name ?? user.login ?? user.email)',
-        'escapeHtml(user.bio)',
-        'escapeHtml(repo.url)',
-        'escapeHtml(repo.name)',
-        'escapeHtml(repo.description)',
-        'escapeHtml(repo.language)',
+        'escapeHtml(firstName)',
+        'escapeHtml(job.title)',
+        'escapeHtml(job.company ?? "Empresa")',
+        'escapeHtml(r.title)',
+        'escapeHtml(r.text)',
       ],
     },
     {

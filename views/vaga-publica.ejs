@@ -28,8 +28,10 @@
 </head>
 <body>
 
-<% if (locals.user) { %>
-  <%- include('partials/header-dev') %>
+<% if (locals.viewer === 'empresa') { %>
+  <%- include('partials/header-company', { currentPage: 'empresa-vagas' }) %>
+<% } else if (locals.user) { %>
+  <%- include('partials/header-dev', { currentPage: 'vagas' }) %>
 <% } else { %>
   <%- include('partials/header') %>
 <% } %>
@@ -54,9 +56,9 @@
   <div id="state-content" <%= job ? "" : "hidden" %>>
   <main class="vaga-page">
 
-    <a href="/vagas" class="vaga-back">
+    <a href="<%= locals.viewer === 'empresa' && locals.isOwner ? '/empresa/vagas' : '/vagas' %>" class="vaga-back" id="vagaBack">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-      Todas as vagas
+      Voltar
     </a>
 
     <!-- ── Hero ── -->
@@ -93,14 +95,34 @@
 
 <script src="/js/escape-html.js"></script>
 <script>
+// ── Botão "Voltar": usa o histórico do navegador em vez de um destino fixo.
+// Só troca pelo history.back() quando dá pra confirmar que a página anterior
+// é do próprio site — senão (link direto, aba nova, vindo de fora) o href
+// padrão ("/vagas") continua servindo de fallback.
+(function () {
+  const backLink = document.getElementById("vagaBack");
+  if (!backLink) return;
+  let cameFromSameSite = false;
+  try {
+    cameFromSameSite = Boolean(document.referrer) && new URL(document.referrer).origin === window.location.origin;
+  } catch (_) {}
+  if (cameFromSameSite && window.history.length > 1) {
+    backLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.history.back();
+    });
+  }
+})();
+
 // ── Constantes ──────────────────────────────────────
-const JOB_ID = <%- jobId %>;
+const JOB_ID   = <%- jobId %>;
+const VIEWER   = "<%= locals.viewer || 'visitante' %>";
+const IS_OWNER = <%= locals.isOwner ? 'true' : 'false' %>;
 
 const LEVEL_LABEL    = { estagio:"Estágio", junior:"Júnior", pleno:"Pleno" };
 const MODALITY_LABEL = { presencial:"Presencial", remoto:"Remoto", hibrido:"Híbrido" };
 const CONTRACT_LABEL = { clt:"CLT", pj:"PJ", estagio:"Estágio", freelancer:"Freelancer" };
 const ENGLISH_LABEL  = { nenhum:"Não exigido", basico:"Básico", intermediario:"Intermediário", avancado:"Avançado", fluente:"Fluente" };
-const INGLES_FLAG    = { nenhum:"", basico:"🇧🇷", intermediario:"🌎", avancado:"🇺🇸", fluente:"🇺🇸" };
 
 function fmt(n) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(n);
@@ -117,9 +139,9 @@ function matchClass(pct) {
   return pct >= 70 ? "high" : pct >= 40 ? "medium" : "low";
 }
 function matchTip(pct) {
-  if (pct >= 70) return "🎉 Você está pronto para se candidatar!";
-  if (pct >= 40) return "💪 Você está no caminho certo. Continue aprendendo!";
-  return "🚀 Siga o roadmap abaixo para se preparar.";
+  if (pct >= 70) return "Você está pronto para se candidatar!";
+  if (pct >= 40) return "Você está no caminho certo. Continue aprendendo!";
+  return "Siga o roadmap abaixo para se preparar.";
 }
 
 // ── Render ──────────────────────────────────────────
@@ -130,7 +152,7 @@ function renderHero(job) {
     `<span class="vaga-badge vbadge-contract">${CONTRACT_LABEL[job.contract_type] ?? "Estágio"}</span>`,
   ];
   if (job.english_level && job.english_level !== "nenhum") {
-    badges.push(`<span class="vaga-badge vbadge-english">${INGLES_FLAG[job.english_level]} ${ENGLISH_LABEL[job.english_level]}</span>`);
+    badges.push(`<span class="vaga-badge vbadge-english">Inglês: ${ENGLISH_LABEL[job.english_level]}</span>`);
   }
 
   document.getElementById("vaga-hero").innerHTML = `
@@ -141,7 +163,7 @@ function renderHero(job) {
         <p class="vaga-company">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/></svg>
           ${escapeHtml(job.company ?? "Empresa")}
-          ${job.location ? `<span style="margin-left:6px">· 📍 ${escapeHtml(job.location)}</span>` : ""}
+          ${job.location ? `<span style="margin-left:6px">· ${escapeHtml(job.location)}</span>` : ""}
         </p>
       </div>
     </div>
@@ -182,6 +204,9 @@ function renderHero(job) {
 
 function renderMatch(match, isLoggedIn) {
   const card = document.getElementById("match-card");
+
+  // Empresa não tem match nem candidatura: o card de compatibilidade é só do fluxo dev.
+  if (VIEWER === "empresa") { card.hidden = true; return; }
 
   if (!isLoggedIn) {
     card.innerHTML = `
@@ -263,12 +288,15 @@ function renderMainCol(job, match, isLoggedIn) {
     const obrig = job.skills.filter(s => s.importance === "obrigatoria");
     const desej = job.skills.filter(s => s.importance === "desejavel");
 
+    const ICON_CHECK  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const ICON_CIRCLE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>`;
+
     function skillRowHtml(s) {
       const m   = matchMap[s.skill_id];
       const has = m?.has ?? false;
       return `
         <div class="skill-row ${isLoggedIn && has ? "has" : "miss"}">
-          <span class="skill-row-icon">${isLoggedIn ? (has ? "✅" : "📚") : "🔹"}</span>
+          <span class="skill-row-icon" aria-hidden="true">${isLoggedIn && has ? ICON_CHECK : ICON_CIRCLE}</span>
           <span class="skill-row-name">${s.name}</span>
           ${isLoggedIn && has && m.confidence
             ? `<span class="skill-confidence">${m.confidence}%</span>`
@@ -283,7 +311,7 @@ function renderMainCol(job, match, isLoggedIn) {
       <h2 class="vaga-section-title">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         Habilidades técnicas
-        ${isLoggedIn ? `<span style="font-size:.75rem;font-weight:400;color:var(--muted);margin-left:4px">(✅ você tem · 📚 aprender)</span>` : ""}
+        ${isLoggedIn ? `<span style="font-size:.75rem;font-weight:400;color:var(--muted);margin-left:4px">(você tem · falta aprender)</span>` : ""}
       </h2>
       <div class="skill-breakdown">
         ${obrig.map(skillRowHtml).join("")}
@@ -353,7 +381,33 @@ async function handleApplyClick() {
   }
 }
 
+function renderCompanySideCol(job) {
+  const col = document.getElementById("vaga-side-col");
+  const status = job.active ? "Ativa" : "Inativa";
+  const actions = IS_OWNER ? `
+      <a href="/empresa/vagas/${job.id}/editar" class="btn-apply-full">Editar vaga</a>
+      <a href="/empresa/vagas" class="btn-roadmap-secondary">Candidaturas e gestão</a>
+      <a href="/empresa/matchs" class="btn-roadmap-secondary">Ver matchs de devs</a>
+      <p class="vaga-meta-label" style="margin:4px 0">Status: <strong>${status}</strong></p>` : `
+      <p class="vaga-meta-label" style="margin:0 0 4px">Vaga de outra empresa — visualização somente leitura.</p>
+      <a href="/empresa/vagas" class="btn-roadmap-secondary">Minhas vagas</a>`;
+
+  const metaItems = [];
+  if (job.salary_min || job.salary_max) metaItems.push({ label: "Faixa salarial", val: [job.salary_min && fmt(job.salary_min), job.salary_max && fmt(job.salary_max)].filter(Boolean).join(" – ") });
+  if (job.years_experience > 0) metaItems.push({ label: "Experiência", val: `${job.years_experience} ano${job.years_experience > 1 ? "s" : ""}` });
+  if (job.english_level && job.english_level !== "nenhum") metaItems.push({ label: "Inglês", val: ENGLISH_LABEL[job.english_level] });
+  if (job.location) metaItems.push({ label: "Local", val: escapeHtml(job.location) });
+
+  col.innerHTML = `
+    <div class="vaga-action-card">
+      ${actions}
+      ${metaItems.length ? `<ul class="vaga-meta-list" aria-label="Detalhes da vaga">${metaItems.map(i => `
+        <li class="vaga-meta-item"><div><div class="vaga-meta-label">${i.label}</div><div class="vaga-meta-val">${i.val}</div></div></li>`).join("")}</ul>` : ""}
+    </div>`;
+}
+
 function renderSideCol(job, isLoggedIn, userType) {
+  if (VIEWER === "empresa") return renderCompanySideCol(job);
   const col  = document.getElementById("vaga-side-col");
   const ctaHref  = isLoggedIn ? `/roadmap?job=${job.id}` : `/login?next=/vagas/${job.id}`;
   const ctaLabel = isLoggedIn ? "Ver meu roadmap" : "Ver roadmap";
@@ -364,19 +418,34 @@ function renderSideCol(job, isLoggedIn, userType) {
       ? `${fmt(job.salary_min)} – ${fmt(job.salary_max)}`
       : job.salary_min ? `a partir de ${fmt(job.salary_min)}`
       : `até ${fmt(job.salary_max)}`;
-    metaItems.push({ icon: "💰", label: "Faixa salarial", val: `<span class="salary-display">${range}</span>` });
+    metaItems.push({
+      icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+      label: "Faixa salarial", val: `<span class="salary-display">${range}</span>`,
+    });
   }
   if (job.years_experience > 0) {
-    metaItems.push({ icon: "🗓️", label: "Experiência", val: `${job.years_experience} ano${job.years_experience > 1 ? "s" : ""}` });
+    metaItems.push({
+      icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+      label: "Experiência", val: `${job.years_experience} ano${job.years_experience > 1 ? "s" : ""}`,
+    });
   }
   if (job.english_level && job.english_level !== "nenhum") {
-    metaItems.push({ icon: "🌐", label: "Inglês", val: ENGLISH_LABEL[job.english_level] });
+    metaItems.push({
+      icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+      label: "Inglês", val: ENGLISH_LABEL[job.english_level],
+    });
   }
   if (job.location) {
-    metaItems.push({ icon: "📍", label: "Local", val: escapeHtml(job.location) });
+    metaItems.push({
+      icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+      label: "Local", val: escapeHtml(job.location),
+    });
   }
   if (job.max_candidates && job.max_candidates < 9999) {
-    metaItems.push({ icon: "👥", label: "Vagas", val: `Até ${job.max_candidates} candidatos` });
+    metaItems.push({
+      icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      label: "Vagas", val: `Até ${job.max_candidates} candidatos`,
+    });
   }
 
   const tagsHtml = job.tags
@@ -426,7 +495,7 @@ async function init() {
 
     renderHero(job);
     renderMatch(job.match, isLoggedIn);
-    renderMainCol(job, job.match, isLoggedIn);
+    renderMainCol(job, job.match, isLoggedIn && VIEWER === "dev");
     renderSideCol(job, isLoggedIn, user?.type);
 
     document.getElementById("state-loading").hidden = true;

@@ -25,56 +25,62 @@
       <p>Carregando seu painel...</p>
     </output>
 
-    <div id="content" hidden>
+    <div id="content" class="page-wrapper" hidden>
+      <div class="dash-layout">
 
-      <section class="user-hero" id="user-hero" aria-label="Perfil do usuário"></section>
+        <div class="dash-main">
 
-      <!-- Vagas + Busca -->
-      <section class="section" id="sec-jobs">
-        <header class="section-header">
-          <h2 class="section-title">
-            <!-- briefcase -->
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-            Vagas disponíveis
-            <span id="jobs-count"></span>
-          </h2>
-        </header>
+          <section class="hero" id="hero"></section>
 
-        <search class="search-bar-wrap" aria-label="Busca de vagas">
-          <span class="search-input-wrap">
-            <span class="search-icon" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            </span>
-            <input type="search" id="search-input" class="search-input"
-              placeholder="Buscar por título ou empresa..."
-              aria-label="Buscar vagas" autocomplete="off" />
-          </span>
-          <fieldset class="filter-chips" aria-label="Filtrar por nível">
-            <button class="filter-chip active" data-level="todos"   aria-pressed="true">Todos</button>
-            <button class="filter-chip"        data-level="estagio" aria-pressed="false">Estágio</button>
-            <button class="filter-chip"        data-level="junior"  aria-pressed="false">Júnior</button>
-            <button class="filter-chip"        data-level="pleno"   aria-pressed="false">Pleno</button>
-          </fieldset>
-        </search>
+          <section class="section">
+            <h2 class="h2 section-title">Seu resumo</h2>
+            <div class="stats">
+              <a class="stat" href="/vagas">
+                <span class="stat-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                </span>
+                <span class="stat-text">
+                  <span class="h3 stat-title">Vagas para você</span>
+                  <span class="t2 stat-meta" id="stat-jobs-meta">—</span>
+                </span>
+                <svg class="stat-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+              </a>
+              <a class="stat" href="/mensagens">
+                <span class="stat-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                </span>
+                <span class="stat-text">
+                  <span class="h3 stat-title">Chats abertos</span>
+                  <span class="t2 stat-meta" id="stat-chats-meta">—</span>
+                </span>
+                <svg class="stat-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+              </a>
+              <a class="stat" href="/roadmap">
+                <span class="stat-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                </span>
+                <span class="stat-text">
+                  <span class="h3 stat-title">Roadmap</span>
+                  <span class="t2 stat-meta" id="stat-roadmap-meta">—</span>
+                </span>
+                <svg class="stat-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </section>
 
-        <p class="results-info" id="results-info" aria-live="polite"></p>
-        <ul class="jobs-grid" id="jobs-grid" aria-label="Vagas disponíveis"></ul>
-      </section>
+          <section class="section">
+            <h2 class="h2 section-title">Hoje para você</h2>
+            <div class="cards" id="today-cards"></div>
+          </section>
 
-      <!-- Repositórios -->
-      <section class="section" id="sec-repos" hidden>
-        <header class="section-header">
-          <h2 class="section-title">
-            <!-- folder -->
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-            Seus repositórios
-            <span id="repos-count"></span>
-          </h2>
-          <a id="github-profile-link" href="#" target="_blank" rel="noopener" class="section-link">Ver perfil no GitHub →</a>
-        </header>
-        <ul class="repos-grid" id="repos-grid"></ul>
-      </section>
+        </div>
 
+        <aside class="aside" aria-label="Recomendações">
+          <h2 class="h2 aside-title">Recomendações da IA</h2>
+          <ol class="recs" id="recs-list"></ol>
+        </aside>
+
+      </div>
     </div>
   </main>
 
@@ -84,35 +90,18 @@
   <script>
     // ── Biblioteca de ícones SVG ──────────────────────────
     const IC = {
-      zap:        `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
-      terminal:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
-      building:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>`,
-      github:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>`,
-      mail:       `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
-      barchart:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
       pentool:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>`,
       settings:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
       wrench:     `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`,
       smartphone: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`,
+      barchart:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
       briefcase:  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
-      star:       `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
-      gitrepo:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>`,
-      search:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
-      userdev:    `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
-      userco:     `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/></svg>`,
     };
 
-    const LANG_COLORS = {
-      javascript:"#f1e05a",typescript:"#3178c6",python:"#3572a5",java:"#b07219",
-      "c#":"#178600","c++":"#f34b7d",c:"#555555",go:"#00add8",rust:"#dea584",
-      php:"#4f5d95",ruby:"#701516",swift:"#f05138",kotlin:"#a97bff",
-      html:"#e34c26",css:"#563d7c",vue:"#41b883",shell:"#89e051",dart:"#00b4ab",
-    };
-    const langColor = l => l ? (LANG_COLORS[l.toLowerCase()] ?? "#7d8590") : "#7d8590";
     const capitalize = s => s ? s[0].toUpperCase() + s.slice(1) : "";
 
     function jobIcon(title) {
-      const t = title.toLowerCase();
+      const t = (title || "").toLowerCase();
       if (t.includes("front"))  return IC.pentool;
       if (t.includes("back"))   return IC.settings;
       if (t.includes("full"))   return IC.wrench;
@@ -121,164 +110,120 @@
       return IC.briefcase;
     }
 
-    // ── Estado da busca ───────────────────────────────────
-    let allJobs = [], activeLevel = "todos", searchQuery = "";
+    function goToVaga(jobId) { window.location.href = `/vagas/${jobId}`; }
 
-    function applyFilters() {
-      const q = searchQuery.trim().toLowerCase();
-      const filtered = allJobs.filter(job => {
-        const matchLevel = activeLevel === "todos" || job.level === activeLevel;
-        const matchQ     = !q || job.title.toLowerCase().includes(q) || (job.company ?? "").toLowerCase().includes(q);
-        return matchLevel && matchQ;
-      });
-      renderJobCards(filtered);
-      const info = document.getElementById("results-info");
-      info.textContent = (q || activeLevel !== "todos")
-        ? `${filtered.length} vaga${filtered.length !== 1 ? "s" : ""} encontrada${filtered.length !== 1 ? "s" : ""}.`
-        : "";
+    // ── Hero ──────────────────────────────────────────────
+    function renderHero(user) {
+      const hero = document.getElementById("hero");
+      const firstName = (user.name ?? user.login ?? user.email ?? "").toString();
+      hero.innerHTML = `
+        <h1 class="h1">Olá, ${escapeHtml(firstName)}!</h1>
+        <p class="t1">Confira suas vagas recomendadas, acompanhe seu progresso e evolua todos os dias.</p>`;
     }
 
-    function renderJobCards(jobs) {
-      const grid = document.getElementById("jobs-grid");
-      grid.innerHTML = "";
+    // ── "Hoje para você" — prévia das vagas mais recentes ──
+    const LEVEL_LABEL = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
+    const LEVEL_BADGE = { estagio: "badge-green", junior: "badge-blue", pleno: "badge-yellow" };
 
+    function renderTodayCards(jobs) {
+      const wrap = document.getElementById("today-cards");
       if (!jobs.length) {
-        grid.innerHTML = `
-          <li>
-            <output class="search-empty" role="status">
-              <span class="search-empty-icon">${IC.search}</span>
-              <strong>Nenhuma vaga encontrada</strong>
-              <p style="margin-top:4px">Tente outro termo ou remova os filtros.</p>
-            </output>
-          </li>`;
+        wrap.innerHTML = `<p class="empty-state" style="grid-column:1/-1">Nenhuma vaga disponível no momento.</p>`;
         return;
       }
-
-      const LEVEL_LABEL = { estagio:"Estágio", junior:"Júnior", pleno:"Pleno" };
-      const LEVEL_BADGE = { estagio:"badge-green", junior:"badge-blue", pleno:"badge-yellow" };
-
-      jobs.forEach(job => {
-        const li = document.createElement("li");
-        const card = document.createElement("article");
-        card.className = "job-card";
-        card.setAttribute("tabindex", "0");
-        card.setAttribute("aria-label", `Ver vaga ${job.title}`);
-        card.innerHTML = `
+      wrap.innerHTML = jobs.slice(0, 2).map(job => `
+        <article class="card" tabindex="0" role="button" aria-label="Ver vaga ${escapeHtml(job.title)}" data-job-id="${job.id}">
           <header class="job-card-top">
             <span class="job-icon">${jobIcon(job.title)}</span>
             <hgroup class="job-card-info">
               <h3 class="job-title">${escapeHtml(job.title)}</h3>
               <p class="job-company">${escapeHtml(job.company ?? "Empresa")}</p>
             </hgroup>
-            <span class="badge ${LEVEL_BADGE[job.level] ?? "badge-green"}" style="align-self:flex-start;flex-shrink:0">
-              ${LEVEL_LABEL[job.level] ?? job.level}
-            </span>
+            <span class="badge ${LEVEL_BADGE[job.level] ?? "badge-green"}">${LEVEL_LABEL[job.level] ?? job.level}</span>
           </header>
-          <footer class="job-card-btn">Ver vaga e se candidatar →</footer>`;
-        card.addEventListener("click",   () => goToVaga(job.id));
-        card.addEventListener("keydown", e  => { if (e.key === "Enter" || e.key === " ") goToVaga(job.id); });
-        li.appendChild(card);
-        grid.appendChild(li);
+          <p class="card-desc">${escapeHtml((job.description || "").slice(0, 140))}${(job.description || "").length > 140 ? "…" : ""}</p>
+          <footer class="job-card-btn">Ver vaga e se candidatar →</footer>
+        </article>`).join("");
+
+      wrap.querySelectorAll(".card[data-job-id]").forEach(card => {
+        const id = card.dataset.jobId;
+        card.addEventListener("click",   () => goToVaga(id));
+        card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") goToVaga(id); });
       });
     }
 
-    document.querySelectorAll(".filter-chip").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".filter-chip").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
-        btn.classList.add("active"); btn.setAttribute("aria-pressed","true");
-        activeLevel = btn.dataset.level;
-        applyFilters();
-      });
-    });
+    // ── Recomendações da IA (heurísticas a partir dos dados já carregados) ──
+    function renderRecs(user, jobsCount, roadmaps) {
+      const list = document.getElementById("recs-list");
+      const recs = [];
 
-    let searchTimer = null;
-    document.getElementById("search-input").addEventListener("input", function () {
-      searchQuery = this.value;
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(applyFilters, 200);
-    });
-
-    function goToVaga(jobId) { window.location.href = `/vagas/${jobId}`; }
-
-    // ── Hero ──────────────────────────────────────────────
-    function renderHero(user) {
-      const hero = document.getElementById("user-hero");
-      const isGH = !!user.avatar;
-
-      const typeBadge = user.nivel
-        ? `<span class="badge badge-blue">${IC.barchart} ${capitalize(user.nivel)}</span>`
-        : user.type === "empresa"
-          ? `<span class="badge badge-yellow">${IC.building} Empresa</span>`
-          : `<span class="badge badge-green">${IC.terminal} Desenvolvedor</span>`;
-
-      const avatarEl = isGH
-        ? `<img class="user-avatar" src="${escapeHtml(user.avatar)}" alt="Avatar de ${escapeHtml(user.name ?? user.login)}" />`
-        : `<span class="user-avatar-placeholder">${user.type === "empresa" ? IC.userco : IC.userdev}</span>`;
-
-      const metaItems = [];
-      if (user.login)                       metaItems.push(`<span class="user-meta-item">${IC.github} @${escapeHtml(user.login)}</span>`);
-      if (user.email)                       metaItems.push(`<span class="user-meta-item">${IC.mail} ${escapeHtml(user.email)}</span>`);
-      if (user.github_login && !user.login) metaItems.push(`<span class="user-meta-item">${IC.github} @${escapeHtml(user.github_login)}</span>`);
-
-      const statsEl = isGH ? `
-        <ul class="user-stats">
-          <li class="stat-item"><strong class="stat-value">${user.publicRepos ?? 0}</strong><span class="stat-label">Repositórios</span></li>
-          <li class="stat-divider" aria-hidden="true"></li>
-          <li class="stat-item"><strong class="stat-value">${user.followers ?? 0}</strong><span class="stat-label">Seguidores</span></li>
-          <li class="stat-divider" aria-hidden="true"></li>
-          <li class="stat-item"><strong class="stat-value">${user.following ?? 0}</strong><span class="stat-label">Seguindo</span></li>
-        </ul>` : "";
-
-      hero.innerHTML = `
-        ${avatarEl}
-        <header class="user-info">
-          <p class="user-greeting">Bem-vindo de volta</p>
-          <h1 class="user-name">${escapeHtml(user.name ?? user.login ?? user.email)}</h1>
-          <p class="user-meta">${typeBadge}${metaItems.join("")}</p>
-          ${user.bio ? `<p style="margin-top:10px;font-size:.85rem;color:var(--muted);max-width:480px">${escapeHtml(user.bio)}</p>` : ""}
-        </header>
-        ${statsEl}`;
-    }
-
-    // ── Repositórios ──────────────────────────────────────
-    function renderRepos(repos) {
-      if (!repos?.length) return;
-      const sec  = document.getElementById("sec-repos");
-      const grid = document.getElementById("repos-grid");
-      const link = document.getElementById("github-profile-link");
-      sec.hidden = false;
-      document.getElementById("repos-count").textContent = `(${repos.length})`;
-      if (repos[0]?.url) {
-        const login = repos[0].url.split("github.com/")[1]?.split("/")[0];
-        if (login) link.href = `https://github.com/${login}`;
+      const active = (roadmaps || []).filter(r => Number(r.progress_percent) < 100);
+      if (active.length) {
+        const next = active[0];
+        recs.push({ title: `Continue o roadmap de ${next.title}`, text: `Você já concluiu ${Math.round(next.progress_percent) || 0}% das skills necessárias.` });
+      } else {
+        recs.push({ title: "Inicie um roadmap", text: "Escolha uma vaga e monte seu plano de estudos personalizado." });
       }
-      grid.innerHTML = repos.slice(0, 12).map(repo => `
-        <li>
-          <a class="repo-card" href="${escapeHtml(repo.url)}" target="_blank" rel="noopener">
-            <h3 class="repo-name">
-              ${IC.gitrepo}
-              ${escapeHtml(repo.name)}
-            </h3>
-            ${repo.description
-              ? `<p class="repo-desc">${escapeHtml(repo.description)}</p>`
-              : `<p class="repo-desc" style="font-style:italic">Sem descrição</p>`}
-            <footer class="repo-footer">
-              ${repo.language ? `<span class="repo-lang"><span class="lang-dot" style="background:${langColor(repo.language)}" aria-hidden="true"></span>${escapeHtml(repo.language)}</span>` : ""}
-              ${repo.stars    ? `<span class="repo-stars">${IC.star} ${repo.stars}</span>` : ""}
-            </footer>
-          </a>
+
+      if (!user.bio) {
+        recs.push({ title: "Complete seu perfil", text: "Uma bio ajuda empresas a te conhecerem melhor antes de conversar." });
+      } else if (!user.repos || !user.repos.length) {
+        recs.push({ title: "Conecte seus repositórios", text: "Mostrar projetos reais aumenta suas chances de match." });
+      } else {
+        recs.push({ title: "Atualize seus repositórios", text: "Empresas visualizam perfis completos com mais frequência." });
+      }
+
+      recs.push({ title: "Explore novas vagas", text: `${jobsCount} vaga${jobsCount !== 1 ? "s" : ""} disponível${jobsCount !== 1 ? "is" : ""} esperando por você.` });
+
+      list.innerHTML = recs.map((r, i) => `
+        <li class="rec">
+          <span class="rec-num" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>
+          <div class="rec-body">
+            <h3 class="rec-title">${escapeHtml(r.title)}</h3>
+            <p class="rec-text">${escapeHtml(r.text)}</p>
+          </div>
         </li>`).join("");
     }
 
-// ── Bootstrap — dados injetados pelo servidor ────────────
-    (function () {
-      const user = JSON.parse(document.getElementById("boot-user").textContent);
-      allJobs    = JSON.parse(document.getElementById("boot-jobs").textContent);
+    // ── Stats "Seu resumo" ──────────────────────────────────
+    async function loadSummary(jobsCount) {
+      document.getElementById("stat-jobs-meta").textContent =
+        `${jobsCount} vaga${jobsCount !== 1 ? "s" : ""} disponível${jobsCount !== 1 ? "is" : ""}`;
 
-      document.getElementById("jobs-count").textContent = `(${allJobs.length})`;
+      let unread = 0;
+      try {
+        const r = await fetch("/api/messages/unread-count");
+        if (r.ok) unread = (await r.json()).count ?? 0;
+      } catch (_) {}
+      document.getElementById("stat-chats-meta").textContent =
+        unread > 0 ? `${unread} nova${unread !== 1 ? "s" : ""} mensagem${unread !== 1 ? "ns" : ""}` : "Nenhuma mensagem nova";
+
+      let roadmaps = [];
+      try {
+        const r = await fetch("/api/dashboard");
+        if (r.ok) roadmaps = await r.json();
+      } catch (_) {}
+
+      const active = roadmaps.filter(r => r.progress_percent != null);
+      if (active.length) {
+        const avg = Math.round(active.reduce((s, r) => s + Number(r.progress_percent || 0), 0) / active.length);
+        document.getElementById("stat-roadmap-meta").textContent = `${avg}% concluído`;
+      } else {
+        document.getElementById("stat-roadmap-meta").textContent = "Nenhum roadmap iniciado";
+      }
+
+      return roadmaps;
+    }
+
+    // ── Bootstrap — dados injetados pelo servidor ────────────
+    (async function () {
+      const user = JSON.parse(document.getElementById("boot-user").textContent);
+      const jobs = JSON.parse(document.getElementById("boot-jobs").textContent);
+
       renderHero(user);
-      applyFilters();
-      if (user.repos) renderRepos(user.repos);
+      renderTodayCards(jobs);
+      const roadmaps = await loadSummary(jobs.length);
+      renderRecs(user, jobs.length, roadmaps);
 
       document.getElementById("loading").hidden = true;
       document.getElementById("content").hidden = false;

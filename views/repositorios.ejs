@@ -131,6 +131,11 @@
       </div>
 
       <div class="edit-field">
+        <label for="edit-title">Título exibido no perfil</label>
+        <input type="text" id="edit-title" placeholder="Nome do repositório" maxlength="255" />
+      </div>
+
+      <div class="edit-field">
         <label for="edit-desc">Descrição exibida no perfil</label>
         <textarea id="edit-desc" placeholder="Descreva este repositório..."></textarea>
       </div>
@@ -176,6 +181,7 @@
     const searchInput  = $('modal-search');
 
     const modalEdit    = $('modal-edit');
+    const editTitle    = $('edit-title');
     const editDesc     = $('edit-desc');
 
     let editingId      = null;
@@ -256,24 +262,26 @@
                       class="repo-visibility-btn js-toggle-visibility${isPublic ? ' is-public' : ''}"
                       data-id="${r.id}" data-public="${isPublic ? '1' : '0'}"
                       aria-pressed="${isPublic}"
-                      aria-label="${isPublic ? 'Remover do perfil público' : 'Publicar no perfil'}"
-                      title="${isPublic ? 'Visível no perfil — clique para ocultar' : 'Oculto — clique para publicar no perfil'}">
+                      aria-label="${isPublic ? 'Tornar privado' : 'Tornar público'}"
+                      title="${isPublic ? 'Visível no perfil — clique para tornar privado' : 'Oculto — clique para tornar público'}">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   ${isPublic
                     ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
                     : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'}
                 </svg>
-                <span>${isPublic ? 'No perfil' : 'Publicar'}</span>
+                <span>${isPublic ? 'Público' : 'Privado'}</span>
               </button>
               <button type="button" class="repo-action-btn js-edit"
-                      data-id="${r.id}" data-desc="${escHtml(r.description || '')}"
-                      aria-label="Editar descrição de ${escHtml(r.repo_name)}" title="Editar">
+                      data-id="${r.id}" data-desc="${escHtml(r.description || '')}" data-title="${escHtml(r.repo_name)}"
+                      aria-label="Editar título e descrição de ${escHtml(r.repo_name)}" title="Editar título e descrição">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>Editar</span>
               </button>
               <button type="button" class="repo-action-btn repo-action-btn--danger js-delete"
                       data-id="${r.id}" data-name="${escHtml(r.repo_name)}"
-                      aria-label="Remover ${escHtml(r.repo_name)} do perfil" title="Remover">
+                      aria-label="Excluir ${escHtml(r.repo_name)} do perfil" title="Excluir do perfil">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                <span>Excluir</span>
               </button>
             </div>
           </div>`;
@@ -284,7 +292,7 @@
         btn.addEventListener('click', () => toggleVisibility(btn));
       });
       reposGrid.querySelectorAll('.js-edit').forEach(btn => {
-        btn.addEventListener('click', () => openEdit(btn.dataset.id, btn.dataset.desc));
+        btn.addEventListener('click', () => openEdit(btn.dataset.id, btn.dataset.desc, btn.dataset.title));
       });
       reposGrid.querySelectorAll('.js-delete').forEach(btn => {
         btn.addEventListener('click', () => deleteRepo(btn.dataset.id, btn.dataset.name));
@@ -305,7 +313,7 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Erro ao atualizar.');
-        toast(nowPublic ? 'Repositório publicado no perfil!' : 'Repositório ocultado do perfil.');
+        toast(nowPublic ? 'Repositório tornado público!' : 'Repositório tornado privado.');
         loadRepos();
       } catch (err) {
         toast(err.message, 'err');
@@ -432,18 +440,12 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Erro ao adicionar.');
 
-        // Marca como adicionado na lista
-        const li = btn.closest('.modal-repo-item');
-        li.classList.add('modal-repo-item--added');
-        li.querySelector('.js-modal-add').replaceWith(
-          Object.assign(document.createElement('span'), { className: 'modal-added-badge', textContent: 'Adicionado' })
-        );
-
         // Atualiza o cache local
         const r = allGhRepos.find(r => r.full_name === payload.repo_full_name);
         if (r) r.already_added = true;
 
         toast(`"${payload.repo_name}" adicionado ao perfil!`);
+        closeModals();
         loadRepos();
       } catch (err) {
         toast(err.message, 'err');
@@ -453,13 +455,14 @@
     }
 
     // ── Abre modal de edição ──────────────────────────────────
-    function openEdit(id, desc) {
+    function openEdit(id, desc, title) {
       lastFocused = document.activeElement;
       editingId         = id;
+      editTitle.value   = title || '';
       editDesc.value    = desc || '';
       modalEdit.hidden  = false;
       document.body.style.overflow = 'hidden';
-      setTimeout(() => editDesc.focus(), 50);
+      setTimeout(() => editTitle.focus(), 50);
     }
 
     // ── Gera descrição via IA e preenche o campo ──────────────
@@ -488,6 +491,14 @@
     // ── Salva edição via API ──────────────────────────────────
     async function saveEdit() {
       if (!editingId) return;
+
+      const title = editTitle.value.trim();
+      if (!title) {
+        toast('O título não pode ficar vazio.', 'err');
+        editTitle.focus();
+        return;
+      }
+
       const btn = $('btn-save-edit');
       btn.disabled = true;
 
@@ -495,7 +506,7 @@
         const res  = await fetch(`/api/user/repos/${editingId}`, {
           method:  'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ description: editDesc.value.trim() }),
+          body:    JSON.stringify({ repo_name: title, description: editDesc.value.trim() }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Erro ao salvar.');
@@ -567,6 +578,9 @@
     // Enter no modal de edição
     editDesc.addEventListener('keydown', e => {
       if (e.key === 'Enter' && e.ctrlKey) saveEdit();
+    });
+    editTitle.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); saveEdit(); }
     });
 
     // ── Init ──────────────────────────────────────────────────

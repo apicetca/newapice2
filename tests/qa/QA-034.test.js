@@ -9,7 +9,8 @@
 // Nota: `empresa-desenvolvedores.css` estava listado no achado original,
 // mas seu único `.filter-chip.active` usa `--teal`/`--teal-dim`, não
 // `--accent`/`--accent-dim` — não tem o bug descrito. Não foi tocado (ver
-// nota de status em CLAUDE.md).
+// nota de status em CLAUDE.md). `dashboard.css` saiu da lista: o dashboard
+// foi redesenhado e não tem mais chips de filtro.
 const fs = require('fs');
 const path = require('path');
 
@@ -89,7 +90,6 @@ function resolveTextColorVar(cssFile, selectorRegex) {
 }
 
 const CASES = [
-  ['dashboard.css',               /\.filter-chip\.active\s*\{[^}]*\}/],
   ['empresa-dashboard.css',       /\.filter-chip\.active\s*\{[^}]*\}/],
   ['progresso.css',               /\.status-tab\.active\s*\{[^}]*\}/],
   ['mensagens.css',               /\.msg-filter-tab\.active\s*\{[^}]*\}/],

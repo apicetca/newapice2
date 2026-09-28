@@ -7,6 +7,8 @@ const helmet       = require("helmet");
 const rateLimit    = require("express-rate-limit");
 const db           = require("./database/db");
 const { getLatestInsights } = require("./services/marketInsights");
+const { plansForType } = require("./config/plans");
+const { getUserPlanCode } = require("./services/subscriptionService");
 
 const app = express();
 const isProd = process.env.NODE_ENV === "production";
@@ -69,26 +71,21 @@ app.use(session({
 }));
 
 // ── Middlewares de auth ───────────────────────────────────
-const { exposeUser, requireAuth, requireCompany, requireAdmin, redirectIfAuth } = require("./middlewares/auth");
+const { exposeUser, requireAuth, requireCompany, requireDev, requireAdmin, redirectIfAuth } = require("./middlewares/auth");
 
 // Expõe `user` para todos os templates, sem o accessToken do GitHub (QA-004)
 app.use(exposeUser);
 
 // ── Páginas públicas ──────────────────────────────────────
 app.get("/", async (req, res) => {
-  let stats      = { devs: 0, jobs: 0, skills: 0 };
-  let recentJobs = [];
+  let stats = { devs: 0, jobs: 0, skills: 0 };
   try {
     const [[d]] = await db.query("SELECT COUNT(*) AS n FROM users WHERE type = 'dev'");
     const [[j]] = await db.query("SELECT COUNT(*) AS n FROM jobs WHERE active = 1");
     const [[s]] = await db.query("SELECT COUNT(*) AS n FROM skills");
-    const [jobs] = await db.query(
-      "SELECT id, title, company, level, location, modality FROM jobs WHERE active = 1 ORDER BY created_at DESC LIMIT 6"
-    );
-    stats      = { devs: d.n, jobs: j.n, skills: s.n };
-    recentJobs = jobs;
+    stats = { devs: d.n, jobs: j.n, skills: s.n };
   } catch (_) {}
-  res.render("index", { stats, recentJobs });
+  res.render("index", { stats });
 });
 
 app.get("/login",    redirectIfAuth, (req, res) => res.render("login"));
@@ -108,7 +105,19 @@ app.get("/vagas", async (req, res) => {
     );
     jobs = rows;
   } catch (_) {}
-  res.render("vagas", { currentPage: "vagas", jobs });
+  const viewer = req.session?.user?.type === "empresa" ? "empresa" : req.session?.user?.type === "dev" ? "dev" : "visitante";
+  res.render("vagas", { currentPage: viewer === "empresa" ? "empresa-vagas" : "vagas", jobs, viewer });
+});
+
+app.get("/sobre", async (req, res) => {
+  let stats = { devs: 0, jobs: 0, skills: 0 };
+  try {
+    const [[d]] = await db.query("SELECT COUNT(*) AS n FROM users WHERE type = 'dev'");
+    const [[j]] = await db.query("SELECT COUNT(*) AS n FROM jobs WHERE active = 1");
+    const [[s]] = await db.query("SELECT COUNT(*) AS n FROM skills");
+    stats = { devs: d.n, jobs: j.n, skills: s.n };
+  } catch (_) {}
+  res.render("sobre", { currentPage: "sobre", stats });
 });
 
 // SEO (QA-020): renderiza o resumo já cacheado (se existir) no servidor,
@@ -122,7 +131,7 @@ app.get("/insights-mercado", async (req, res) => {
 });
 
 // ── Área do desenvolvedor ─────────────────────────────────
-app.get("/dashboard", requireAuth, async (req, res) => {
+app.get("/dashboard", requireDev, async (req, res) => {
   let jobs = [];
   try {
     const [rows] = await Promise.race([
@@ -135,7 +144,7 @@ app.get("/dashboard", requireAuth, async (req, res) => {
   res.render("dashboard", { currentPage: "dashboard", jobs, user: safeUser });
 });
 
-app.get("/meu-progresso", requireAuth, (req, res) => {
+app.get("/meu-progresso", requireDev, (req, res) => {
   res.render("progresso", { currentPage: "progresso" });
 });
 
@@ -144,7 +153,7 @@ app.get("/repositorios", requireAuth, (req, res) => {
   res.render("repositorios", { currentPage: "repositorios" });
 });
 
-app.get("/roadmap", requireAuth, (req, res) => {
+app.get("/roadmap", requireDev, (req, res) => {
   res.render("roadmap", { currentPage: "roadmap" });
 });
 
@@ -235,12 +244,15 @@ app.get("/vagas/:id", async (req, res) => {
   let job = null;
   try {
     const [rows] = await db.query(
-      "SELECT id, title, description, company FROM jobs WHERE id = ?",
+      "SELECT id, title, description, company, company_id FROM jobs WHERE id = ?",
       [jobId]
     );
     job = rows[0] ?? null;
   } catch (_) {}
-  res.render("vaga-publica", { jobId, job });
+  const sessionUser = req.session?.user;
+  const viewer  = sessionUser?.type === "empresa" ? "empresa" : sessionUser?.type === "dev" ? "dev" : "visitante";
+  const isOwner = viewer === "empresa" && job != null && job.company_id === sessionUser.id;
+  res.render("vaga-publica", { jobId, job, viewer, isOwner, currentPage: viewer === "empresa" ? "empresa-vagas" : "vagas" });
 });
 
 // ── Área do administrador ─────────────────────────────────
@@ -267,6 +279,29 @@ app.get("/perfil", requireAuth, (req, res) => {
 
 app.get("/empresa/perfil", requireCompany, (req, res) => {
   res.render("perfil-empresa", { currentPage: "perfil" });
+});
+
+// ── Planos ────────────────────────────────────────────────
+// Pública (visitante pode comparar antes de criar conta) — quando autenticado,
+// mostra o plano do próprio usuário em destaque.
+app.get("/planos", async (req, res) => {
+  const loggedIn = Boolean(req.session?.user);
+  if (loggedIn && req.session.user.type === "admin") return res.redirect("/admin/dashboard");
+
+  const type = loggedIn
+    ? (req.session.user.type === "empresa" ? "empresa" : "dev")
+    : (req.query.tipo === "empresa" ? "empresa" : "dev");
+
+  const plans = plansForType(type);
+  let currentCode = null;
+  if (loggedIn) {
+    try {
+      currentCode = await getUserPlanCode(req.session.user.id, type);
+    } catch (_) {
+      currentCode = null;
+    }
+  }
+  res.render("planos", { currentPage: "planos", type, plans, currentCode, loggedIn });
 });
 
 // ── Rotas modulares ───────────────────────────────────────

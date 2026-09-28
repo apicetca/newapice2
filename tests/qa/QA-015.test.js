@@ -21,10 +21,10 @@ describe('QA-015 — repositorios.ejs move e devolve o foco nos dois modais', ()
     expect(fn).toMatch(/searchInput\.focus\(\)/);
   });
 
-  test('openEdit() guarda o foco anterior (além de já focar editDesc)', () => {
-    const fn = content.match(/function openEdit\(id, desc\) \{[\s\S]*?\n    \}/)[0];
+  test('openEdit() guarda o foco anterior (além de já focar o campo de título)', () => {
+    const fn = content.match(/function openEdit\(id, desc, title\) \{[\s\S]*?\n    \}/)[0];
     expect(fn).toContain('lastFocused = document.activeElement;');
-    expect(fn).toContain('editDesc.focus()');
+    expect(fn).toContain('editTitle.focus()');
   });
 
   test('closeModals() devolve o foco a lastFocused', () => {
