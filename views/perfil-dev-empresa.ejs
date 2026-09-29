@@ -26,6 +26,10 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 1.9rem; font-weight: 700; color: #fff; border: 2px solid var(--border-lite);
     }
+    /* [hidden] tem a mesma especificidade de uma classe — sem isto, o <img>
+       e o placeholder de iniciais (mesma classe) ficam os dois visíveis
+       ao mesmo tempo quando um deles deveria estar escondido. */
+    .dev-hero-avatar[hidden] { display: none; }
     .dev-hero-main { flex: 1; min-width: 220px; }
     .dev-hero-name { font-size: 1.35rem; font-weight: 700; color: var(--text); margin: 0 0 .2rem; }
     .dev-hero-role { font-size: .85rem; color: var(--muted); margin-bottom: .6rem; }

@@ -65,42 +65,38 @@
   </nav>
 
   <%# ── Direita: user menu + hamburger ───────── %>
-  <div class="header-right">
+  <nav class="header-right" aria-label="Ações do usuário">
 
     <% if (locals.user) { %>
-    <div class="header-user">
-      <div class="user-menu">
-        <button class="user-menu-btn" id="userMenuBtn" type="button"
-                aria-haspopup="true" aria-expanded="false"
-                aria-controls="userMenuList" aria-label="Menu do administrador">
-          <span class="header-avatar-placeholder header-avatar-placeholder--company" aria-hidden="true">
-            <%= (user.name || 'A').charAt(0).toUpperCase() %>
-          </span>
-          <span class="header-username"><%= (user.name || 'Admin').split(' ')[0] %></span>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+    <button class="user-menu-btn" id="userMenuBtn" type="button"
+            aria-haspopup="true" aria-expanded="false"
+            aria-controls="userMenuList" aria-label="Menu do administrador">
+      <span class="header-avatar-placeholder header-avatar-placeholder--company" aria-hidden="true">
+        <%= (user.name || 'A').charAt(0).toUpperCase() %>
+      </span>
+      <span class="header-username"><%= (user.name || 'Admin').split(' ')[0] %></span>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
 
-        <ul class="user-menu-list user-menu-list--company" id="userMenuList" role="menu">
-          <li role="none">
-            <button role="menuitem" type="button" class="menu-item-toggle" data-a11y="dark-mode"
-                    aria-pressed="false" onclick="toggleDarkMode()">Modo escuro</button>
-          </li>
-          <li role="none">
-            <button role="menuitem" type="button" class="menu-item-toggle" data-a11y="high-contrast"
-                    aria-pressed="false" onclick="toggleHighContrast()">Alto contraste</button>
-          </li>
-          <li role="separator" class="menu-divider" aria-hidden="true"></li>
-          <li role="none">
-            <form method="POST" action="/auth/logout">
-              <button role="menuitem" type="submit" class="menu-item--danger">Sair</button>
-            </form>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <ul class="user-menu-list user-menu-list--company" id="userMenuList" role="menu">
+      <li role="none">
+        <button role="menuitem" type="button" class="menu-item-toggle" data-a11y="dark-mode"
+                aria-pressed="false" onclick="toggleDarkMode()">Modo escuro</button>
+      </li>
+      <li role="none">
+        <button role="menuitem" type="button" class="menu-item-toggle" data-a11y="high-contrast"
+                aria-pressed="false" onclick="toggleHighContrast()">Alto contraste</button>
+      </li>
+      <li role="separator" class="menu-divider" aria-hidden="true"></li>
+      <li role="none">
+        <form method="POST" action="/auth/logout">
+          <button role="menuitem" type="submit" class="menu-item--danger">Sair</button>
+        </form>
+      </li>
+    </ul>
     <% } %>
 
     <%# ── Botão hamburger (aparece só no mobile) %>
@@ -112,15 +108,15 @@
       <span class="hamburger-bar"></span>
     </button>
 
-  </div>
+  </nav>
 
 </header>
 
 <%# ═══ Mobile Drawer (admin — teal) ═══════════ %>
-<div class="mobile-drawer mobile-drawer--company" id="mobileDrawer"
+<section class="mobile-drawer mobile-drawer--company" id="mobileDrawer"
      role="dialog" aria-modal="true" aria-label="Menu de navegação" aria-hidden="true" inert>
 
-  <div class="drawer-head">
+  <header class="drawer-head">
     <a href="/admin/dashboard" class="site-logo" tabindex="-1" aria-hidden="true">
       <img src="/images/principal.webp" alt="Ápice" height="22" width="90" loading="eager" />
     </a>
@@ -131,7 +127,7 @@
         <line x1="6" y1="6" x2="18" y2="18"/>
       </svg>
     </button>
-  </div>
+  </header>
 
   <nav class="drawer-nav" aria-label="Navegação do administrador">
 
@@ -219,17 +215,17 @@
   </nav>
 
   <% if (locals.user) { %>
-  <div class="drawer-foot">
-    <div class="drawer-user">
+  <footer class="drawer-foot">
+    <span class="drawer-user">
       <span class="drawer-avatar-ph drawer-avatar-ph--company">
         <%= (user.name || 'A').charAt(0).toUpperCase() %>
       </span>
-      <div class="drawer-user-info">
+      <span class="drawer-user-info">
         <span class="drawer-user-name"><%= user.name || user.email %></span>
         <span class="drawer-user-role">Administrador</span>
-      </div>
-    </div>
-    <div class="drawer-foot-links">
+      </span>
+    </span>
+    <nav class="drawer-foot-links" aria-label="Ações da conta">
       <button type="button" class="drawer-foot-link" data-a11y="dark-mode"
               aria-pressed="false" onclick="toggleDarkMode()">Modo escuro</button>
       <button type="button" class="drawer-foot-link" data-a11y="high-contrast"
@@ -237,14 +233,14 @@
       <form method="POST" action="/auth/logout">
         <button type="submit" class="drawer-foot-link drawer-foot-link--danger">Sair da conta</button>
       </form>
-    </div>
-  </div>
+    </nav>
+  </footer>
   <% } %>
 
-</div>
+</section>
 
 <%# ═══ Overlay ═══════════════════════════════ %>
-<div class="drawer-overlay" id="drawerOverlay" aria-hidden="true"></div>
+<span class="drawer-overlay" id="drawerOverlay" aria-hidden="true"></span>
 
 <%# ═══ Bottom Nav Mobile (pill — admin) ════════ %>
 <nav class="bottom-nav bottom-nav--company" aria-label="Navegação do administrador">

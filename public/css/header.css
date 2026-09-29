@@ -266,13 +266,6 @@
 /* ═══════════════════════════════════════════
    USER AREA (dev + company)
 ═══════════════════════════════════════════ */
-.header-user {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
 /* Avatar */
 .header-avatar {
   width: 26px;
@@ -348,7 +341,6 @@
 .header-msg-badge[hidden] { display: none; }
 
 /* ── Dropdown ─────────────────────────────── */
-.user-menu { position: relative; }
 
 .user-menu-btn {
   display: inline-flex;
@@ -617,6 +609,7 @@
 
 /* ─── Header right wrapper ───────────────────── */
 .header-right {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;

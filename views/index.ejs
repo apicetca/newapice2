@@ -164,19 +164,7 @@
               <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </a>
-          <a href="#como-funciona" class="btn-ghost">Ver como funciona</a>
         </nav>
-
-        <p class="hero__empresa">
-          <a href="/login?tipo=empresa" class="hero__empresa-link">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <rect x="1" y="4" width="12" height="9" rx="1" stroke="currentColor" stroke-width="1.3"/>
-              <path d="M4 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.3"/>
-              <path d="M1 8h12" stroke="currentColor" stroke-width="1.3"/>
-            </svg>
-            Sou empresa — publicar vagas
-          </a>
-        </p>
 
       </article>
     </section>
@@ -184,28 +172,31 @@
     <!-- ══════════════════════════════════════════
          LOGOS — empresas parceiras (decorativo)
     ══════════════════════════════════════════ -->
-    <section class="logos" aria-label="Empresas parceiras">
-      <p class="logos__label">Empresas Contratando</p>
-      <ul class="logos__row container">
-        <li class="logos__item" aria-hidden="true">
-          <img src="/images/logo%20nubank.svg" alt="" width="90" height="26" loading="lazy" />
-        </li>
-        <li class="logos__item" aria-hidden="true">
-          <img src="/images/logo%20hotmart.svg" alt="" width="90" height="26" loading="lazy" />
-        </li>
-        <li class="logos__item logos__item--picpay" aria-hidden="true">
-          <img src="/images/logo%20picpay.svg" alt="" width="90" height="90" loading="lazy" />
-        </li>
-        <li class="logos__item" aria-hidden="true">
-          <img src="/images/logo%20ifood.svg" alt="" width="90" height="26" loading="lazy" />
-        </li>
-        <li class="logos__item" aria-hidden="true">
-          <img src="/images/logo%20mercado%20livre.svg" alt="" width="110" height="26" loading="lazy" />
-        </li>
-        <li class="logos__item" aria-hidden="true">
-          <img src="/images/logo%20ci&amp;t.svg" alt="" width="90" height="26" loading="lazy" />
-        </li>
-      </ul>
+    <section class="logos logos--big" aria-label="Empresas parceiras">
+      <hgroup class="section-header section-header--center container">
+        <p class="section-label">Quem já está contratando</p>
+        <h2 class="logos__title">Empresas Contratando</h2>
+        <p class="section-desc">Times de tecnologia de todos os tamanhos já usam a Ápice pra encontrar desenvolvedores compatíveis com a vaga.</p>
+      </hgroup>
+
+      <div class="logos__viewport">
+        <ul class="logos__track" aria-hidden="true">
+          <!-- Conjunto 1 -->
+          <li class="logos__item"><img src="/images/logo%20nubank.svg" alt="" width="110" height="30" loading="lazy" /></li>
+          <li class="logos__item"><img src="/images/logo%20hotmart.svg" alt="" width="110" height="30" loading="lazy" /></li>
+          <li class="logos__item logos__item--picpay"><img src="/images/logo%20picpay.svg" alt="" width="100" height="100" loading="lazy" /></li>
+          <li class="logos__item"><img src="/images/logo%20ifood.svg" alt="" width="110" height="30" loading="lazy" /></li>
+          <li class="logos__item"><img src="/images/logo%20mercado%20livre.svg" alt="" width="130" height="30" loading="lazy" /></li>
+          <li class="logos__item"><img src="/images/logo%20ci&amp;t.svg" alt="" width="110" height="30" loading="lazy" /></li>
+          <!-- Conjunto 2 (idêntico, pra loop contínuo sem emenda) -->
+          <li class="logos__item"><img src="/images/logo%20nubank.svg" alt="" width="110" height="30" loading="lazy" /></li>
+          <li class="logos__item"><img src="/images/logo%20hotmart.svg" alt="" width="110" height="30" loading="lazy" /></li>
+          <li class="logos__item logos__item--picpay"><img src="/images/logo%20picpay.svg" alt="" width="100" height="100" loading="lazy" /></li>
+          <li class="logos__item"><img src="/images/logo%20ifood.svg" alt="" width="110" height="30" loading="lazy" /></li>
+          <li class="logos__item"><img src="/images/logo%20mercado%20livre.svg" alt="" width="130" height="30" loading="lazy" /></li>
+          <li class="logos__item"><img src="/images/logo%20ci&amp;t.svg" alt="" width="110" height="30" loading="lazy" /></li>
+        </ul>
+      </div>
     </section>
 
     <!-- ══════════════════════════════════════════
@@ -220,164 +211,72 @@
         <p class="section-desc">Desenvolvedores encontram vagas com match real. Empresas encontram devs prontos para o cargo.</p>
       </hgroup>
 
-      <div class="experiences__grid container">
+      <ul class="experiences__grid container">
 
         <!-- Card candidato -->
-        <article class="experience-card experience-card--dev" aria-labelledby="match-title">
-          <span class="experience-card__badge">Para candidatos</span>
-          <h3 id="match-title">Saiba exatamente o quanto você vale para cada vaga</h3>
-          <p>Chega de se candidatar às cegas. A Ápice calcula sua compatibilidade real com cada vaga baseada no que você já sabe e no que a empresa precisa.</p>
+        <li>
+        <article class="card card--dev experience-card" aria-labelledby="dev-card-title">
+          <header class="head">
+            <hgroup class="head__text">
+              <h2 class="h2" id="dev-card-title">Desenvolvedores</h2>
+              <p class="t2">Construa sua carreira com dados,<br>não com sorte.</p>
+            </hgroup>
+            <svg class="ico ico--code" viewBox="0 0 36 24" aria-hidden="true">
+              <path d="M10 4 2 12l8 8M26 4l8 8-8 8M21 2l-6 20"/>
+            </svg>
+          </header>
 
-          <ul class="experience-card__features match__features">
-            <li>
-              <span class="experience-card__icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="1" fill="currentColor"/></svg>
-              </span>
-              <span>Percentual de compatibilidade calculado por skills</span>
-            </li>
-            <li>
-              <span class="experience-card__icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="1 9 5 13 15 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </span>
-              <span>Visualização clara das skills que você tem e as que faltam</span>
-            </li>
-            <li>
-              <span class="experience-card__icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 14 8 2l6 12H2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-              </span>
-              <span>Recomendação do próximo passo para aumentar o match</span>
-            </li>
+          <h3 class="h3">Por que Ápice?</h3>
+
+          <ul class="list">
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Saiba onde seu perfil tem maior compatibilidade.</span></li>
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Evolua com um plano de estudos personalizado.</span></li>
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Descubra suas principais habilidades automaticamente.</span></li>
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Candidate-se apenas às vagas certas.</span></li>
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Economize tempo e aumente suas chances de contratação.</span></li>
           </ul>
 
-          <nav class="experience-card__actions" aria-label="Ações para candidatos">
-            <a href="/cadastro" class="btn-primary">
-              Criar conta grátis
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
-          </nav>
-
-          <figure class="experience-card__visual" aria-hidden="true">
-            <figcaption class="match__card-header">
-              <span class="match__card-dot"></span>
-              <span>perfil analisado</span>
-            </figcaption>
-            <p class="match__card-job">Estágio Frontend · React</p>
-            <p class="match__ring-wrap" aria-hidden="true">
-              <svg class="match__ring" viewBox="0 0 100 100" width="100" height="100">
-                <circle class="match__ring-bg" cx="50" cy="50" r="40"/>
-                <circle class="match__ring-fill" cx="50" cy="50" r="40"
-                  stroke-dasharray="251.2"
-                  stroke-dashoffset="45.2"
-                />
-              </svg>
-              <span class="match__ring-value">82%</span>
-            </p>
-            <ul class="match__skills-list">
-              <li class="match__skill match__skill--ok">
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="1 6 4 9 11 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                React
-              </li>
-              <li class="match__skill match__skill--ok">
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="1 6 4 9 11 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                JavaScript
-              </li>
-              <li class="match__skill match__skill--ok">
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="1 6 4 9 11 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Node.js
-              </li>
-              <li class="match__skill match__skill--gap">
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                TypeScript
-              </li>
-              <li class="match__skill match__skill--gap">
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                APIs REST
-              </li>
-            </ul>
-            <p class="match__next-step">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1 6h10M7 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              próximo passo: <strong>TypeScript</strong>
-            </p>
-          </figure>
+          <a class="lnk" href="/planos">Quer impulsionar seu currículo?<br>Conheça o Ápice Pro.</a>
         </article>
+        </li>
 
         <!-- Card empresa -->
-        <article class="experience-card experience-card--company" aria-labelledby="companies-title">
-          <span class="experience-card__badge">Para empresas</span>
-          <h3 id="companies-title">Encontre devs que já estão prontos para a vaga</h3>
-          <p>Publique suas vagas e veja automaticamente quais desenvolvedores têm o perfil mais compatível — antes mesmo de receber um currículo.</p>
+        <li>
+        <article class="card card--emp experience-card" aria-labelledby="emp-card-title">
+          <header class="head">
+            <hgroup class="head__text">
+              <h2 class="h2" id="emp-card-title">Empresas</h2>
+              <p class="t2">Encontre talentos com mais<br>precisão.</p>
+            </hgroup>
+            <svg class="ico ico--case" viewBox="0 0 28 24" aria-hidden="true">
+              <rect x="1.5" y="6" width="25" height="16.5" rx="3"/>
+              <path d="M9.5 6V3.5a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2V6M1.5 13h25M12 11.5h4v3h-4z"/>
+            </svg>
+          </header>
 
-          <ul class="experience-card__features companies__benefits">
-            <li>
-              <span class="experience-card__icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="11" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 3V2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.3"/><path d="M4 8h8M4 11h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              </span>
-              <span>Publicação de vagas com skills mapeadas</span>
-            </li>
-            <li>
-              <span class="experience-card__icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2 14c0-3.31 2.69-5 6-5s6 1.69 6 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              </span>
-              <span>Acesso ao ranking de devs mais compatíveis</span>
-            </li>
-            <li>
-              <span class="experience-card__icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 14 8 2l6 12H2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-              </span>
-              <span>Acompanhamento do progresso dos candidatos em tempo real</span>
-            </li>
-            <li>
-              <span class="experience-card__icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 13h10M5 13V7M8 13V4M11 13V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              </span>
-              <span>Dados reais de compatibilidade por skill e nível</span>
-            </li>
+          <h3 class="h3">Por que Ápice?</h3>
+
+          <ul class="list">
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Publique vagas para milhares de desenvolvedores.</span></li>
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Receba candidatos mais alinhados ao perfil da vaga.</span></li>
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Analise competências técnicas em poucos segundos.</span></li>
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Destaque oportunidades para aumentar o alcance.</span></li>
+            <li class="list__item"><svg class="arrow" viewBox="0 0 15 20" aria-hidden="true"><path d="M1 10h12.5M9 5.5l4.5 4.5L9 14.5"/></svg><span class="t1">Centralize vagas e candidatos em uma única plataforma.</span></li>
           </ul>
 
-          <nav class="experience-card__actions" aria-label="Acesso para empresas">
-            <a href="/login?tipo=empresa" class="btn-primary">
-              Publicar primeira vaga
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
-            <a href="/login?tipo=empresa" class="btn-ghost">Criar conta empresa</a>
-          </nav>
-
-          <figure class="experience-card__visual" aria-hidden="true">
-            <figcaption class="companies__card-bar">
-              <span class="companies__card-dot"></span>
-              <span>painel da empresa</span>
-            </figcaption>
-            <ul class="companies__stat-list">
-              <li class="companies__stat">
-                <strong>3</strong>
-                <span>vagas ativas</span>
-              </li>
-              <li class="companies__stat">
-                <strong>12</strong>
-                <span>candidatos em roadmap</span>
-              </li>
-            </ul>
-            <ul class="companies__job-list">
-              <li class="companies__job-item">
-                <span class="companies__job-badge companies__job-badge--teal">Estágio</span>
-                <span>Desenvolvedor Frontend</span>
-                <span class="companies__job-match">8 matchs</span>
-              </li>
-              <li class="companies__job-item">
-                <span class="companies__job-badge companies__job-badge--blue">Júnior</span>
-                <span>Engenheiro Backend</span>
-                <span class="companies__job-match">5 matchs</span>
-              </li>
-              <li class="companies__job-item">
-                <span class="companies__job-badge companies__job-badge--yellow">Pleno</span>
-                <span>Analista de Dados</span>
-                <span class="companies__job-match">3 matchs</span>
-              </li>
-            </ul>
-          </figure>
+          <a class="lnk" href="/planos">Quer destacar suas vagas?<br>Conheça os planos disponíveis.</a>
         </article>
+        </li>
 
-      </div>
+      </ul>
+
+      <nav class="experiences__actions container" aria-label="Comece agora">
+        <a href="/cadastro" class="btn-primary">
+          Criar conta
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="/planos" class="btn-ghost">Visualizar os planos</a>
+      </nav>
     </section>
 
     <!-- ══════════════════════════════════════════
@@ -513,71 +412,7 @@
         <li class="skill-pill">React Native</li>
       </ul>
 
-      <p class="roadmap__cta container">
-        <a href="/cadastro" class="btn-ghost">
-          Ver todos os roadmaps disponíveis
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </p>
-
     </section>
-
-    <!-- ══════════════════════════════════════════
-         VAGAS EM DESTAQUE — apenas se existirem
-    ══════════════════════════════════════════ -->
-    <% if (recentJobs && recentJobs.length > 0) { %>
-    <%
-      const LEVEL_LABEL = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
-      const LEVEL_CLS   = { estagio: "badge-teal", junior: "badge-blue", pleno: "badge-yellow" };
-      const MOD_LABEL   = { remoto: "Remoto", presencial: "Presencial", hibrido: "Híbrido" };
-    %>
-    <section class="jobs" aria-labelledby="jobs-title">
-
-      <hgroup class="section-header container">
-        <p class="section-label">Vagas em destaque</p>
-        <h2 id="jobs-title">Oportunidades publicadas agora</h2>
-      </hgroup>
-
-      <ul class="jobs__grid container">
-        <% recentJobs.forEach(job => { %>
-        <li>
-          <article class="job-card">
-            <header class="job-card__header">
-              <span class="job-card__level <%= LEVEL_CLS[job.level] || 'badge-muted' %>">
-                <%= LEVEL_LABEL[job.level] || job.level %>
-              </span>
-              <% if (job.modality) { %>
-              <span class="job-card__modality"><%= MOD_LABEL[job.modality] || job.modality %></span>
-              <% } %>
-            </header>
-            <h3 class="job-card__title"><%= job.title %></h3>
-            <p class="job-card__company">
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="4" width="12" height="9" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1M1 8h12" stroke="currentColor" stroke-width="1.3"/></svg>
-              <%= job.company || 'Empresa' %>
-              <% if (job.location) { %>
-              · <span><%= job.location %></span>
-              <% } %>
-            </p>
-            <footer class="job-card__footer">
-              <a href="/vagas/<%= job.id %>" class="job-card__link">
-                Ver vaga
-                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </a>
-            </footer>
-          </article>
-        </li>
-        <% }) %>
-      </ul>
-
-      <p class="jobs__more container">
-        <a href="/vagas" class="btn-ghost">
-          Ver todas as vagas
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </p>
-
-    </section>
-    <% } %>
 
     <!-- ══════════════════════════════════════════
          FAQ — perguntas frequentes
@@ -666,34 +501,6 @@
       </ul>
     </section>
 
-    <!-- ══════════════════════════════════════════
-         CTA FINAL — limpo, sem card fake
-    ══════════════════════════════════════════ -->
-    <section class="cta-final" aria-labelledby="cta-title">
-      <article class="cta-final__inner container">
-        <hgroup>
-          <p class="section-label">Pronto para começar?</p>
-          <h2 id="cta-title">Seu próximo passo na carreira começa aqui.</h2>
-          <p>Crie sua conta, conecte seu GitHub e descubra o que falta para conseguir a vaga que você quer — de graça.</p>
-        </hgroup>
-        <nav class="cta-final__actions" aria-label="Ações de registro">
-          <a href="/cadastro" class="btn-primary btn-lg">
-            Criar conta grátis
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </a>
-          <a href="/login?tipo=empresa" class="btn-ghost">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <rect x="1" y="4" width="12" height="9" rx="1" stroke="currentColor" stroke-width="1.3"/>
-              <path d="M4 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1M1 8h12" stroke="currentColor" stroke-width="1.3"/>
-            </svg>
-            Sou empresa
-          </a>
-        </nav>
-      </article>
-    </section>
-
   </main>
 
   <!-- ══════════════════════════════════════════
@@ -715,6 +522,7 @@
         <ul>
           <li><a href="#como-funciona">Como funciona</a></li>
           <li><a href="/vagas">Ver vagas</a></li>
+          <li><a href="/sobre">Sobre nós</a></li>
           <li><a href="/cadastro">Criar conta</a></li>
         </ul>
       </nav>
@@ -777,7 +585,7 @@
     }, { threshold: 0.08, rootMargin: "0px 0px -28px 0px" });
 
     document.querySelectorAll(
-      ".step-card, .stats__item, .experience-card, .job-card, .section-header, .faq__item, .logos__item, .skills-cloud, .cta-final__inner"
+      ".step-card, .stats__item, .experience-card, .section-header, .faq__item, .skills-cloud"
     ).forEach(el => io.observe(el));
   </script>
 
