@@ -23,6 +23,15 @@
     <main class="lp-left" aria-label="Formulário de acesso">
       <div class="lp-left-inner">
 
+        <!-- Voltar -->
+        <a href="/" class="lp-back-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Voltar ao início
+        </a>
+
         <!-- Logo -->
         <a href="/" class="lp-logo" aria-label="Ápice — Página inicial">
           <img src="/images/principal.webp" alt="Ápice" height="26" loading="eager" />
@@ -168,105 +177,49 @@
     ════════════════════════════════════════ -->
     <aside class="lp-right" aria-hidden="true">
 
-      <!-- Orbs de brilho -->
-      <div class="lp-orb lp-orb-1"></div>
-      <div class="lp-orb lp-orb-2"></div>
-      <div class="lp-orb lp-orb-3"></div>
+      <!-- Realce único e estático -->
+      <div class="lp-right-glow"></div>
 
-      <!-- Decorações flutuantes -->
-      <div class="lp-deco lp-deco-ring lp-deco-ring-1"></div>
-      <div class="lp-deco lp-deco-ring lp-deco-ring-2"></div>
-      <div class="lp-deco lp-deco-cross lp-deco-cross-1"></div>
-      <div class="lp-deco lp-deco-cross lp-deco-cross-2"></div>
-      <div class="lp-deco lp-deco-dot lp-deco-dot-1"></div>
-      <div class="lp-deco lp-deco-dot lp-deco-dot-2"></div>
-      <div class="lp-deco lp-deco-dot lp-deco-dot-3"></div>
-
-      <!-- Preview: cards da plataforma -->
+      <!-- Painel editorial: como a plataforma funciona -->
       <div class="lp-preview">
 
-        <!-- Notificação de status -->
-        <div class="lp-status-bar">
-          <span class="lp-status-dot"></span>
-          <span>3 novas vagas combinam com seu perfil</span>
-        </div>
+        <p class="lp-eyebrow">
+          <span class="lp-eyebrow-dot"></span>
+          Como funciona
+        </p>
 
-        <!-- Card: perfil do desenvolvedor -->
-        <article class="lp-card">
-          <div class="lp-card-head">
-            <div class="lp-avatar">JD</div>
-            <div class="lp-card-info">
-              <p class="lp-profile-name">João Dias</p>
-              <p class="lp-profile-role">Dev Full Stack · Pleno</p>
-            </div>
-            <div class="lp-github-badge">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-              </svg>
-              Conectado
-            </div>
-          </div>
+        <h2 class="lp-right-title">De zero à vaga,<br/>em quatro passos.</h2>
 
-          <div class="lp-stats">
-            <div class="lp-stat">
-              <span class="lp-stat-n">24</span>
-              <span class="lp-stat-l">Repos</span>
+        <ol class="lp-steps-mini">
+          <li>
+            <span class="lp-steps-mini-num">01</span>
+            <div>
+              <p class="lp-steps-mini-title">Crie seu perfil</p>
+              <p class="lp-steps-mini-desc">Com e-mail ou GitHub, em segundos.</p>
             </div>
-            <div class="lp-stat">
-              <span class="lp-stat-n">87</span>
-              <span class="lp-stat-l">Skills</span>
+          </li>
+          <li>
+            <span class="lp-steps-mini-num">02</span>
+            <div>
+              <p class="lp-steps-mini-title">Conecte seu GitHub</p>
+              <p class="lp-steps-mini-desc">Seus repositórios viram skills catalogadas.</p>
             </div>
-            <div class="lp-stat lp-stat--accent">
-              <span class="lp-stat-n">3</span>
-              <span class="lp-stat-l">Matchs</span>
+          </li>
+          <li>
+            <span class="lp-steps-mini-num">03</span>
+            <div>
+              <p class="lp-steps-mini-title">Veja seu match</p>
+              <p class="lp-steps-mini-desc">Compatibilidade real com cada vaga, sem adivinhação.</p>
             </div>
-          </div>
-
-          <div class="lp-skills">
-            <span class="lp-tag lp-tag--purple">JavaScript</span>
-            <span class="lp-tag lp-tag--purple">React</span>
-            <span class="lp-tag lp-tag--purple">Node.js</span>
-            <span class="lp-tag lp-tag--green">TypeScript</span>
-            <span class="lp-tag lp-tag--muted">Python</span>
-          </div>
-        </article>
-
-        <!-- Card: vaga com match -->
-        <article class="lp-match-card">
-          <div class="lp-match-ico">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="7" width="20" height="14" rx="2"/>
-              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-            </svg>
-          </div>
-          <div class="lp-match-body">
-            <p class="lp-match-title">Dev Frontend Pleno</p>
-            <p class="lp-match-company">TechCorp · São Paulo · Remoto</p>
-          </div>
-          <div class="lp-match-right">
-            <span class="lp-match-pct">94%</span>
-            <span class="lp-match-label">match</span>
-          </div>
-        </article>
-
-        <!-- Linha de progresso de habilidade -->
-        <article class="lp-skill-bar-card">
-          <div class="lp-skill-bar-row">
-            <span class="lp-skill-bar-name">React</span>
-            <span class="lp-skill-bar-val">82%</span>
-          </div>
-          <div class="lp-skill-track">
-            <div class="lp-skill-fill" style="width:82%"></div>
-          </div>
-          <div class="lp-skill-bar-row" style="margin-top:10px">
-            <span class="lp-skill-bar-name">Node.js</span>
-            <span class="lp-skill-bar-val">71%</span>
-          </div>
-          <div class="lp-skill-track">
-            <div class="lp-skill-fill lp-skill-fill--green" style="width:71%"></div>
-          </div>
-        </article>
+          </li>
+          <li>
+            <span class="lp-steps-mini-num">04</span>
+            <div>
+              <p class="lp-steps-mini-title">Evolua com um roadmap</p>
+              <p class="lp-steps-mini-desc">Skills que faltam, recursos e projetos práticos.</p>
+            </div>
+          </li>
+        </ol>
 
       </div>
 
@@ -417,5 +370,6 @@
     }
   </script>
 
+  <script src="/js/form-validation.js"></script>
 </body>
 </html>

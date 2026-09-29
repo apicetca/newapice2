@@ -16,6 +16,10 @@
   align-items: center; justify-content: center;
   min-height: 60vh; gap: 16px; color: var(--muted); font-size: .9rem;
 }
+/* [hidden] tem a mesma especificidade de uma classe — sem isto, o JS
+   marca a tela de carregamento como hidden, mas ela continua com
+   display:flex e fica "presa" na tela por cima do conteúdo já carregado. */
+.loading-screen[hidden] { display: none; }
 .spinner {
   width: 32px; height: 32px;
   border: 2px solid var(--border-lite); border-top-color: var(--accent);

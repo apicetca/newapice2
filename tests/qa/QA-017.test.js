@@ -15,7 +15,6 @@ describe('QA-017 — campos de texto com aria-label', () => {
     ['empresa-mensagens.ejs', 'msgInput'],
     ['mentor.ejs', 'mentorInput'],
     ['mensagens.ejs', 'jobSearchInput'],
-    ['empresa-mensagens.ejs', 'devSearchInput'],
     ['empresa-vaga-form.ejs', 'search-required'],
     ['empresa-vaga-form.ejs', 'search-desired'],
     ['empresa-vaga-form.ejs', 'tag-input'],

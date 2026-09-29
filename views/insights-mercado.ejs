@@ -32,7 +32,9 @@
 </head>
 <body>
 
-<% if (locals.user) { %>
+<% if (locals.viewer === 'empresa') { %>
+  <%- include('partials/header-company', { currentPage: 'insights-mercado' }) %>
+<% } else if (locals.user) { %>
   <%- include('partials/header-dev', { currentPage: 'insights-mercado' }) %>
 <% } else { %>
   <%- include('partials/header') %>

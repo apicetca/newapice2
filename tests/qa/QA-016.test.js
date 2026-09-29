@@ -15,7 +15,6 @@ const readView = name => fs.readFileSync(path.join(VIEWS_DIR, name), 'utf8').rep
 
 describe.each([
   { file: 'mensagens.ejs',          openFn: 'openNewConvModal', closeFn: 'closeNewConvModal', dialogGetter: '$("modalNewConv")' },
-  { file: 'empresa-mensagens.ejs',  openFn: 'openNewConvModal', closeFn: 'closeNewConvModal', dialogGetter: '$("modalNewConv")' },
 ])('$file — modal "nova conversa" usa a API nativa de <dialog>', ({ file, openFn, closeFn, dialogGetter }) => {
   const content = readView(file);
 

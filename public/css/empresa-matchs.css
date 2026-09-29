@@ -475,6 +475,10 @@
   color: var(--muted);
   font-size: .9rem;
 }
+/* [hidden] tem a mesma especificidade de uma classe — sem isto, o JS
+   marca a tela de carregamento como hidden, mas ela continua com
+   display:flex e fica "presa" na tela por cima do conteúdo já carregado. */
+.loading-screen[hidden] { display: none; }
 
 .spinner {
   width: 30px; height: 30px;

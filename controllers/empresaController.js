@@ -484,7 +484,7 @@ const empresaController = {
 
     try {
       const [profiles] = await db.query(
-        "SELECT user_id AS id, github_id, nome, sobrenome, github_login, nivel FROM user_dev_profiles WHERE user_id = ?",
+        "SELECT user_id AS id, github_id, nome, sobrenome, github_login, nivel, avatar_url FROM user_dev_profiles WHERE user_id = ?",
         [devId]
       );
       if (!profiles.length) return res.status(404).json({ error: "Desenvolvedor não encontrado." });
@@ -544,6 +544,7 @@ const empresaController = {
         github_id:    dev.github_id,
         name:         [dev.nome, dev.sobrenome].filter(Boolean).join(" "),
         github:       dev.github_login,
+        avatar_url:   dev.avatar_url,
         level:        NIVEL_MAP[dev.nivel] ?? "estagio",
         skills:       skillRows.map(s => ({ name: s.name, category: s.category, type: s.type, confidence: s.confidence })),
         match:        bestMatch,

@@ -64,6 +64,7 @@
           <span class="msg-thread-header-clickable" id="threadHeaderInfo" role="button" tabindex="0" aria-label="Ver informações da empresa">
             <!-- preenchido via JS -->
           </span>
+          <button class="msg-thread-details-btn" id="threadDetailsBtn" type="button">Detalhes</button>
         </header>
 
         <div class="msg-thread-body" id="threadBody" aria-live="polite"></div>
@@ -175,7 +176,7 @@
     }
 
     container.innerHTML = list.map(c => `
-      <button class="msg-conv-item ${c.id === activeConversationId ? "active" : ""}" data-id="${c.id}">
+      <button class="msg-conv-item ${c.id === activeConversationId ? "active" : ""} ${c.unread > 0 ? "unread" : ""}" data-id="${c.id}">
         <span class="msg-conv-avatar" aria-hidden="true">${escapeHtml(initials(c.company_name))}</span>
         <span class="msg-conv-main">
           <span class="msg-conv-top">
@@ -255,11 +256,15 @@
     if (!messages.length) {
       body.innerHTML = `<p class="msg-conv-empty">Nenhuma mensagem ainda. Diga oi! 👋</p>`;
     } else {
-      body.innerHTML = messages.map(m => `
-        <div class="msg-bubble-row ${m.mine ? "mine" : ""}">
+      body.innerHTML = messages.map((m, i) => {
+        const prev = messages[i - 1];
+        const stacked = prev && prev.mine === m.mine && (new Date(m.created_at) - new Date(prev.created_at)) < 5 * 60 * 1000;
+        return `
+        <div class="msg-bubble-row ${m.mine ? "mine" : ""} ${stacked ? "stacked" : ""}">
           <span class="msg-bubble">${escapeHtml(m.body)}</span>
           <span class="msg-bubble-time">${new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
-        </div>`).join("");
+        </div>`;
+      }).join("");
     }
     body.scrollTop = body.scrollHeight;
   }
@@ -269,6 +274,20 @@
     div.textContent = str;
     return div.innerHTML;
   }
+
+  // ── Composer: cresce com o texto, Enter envia (Shift+Enter quebra linha) ──
+  function autoResizeInput() {
+    const input = $("msgInput");
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 140) + "px";
+  }
+  $("msgInput").addEventListener("input", autoResizeInput);
+  $("msgInput").addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      $("msgForm").requestSubmit();
+    }
+  });
 
   $("msgForm").addEventListener("submit", async e => {
     e.preventDefault();
@@ -285,6 +304,7 @@
       });
       if (!res.ok) throw new Error();
       input.value = "";
+      autoResizeInput();
       const res2 = await fetch(`/api/messages/conversations/${activeConversationId}`);
       renderThreadMessages(await res2.json());
       loadConversations();
@@ -337,6 +357,7 @@
   }
 
   $("infoPanelClose").addEventListener("click", () => { $("infoPanel").hidden = true; });
+  $("threadDetailsBtn").addEventListener("click", openInfoPanel);
 
   // ── Nova conversa (busca por vaga) ─────────────────────────
   function openNewConvModal() {
@@ -410,5 +431,6 @@
   loadConversations();
 </script>
 
+  <script src="/js/form-validation.js"></script>
 </body>
 </html>

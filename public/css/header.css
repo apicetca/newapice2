@@ -321,16 +321,16 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: var(--accent-dim);
-  border: 1px solid var(--accent-border);
-  color: var(--accent);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #fff;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
   flex-shrink: 0;
 }
-.header-msg-btn:hover { background: var(--accent); color: #fff; }
-.header-msg-btn--company { background: var(--teal-dim); border-color: var(--teal-border); color: var(--teal); }
-.header-msg-btn--company:hover { background: var(--teal); color: #06210f; }
+.header-msg-btn:hover { background: var(--accent-hv); border-color: var(--accent-hv); transform: translateY(-1px); box-shadow: 0 6px 16px var(--accent-glow); }
+.header-msg-btn--company { background: var(--teal); border-color: var(--teal); color: #06210f; }
+.header-msg-btn--company:hover { background: var(--teal-hv); border-color: var(--teal-hv); box-shadow: 0 6px 16px var(--teal-glow); }
 
 .header-msg-badge {
   position: absolute;

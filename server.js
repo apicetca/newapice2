@@ -117,7 +117,8 @@ app.get("/sobre", async (req, res) => {
     const [[s]] = await db.query("SELECT COUNT(*) AS n FROM skills");
     stats = { devs: d.n, jobs: j.n, skills: s.n };
   } catch (_) {}
-  res.render("sobre", { currentPage: "sobre", stats });
+  const viewer = req.session?.user?.type === "empresa" ? "empresa" : req.session?.user?.type === "dev" ? "dev" : "visitante";
+  res.render("sobre", { currentPage: "sobre", stats, viewer });
 });
 
 // SEO (QA-020): renderiza o resumo já cacheado (se existir) no servidor,
@@ -127,7 +128,8 @@ app.get("/insights-mercado", async (req, res) => {
   try {
     insights = await getLatestInsights();
   } catch (_) {}
-  res.render("insights-mercado", { currentPage: "insights-mercado", insights });
+  const viewer = req.session?.user?.type === "empresa" ? "empresa" : req.session?.user?.type === "dev" ? "dev" : "visitante";
+  res.render("insights-mercado", { currentPage: "insights-mercado", insights, viewer });
 });
 
 // ── Área do desenvolvedor ─────────────────────────────────

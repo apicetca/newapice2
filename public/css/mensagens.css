@@ -5,20 +5,22 @@
    views/mensagens.ejs e views/empresa-mensagens.ejs.
 ============================================= */
 
-.msg-page.page-content { padding: 20px 24px 0; max-width: 1280px; margin: 0 auto; }
+/* "Tirar o scroll padrão": a página em si nunca rola — só os painéis
+   internos (lista, thread, info) têm sua própria scrollbar fina. */
+.msg-page.page-content { padding: 24px 28px 0; max-width: 1320px; margin: 0 auto; overflow: hidden; }
 
 .msg-layout {
   display: grid;
-  grid-template-columns: 300px 1fr 300px;
-  gap: 14px;
-  height: calc(100vh - 150px);
+  grid-template-columns: 320px 1fr 320px;
+  gap: 20px;
+  height: calc(100vh - 156px);
   min-height: 480px;
 }
 
-.msg-layout:has(.msg-info-panel[hidden]) { grid-template-columns: 300px 1fr; }
+.msg-layout:has(.msg-info-panel[hidden]) { grid-template-columns: 320px 1fr; }
 
 .msg-sidebar, .msg-thread, .msg-info-panel {
-  background: rgba(15, 15, 23, .88);
+  background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -26,18 +28,25 @@
   flex-direction: column;
   animation: fadeUp .35s ease both;
 }
+/* O atributo [hidden] precisa vencer o display:flex acima, senão o painel
+   "vaza" pro grid mesmo escondido (sobra uma 3ª faixa/linha implícita). */
+.msg-sidebar[hidden], .msg-thread[hidden], .msg-info-panel[hidden] { display: none; }
+
 .msg-thread      { animation-delay: .04s; }
 .msg-info-panel  { animation-delay: .08s; }
 
 /* ── Sidebar (lista de conversas) ── */
-.msg-sidebar-head { padding: 14px; border-bottom: 1px solid var(--border); }
+.msg-sidebar-head { padding: 16px; border-bottom: 1px solid var(--border); }
+
+.msg-sidebar-hint { font-size: .78rem; line-height: 1.5; color: var(--muted); }
+.msg-sidebar-hint a { color: var(--accent-text); text-decoration: underline; text-underline-offset: 2px; }
 
 .msg-new-btn {
   width: 100%;
   display: flex; align-items: center; justify-content: center; gap: 7px;
-  padding: 9px 14px;
+  padding: 10px 14px;
   background: var(--accent); color: #fff;
-  border: none; border-radius: var(--radius-sm);
+  border: none; border-radius: var(--radius-md);
   font-family: var(--font-display); font-size: .85rem; font-weight: 700;
   cursor: pointer; transition: background .15s, transform .15s, box-shadow .15s;
 }
@@ -45,8 +54,8 @@
 .msg-new-btn:active { transform: translateY(0); }
 
 .msg-search-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 9px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
   color: var(--muted);
 }
 .msg-search-row input {
@@ -57,11 +66,11 @@
 .msg-search-row input::placeholder { color: var(--muted); }
 
 .msg-filter-tabs {
-  display: flex; gap: 6px; padding: 10px 14px;
+  display: flex; gap: 7px; padding: 12px 16px;
   border: none; margin: 0;
 }
 .msg-filter-tab {
-  padding: 5px 12px; border-radius: 99px;
+  padding: 6px 13px; border-radius: 99px;
   font-size: .76rem; font-weight: 600; font-family: var(--font-body);
   border: 1px solid var(--border-lite); background: transparent; color: var(--muted);
   cursor: pointer; transition: all .15s;
@@ -75,33 +84,38 @@
   line-height: 16px; text-align: center;
 }
 
-.msg-conv-list { flex: 1; overflow-y: auto; padding: 6px; }
+.msg-conv-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
 .msg-conv-loading, .msg-conv-empty {
   padding: 24px 16px; text-align: center; color: var(--muted); font-size: .82rem;
 }
 
 .msg-conv-item {
-  width: 100%; display: flex; align-items: center; gap: 10px;
-  padding: 10px; border: none; border-radius: var(--radius-md);
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 11px 10px; border: none; border-radius: var(--radius-md);
   background: transparent; cursor: pointer; text-align: left;
-  transition: background .12s, transform .12s;
+  transition: background .12s;
 }
-.msg-conv-item:hover { background: rgba(255,255,255,.03); transform: translateX(2px); }
+.msg-conv-item:hover { background: rgba(255,255,255,.035); }
 .msg-conv-item.active { background: var(--accent-dim); }
 
 .msg-conv-avatar {
-  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg-3); border: 1px solid var(--border-lite);
-  font-family: var(--font-display); font-weight: 700; font-size: .85rem; color: var(--accent);
+  font-family: var(--font-display); font-weight: 700; font-size: .86rem; color: var(--accent);
 }
 
-.msg-conv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.msg-conv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .msg-conv-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.msg-conv-name { font-size: .85rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-conv-name { font-size: .86rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .msg-conv-time { font-size: .68rem; color: var(--muted); flex-shrink: 0; }
 .msg-conv-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .msg-conv-preview { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Conversa não lida: nome e prévia ganham peso pra destacar na lista */
+.msg-conv-item.unread .msg-conv-name { font-weight: 700; color: #fff; }
+.msg-conv-item.unread .msg-conv-preview { color: var(--text); }
+
 .msg-conv-unread-dot {
   flex-shrink: 0; min-width: 18px; height: 18px; padding: 0 5px;
   background: var(--accent); color: #fff; border-radius: 99px;
@@ -111,69 +125,104 @@
 /* ── Thread (conversa ativa) ── */
 .msg-thread-empty {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 12px; color: var(--muted); font-size: .88rem; text-align: center; padding: 24px;
+  gap: 14px; color: var(--muted); font-size: .88rem; text-align: center; padding: 24px;
 }
 .msg-thread-empty svg { color: var(--border-lite); }
 
 .msg-thread-active { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
+/* Mesmo problema do [hidden] das colunas: sem isso, o estado vazio e a
+   conversa ativa ficam empilhados ao mesmo tempo (o body "encolhe" pela metade). */
+.msg-thread-empty[hidden], .msg-thread-active[hidden] { display: none; }
+
 .msg-thread-header {
-  display: flex; align-items: center; gap: 6px;
-  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
 }
 .msg-thread-back {
   align-items: center; justify-content: center;
   width: 30px; height: 30px; border-radius: var(--radius-sm); flex-shrink: 0;
   background: transparent; border: none; color: var(--muted); cursor: pointer;
 }
-.msg-thread-back:hover { color: var(--text); background: var(--bg-3); }
+.msg-thread-back:hover { color: var(--text); background: var(--bg-2); }
 .msg-thread-header-clickable {
-  flex: 1; display: flex; align-items: center; gap: 10px;
-  cursor: pointer; border-radius: var(--radius-sm); padding: 4px; margin: -4px;
+  flex: 1; display: flex; align-items: center; gap: 11px;
+  cursor: pointer; border-radius: var(--radius-sm); padding: 5px; margin: -5px;
   transition: background .12s;
 }
-.msg-thread-header-clickable:hover { background: rgba(255,255,255,.02); }
+.msg-thread-header-clickable:hover { background: rgba(255,255,255,.03); }
+.msg-thread-header-clickable .msg-conv-avatar { width: 40px; height: 40px; }
 .msg-thread-header-info { display: flex; flex-direction: column; gap: 1px; }
-.msg-thread-header-info strong { font-size: .88rem; color: var(--text); }
+.msg-thread-header-info strong { font-size: .9rem; color: var(--text); }
 .msg-thread-header-info span { font-size: .74rem; color: var(--muted); }
 
+/* Botão "Detalhes" — só aparece no mobile (≤980px), onde o painel de
+   info vira um overlay em tela cheia e precisa de um gatilho explícito
+   além de tocar no cabeçalho. */
+.msg-thread-details-btn {
+  display: none; flex-shrink: 0;
+  padding: 7px 13px; border-radius: 99px;
+  background: transparent; border: 1px solid var(--border-lite); color: var(--text);
+  font-family: var(--font-body); font-size: .76rem; font-weight: 600;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.msg-thread-details-btn:hover { border-color: var(--accent-border); background: var(--accent-dim); }
+
 .msg-thread-body {
-  flex: 1; overflow-y: auto; padding: 16px;
-  display: flex; flex-direction: column; gap: 10px;
+  flex: 1; overflow-y: auto; padding: 20px 24px;
+  display: flex; flex-direction: column; gap: 4px;
 }
 
-.msg-bubble-row { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; max-width: 72%; animation: bubbleIn .22s ease both; }
+.msg-bubble-row {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  max-width: min(70%, 560px);
+  margin-top: 14px;
+  animation: bubbleIn .22s ease both;
+}
+.msg-bubble-row.stacked { margin-top: 3px; }
+.msg-thread-body > .msg-bubble-row:first-child { margin-top: 0; }
 .msg-bubble-row.mine { align-self: flex-end; align-items: flex-end; }
 .msg-bubble {
-  padding: 9px 13px; border-radius: var(--radius-md);
-  background: var(--bg-3); color: var(--text);
-  font-size: .85rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+  padding: 10px 14px; border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 4px;
+  background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.09); color: var(--text);
+  font-size: .87rem; line-height: 1.55; white-space: pre-wrap; word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
 }
-.msg-bubble-row.mine .msg-bubble { background: var(--accent); color: #fff; }
-.msg-bubble-time { font-size: .66rem; color: var(--muted); padding: 0 4px; }
+.msg-bubble-row.mine .msg-bubble {
+  background: var(--accent); border-color: var(--accent);
+  color: #fff; border-radius: var(--radius-lg) var(--radius-lg) 4px var(--radius-lg);
+  box-shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+.msg-bubble-time {
+  font-size: .66rem; color: var(--muted); padding: 0 4px;
+  opacity: 0; transition: opacity .12s;
+}
+.msg-bubble-row:not(:has(+ .msg-bubble-row.stacked)) .msg-bubble-time,
+.msg-bubble-row:hover .msg-bubble-time { opacity: 1; }
 
 .msg-thread-input {
-  display: flex; align-items: flex-end; gap: 10px;
-  padding: 12px 16px; border-top: 1px solid var(--border);
+  display: flex; align-items: flex-end; gap: 12px;
+  padding: 14px 20px; border-top: 1px solid var(--border);
 }
 .msg-thread-input textarea {
-  flex: 1; resize: none; max-height: 120px;
-  background: var(--bg-3); border: 1px solid var(--border-lite); border-radius: var(--radius-md);
-  padding: 9px 13px; color: var(--text); font-family: var(--font-body); font-size: .85rem;
+  flex: 1; resize: none; max-height: 140px; min-height: 42px;
+  background: var(--bg-3); border: 1px solid var(--border-lite); border-radius: var(--radius-xl);
+  padding: 11px 16px; color: var(--text); font-family: var(--font-body); font-size: .87rem;
+  line-height: 1.4; transition: border-color .15s;
 }
 .msg-thread-input textarea:focus { outline: none; border-color: var(--accent); }
 .msg-thread-input button {
-  width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%;
+  width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%;
   background: var(--accent); color: #fff; border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; transition: background .15s;
+  display: flex; align-items: center; justify-content: center; transition: background .15s, transform .12s;
 }
-.msg-thread-input button:hover { background: var(--accent-hv); }
-.msg-thread-input button:disabled { opacity: .5; cursor: not-allowed; }
+.msg-thread-input button:hover:not(:disabled) { background: var(--accent-hv); transform: translateY(-1px); }
+.msg-thread-input button:disabled { opacity: .4; cursor: not-allowed; }
 
 /* ── Painel de info (empresa / dev) ── */
-.msg-info-panel { padding: 16px; overflow-y: auto; position: relative; }
+.msg-info-panel { padding: 20px; overflow-y: auto; position: relative; }
 .msg-info-close {
-  position: absolute; top: 12px; right: 12px;
+  position: absolute; top: 14px; right: 14px;
   width: 26px; height: 26px; border-radius: var(--radius-sm);
   background: transparent; border: 1px solid var(--border-lite); color: var(--muted);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -181,14 +230,14 @@
 .msg-info-close:hover { color: var(--text); background: var(--bg-3); }
 
 .msg-info-avatar {
-  width: 56px; height: 56px; border-radius: 50%; margin: 8px auto 10px;
+  width: 60px; height: 60px; border-radius: 50%; margin: 10px auto 12px;
   display: flex; align-items: center; justify-content: center;
   background: var(--accent-dim); border: 1px solid var(--accent-border);
-  font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; color: var(--accent);
+  font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; color: var(--accent);
 }
-.msg-info-name { text-align: center; font-size: 1rem; margin-bottom: 14px; }
+.msg-info-name { text-align: center; font-size: 1.02rem; margin-bottom: 16px; }
 
-.msg-info-block { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.msg-info-block { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
 .msg-info-block h4 { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 8px; }
 .msg-info-block p { font-size: .82rem; color: var(--text); line-height: 1.6; }
 
@@ -211,10 +260,10 @@
 .msg-info-job svg { flex-shrink: 0; color: var(--muted); }
 
 /* ── Modal: nova conversa ── */
-.msg-job-results { margin-top: 12px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.msg-job-results { margin-top: 12px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; }
 .msg-job-result {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  width: 100%; padding: 10px 12px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; padding: 11px 13px; border-radius: var(--radius-md);
   background: var(--bg-3); border: 1px solid var(--border-lite); color: var(--text);
   cursor: pointer; text-align: left; transition: border-color .15s, transform .15s;
 }
@@ -223,11 +272,32 @@
 .msg-job-result span { display: block; font-size: .74rem; color: var(--muted); margin-top: 1px; }
 .msg-job-result svg { flex-shrink: 0; color: var(--muted); }
 
+/* ── Scrollbars finas (lista de conversas / corpo da conversa) ── */
+.msg-conv-list, .msg-thread-body, .msg-info-panel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-lite) transparent;
+}
+.msg-conv-list::-webkit-scrollbar,
+.msg-thread-body::-webkit-scrollbar,
+.msg-info-panel::-webkit-scrollbar { width: 8px; }
+.msg-conv-list::-webkit-scrollbar-track,
+.msg-thread-body::-webkit-scrollbar-track,
+.msg-info-panel::-webkit-scrollbar-track { background: transparent; }
+.msg-conv-list::-webkit-scrollbar-thumb,
+.msg-thread-body::-webkit-scrollbar-thumb,
+.msg-info-panel::-webkit-scrollbar-thumb {
+  background: var(--border-lite); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box;
+}
+.msg-conv-list::-webkit-scrollbar-button,
+.msg-thread-body::-webkit-scrollbar-button,
+.msg-info-panel::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
+
 /* ── Responsivo ── */
 @media (max-width: 980px) {
   .msg-layout { grid-template-columns: 260px 1fr; }
   .msg-info-panel { position: fixed; inset: 0; z-index: 210; border-radius: 0; height: 100vh; }
   .msg-layout:has(.msg-info-panel[hidden]) { grid-template-columns: 260px 1fr; }
+  .msg-thread-details-btn { display: inline-flex; align-items: center; }
 }
 @media (max-width: 720px) {
   .msg-page.page-content { padding: 12px 12px 0; }

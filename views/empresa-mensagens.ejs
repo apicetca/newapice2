@@ -26,10 +26,7 @@
     <!-- ══ Coluna 1: lista de conversas ══ -->
     <aside class="msg-sidebar" aria-label="Suas conversas">
       <div class="msg-sidebar-head">
-        <button class="msg-new-btn" id="btnNewConv" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nova conversa
-        </button>
+        <p class="msg-sidebar-hint">Para contatar um novo candidato, acesse o perfil dele em <a href="/empresa/desenvolvedores">Candidatos</a>.</p>
       </div>
 
       <div class="msg-search-row">
@@ -64,6 +61,7 @@
           <span class="msg-thread-header-clickable" id="threadHeaderInfo" role="button" tabindex="0" aria-label="Ver informações do desenvolvedor">
             <!-- preenchido via JS -->
           </span>
+          <button class="msg-thread-details-btn" id="threadDetailsBtn" type="button">Detalhes</button>
         </header>
 
         <div class="msg-thread-body" id="threadBody" aria-live="polite"></div>
@@ -90,21 +88,6 @@
   </div>
 </main>
 
-<!-- ══ Modal: nova conversa (busca por desenvolvedor) ══ -->
-<dialog class="modal-overlay" id="modalNewConv" role="dialog" aria-modal="true" aria-labelledby="modalNewConvTitle">
-  <article class="modal">
-    <header class="modal-header">
-      <h2 class="modal-title" id="modalNewConvTitle">Nova conversa</h2>
-      <button class="modal-close" type="button" onclick="closeNewConvModal()" aria-label="Fechar">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </header>
-    <p style="color:var(--muted);font-size:.82rem;margin-bottom:12px">Busque um desenvolvedor pra começar a conversar.</p>
-    <input type="search" id="devSearchInput" class="form-input" aria-label="Buscar desenvolvedor" placeholder="Buscar por nome ou usuário do GitHub..." autofocus />
-    <div id="devSearchResults" class="msg-job-results"></div>
-  </article>
-</dialog>
-
 <output class="toast" id="toast" role="status" aria-live="polite"></output>
 
 <footer class="site-footer">
@@ -117,7 +100,6 @@
   let activeFilter = "todas";
   let activeConversationId = null;
   let activeConversation = null;
-  let allDevsCache = null;
 
   // ── Toast ──────────────────────────────────────────────
   let toastTimer = null;
@@ -175,7 +157,7 @@
     }
 
     container.innerHTML = list.map(c => `
-      <button class="msg-conv-item ${c.id === activeConversationId ? "active" : ""}" data-id="${c.id}">
+      <button class="msg-conv-item ${c.id === activeConversationId ? "active" : ""} ${c.unread > 0 ? "unread" : ""}" data-id="${c.id}">
         <span class="msg-conv-avatar" aria-hidden="true">${escapeHtml(initials(c.dev_name || c.dev_github))}</span>
         <span class="msg-conv-main">
           <span class="msg-conv-top">
@@ -255,11 +237,15 @@
     if (!messages.length) {
       body.innerHTML = `<p class="msg-conv-empty">Nenhuma mensagem ainda. Diga oi! 👋</p>`;
     } else {
-      body.innerHTML = messages.map(m => `
-        <div class="msg-bubble-row ${m.mine ? "mine" : ""}">
+      body.innerHTML = messages.map((m, i) => {
+        const prev = messages[i - 1];
+        const stacked = prev && prev.mine === m.mine && (new Date(m.created_at) - new Date(prev.created_at)) < 5 * 60 * 1000;
+        return `
+        <div class="msg-bubble-row ${m.mine ? "mine" : ""} ${stacked ? "stacked" : ""}">
           <span class="msg-bubble">${escapeHtml(m.body)}</span>
           <span class="msg-bubble-time">${new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
-        </div>`).join("");
+        </div>`;
+      }).join("");
     }
     body.scrollTop = body.scrollHeight;
   }
@@ -269,6 +255,20 @@
     div.textContent = str;
     return div.innerHTML;
   }
+
+  // ── Composer: cresce com o texto, Enter envia (Shift+Enter quebra linha) ──
+  function autoResizeInput() {
+    const input = $("msgInput");
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 140) + "px";
+  }
+  $("msgInput").addEventListener("input", autoResizeInput);
+  $("msgInput").addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      $("msgForm").requestSubmit();
+    }
+  });
 
   $("msgForm").addEventListener("submit", async e => {
     e.preventDefault();
@@ -285,6 +285,7 @@
       });
       if (!res.ok) throw new Error();
       input.value = "";
+      autoResizeInput();
       const res2 = await fetch(`/api/messages/conversations/${activeConversationId}`);
       renderThreadMessages(await res2.json());
       loadConversations();
@@ -328,77 +329,19 @@
   }
 
   $("infoPanelClose").addEventListener("click", () => { $("infoPanel").hidden = true; });
+  $("threadDetailsBtn").addEventListener("click", openInfoPanel);
 
-  // ── Nova conversa (busca por desenvolvedor) ────────────────
-  function openNewConvModal() {
-    $("modalNewConv").showModal();
-    $("modalNewConv").classList.add("open");
-    $("devSearchInput").value = "";
-    $("devSearchInput").focus();
-    loadDevsForSearch();
-  }
-  function closeNewConvModal() { $("modalNewConv").close(); }
+  // Chegando de /empresa/dev/:id com "Enviar mensagem", a conversa já foi
+  // criada no servidor — só precisamos abri-la direto.
+  const paramConvId = Number(new URLSearchParams(location.search).get("conv"));
 
-  $("btnNewConv").addEventListener("click", openNewConvModal);
-  $("modalNewConv").addEventListener("close", () => $("modalNewConv").classList.remove("open"));
-  $("modalNewConv").addEventListener("click", e => { if (e.target === e.currentTarget) closeNewConvModal(); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeNewConvModal(); });
-
-  async function loadDevsForSearch() {
-    if (!allDevsCache) {
-      try {
-        const res = await fetch("/api/empresa/desenvolvedores");
-        allDevsCache = res.ok ? await res.json() : [];
-      } catch {
-        allDevsCache = [];
-      }
+  loadConversations().then(() => {
+    if (paramConvId && allConversations.some(c => c.id === paramConvId)) {
+      selectConversation(paramConvId);
     }
-    renderDevSearchResults();
-  }
-
-  function renderDevSearchResults() {
-    const q = $("devSearchInput").value.trim().toLowerCase();
-    const results = (allDevsCache ?? [])
-      .filter(d => !q || (d.name ?? "").toLowerCase().includes(q) || (d.github ?? "").toLowerCase().includes(q))
-      .slice(0, 30);
-
-    $("devSearchResults").innerHTML = results.length
-      ? results.map(d => `
-          <button class="msg-job-result" data-dev-github-id="${d.dev_github_id}">
-            <span>
-              <strong>${escapeHtml(d.name ?? d.github ?? "Desenvolvedor")}</strong>
-              <span>@${d.github ?? "—"} · match ${d.match}%</span>
-            </span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </button>`).join("")
-      : `<p class="msg-conv-empty">Nenhum desenvolvedor encontrado.</p>`;
-
-    $("devSearchResults").querySelectorAll(".msg-job-result").forEach(btn => {
-      btn.addEventListener("click", () => startConversationWithDev(Number(btn.dataset.devGithubId)));
-    });
-  }
-
-  $("devSearchInput").addEventListener("input", renderDevSearchResults);
-
-  async function startConversationWithDev(devGithubId) {
-    try {
-      const res = await fetch("/api/messages/conversations", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dev_github_id: devGithubId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Erro ao iniciar conversa");
-
-      closeNewConvModal();
-      await loadConversations();
-      selectConversation(data.conversation_id);
-    } catch (err) {
-      showToast(err.message, true);
-    }
-  }
-
-  loadConversations();
+  });
 </script>
 
+  <script src="/js/form-validation.js"></script>
 </body>
 </html>

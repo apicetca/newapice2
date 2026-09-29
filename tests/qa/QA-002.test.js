@@ -59,7 +59,7 @@ describe('QA-002 — páginas públicas e dev↔empresa escapam campos vulneráv
       file: 'empresa-mensagens.ejs',
       needsScriptTag: false,
       mustContain: [
-        'escapeHtml(c.dev_name', 'escapeHtml(d.name', 'escapeHtml(data.name)',
+        'escapeHtml(c.dev_name', 'escapeHtml(data.name)',
         'escapeHtml(activeConversation.dev_name',
       ],
     },

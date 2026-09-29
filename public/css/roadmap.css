@@ -26,6 +26,11 @@ main#main-content {
   gap: 14px;
   text-align: center;
 }
+/* [hidden] tem a mesma especificidade de um id — sem isto, o JS marca
+   o estado como hidden, mas ele continua com display:flex e fica
+   "preso" na tela por cima do conteúdo já carregado. */
+#state-loading[hidden],
+#state-error[hidden] { display: none; }
 
 .state-msg {
   font-size: .88rem;
