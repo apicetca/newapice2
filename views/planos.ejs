@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Escolha seu plano na Ápice." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <title>Ápice — Planos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <% if (userType === "empresa") { %>
+  <link rel="stylesheet" href="/css/empresa-dashboard.css" />
+  <% } else { %>
+  <link rel="stylesheet" href="/css/dev.css" />
+  <% } %>
+  <link rel="stylesheet" href="/css/perfil.css" />
+  <style>
+    .plans-header { max-width: 760px; margin: 0 auto 2rem; text-align: center; }
+    .plans-header h1 { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .5rem; }
+    .plans-header p { color: var(--muted); font-size: .92rem; }
+
+    .plans-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem; max-width: 900px; margin: 0 auto;
+    }
+
+    .plan-card {
+      display: flex; flex-direction: column; gap: 1rem;
+      position: relative;
+    }
+    .plan-card.is-current { border-color: var(--accent-border); }
+    .plan-card-current-badge {
+      position: absolute; top: -11px; left: 1.5rem;
+      background: var(--accent); color: #fff;
+      font-size: .68rem; font-weight: 700; letter-spacing: .03em;
+      padding: 3px 12px; border-radius: 99px;
+    }
+
+    .plan-name { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; }
+    .plan-price { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; letter-spacing: -.02em; }
+    .plan-price span { font-size: .8rem; font-weight: 500; color: var(--muted); }
+
+    .plan-features { display: flex; flex-direction: column; gap: .55rem; flex: 1; margin: 0; padding: 0; list-style: none; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 8px; font-size: .85rem; color: var(--text); }
+    .plan-features li.is-off { color: var(--muted); }
+    .plan-features svg { flex-shrink: 0; margin-top: 2px; }
+    .plan-features .ic-on  { color: var(--accent); }
+    .plan-features .ic-off { color: var(--border-lite); }
+
+    .plan-cta { width: 100%; padding: 11px; border-radius: var(--radius-sm); font-family: var(--font-display); font-weight: 700; font-size: .88rem; cursor: pointer; transition: all .15s; border: none; }
+    .plan-cta.is-primary { background: var(--accent); color: #fff; }
+    .plan-cta.is-primary:hover { background: var(--accent-hv); }
+    .plan-cta.is-current { background: var(--bg-3); color: var(--muted); cursor: default; border: 1px solid var(--border-lite); }
+    .plan-cta:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* Modal de confirmação (checkout simplificado, sem gateway real) */
+    .checkout-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.6);
+      display: flex; align-items: center; justify-content: center; z-index: 100;
+      padding: 20px;
+    }
+    .checkout-modal {
+      background: var(--bg-2); border: 1px solid var(--border-lite); border-radius: var(--radius-lg);
+      padding: 1.75rem 2rem; max-width: 380px; width: 100%;
+      animation: fadeUp .25s ease both;
+    }
+    .checkout-modal h2 { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: .4rem; }
+    .checkout-modal p { color: var(--muted); font-size: .85rem; margin-bottom: 1.25rem; }
+    .checkout-summary { background: var(--bg-3); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; font-size: .88rem; }
+    .checkout-actions { display: flex; gap: 10px; }
+    .checkout-actions button { flex: 1; }
+
+    @media (max-width: 640px) {
+      .plans-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <% if (userType === "empresa") { %>
+    <%- include('partials/header-company', { currentPage: 'planos' }) %>
+  <% } else { %>
+    <%- include('partials/header-dev', { currentPage: 'planos' }) %>
+  <% } %>
+
+<main class="page-content" id="main-content">
+
+  <section class="loading-screen" id="loading" role="status" aria-live="polite">
+    <span class="spinner" aria-hidden="true"></span>
+    <p>Carregando planos...</p>
+  </section>
+
+  <article id="content" hidden>
+    <header class="plans-header">
+      <h1>Escolha o plano certo para você</h1>
+      <p>Cancele ou troque quando quiser.</p>
+    </header>
+
+    <section class="plans-grid" id="plans-grid" aria-label="Planos disponíveis"></section>
+  </article>
+</main>
+
+<div class="checkout-overlay" id="checkout-overlay" hidden>
+  <div class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+    <h2 id="checkout-title">Confirmar assinatura</h2>
+    <p id="checkout-desc">Este é um ambiente de demonstração — nenhum pagamento real é processado. O plano é ativado imediatamente ao confirmar.</p>
+    <div class="checkout-summary">
+      <span id="checkout-plan-name"></span>
+      <strong id="checkout-plan-price"></strong>
+    </div>
+    <div class="checkout-actions">
+      <button type="button" class="btn-secondary" id="checkout-cancel">Cancelar</button>
+      <button type="button" class="plan-cta is-primary" id="checkout-confirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<output class="toast" id="toast" role="status" aria-live="polite"></output>
+
+<footer class="site-footer">
+  <p>&copy; <script>document.write(new Date().getFullYear())</script> Ápice.</p>
+</footer>
+
+<script>
+const FEATURE_LABEL = {
+  roadmap_personalizado: "Roadmap com cursos e vídeos recomendados",
+  destaque_perfil:       "Destaque do seu perfil para empresas",
+  mentor_carreira:       "Mentor de carreira com IA",
+  simulador_entrevista:  "Simulador de entrevista técnica com IA",
+};
+
+function formatPrice(cents) {
+  if (cents === 0) return "Grátis";
+  return `R$ ${(cents / 100).toFixed(2).replace(".", ",")}`;
+}
+
+function iconOn() {
+  return `<svg class="ic-on" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+}
+function iconOff() {
+  return `<svg class="ic-off" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+}
+
+function renderFeatures(plan) {
+  if (plan.features) {
+    return Object.entries(FEATURE_LABEL).map(([key, label]) => {
+      const on = Boolean(plan.features[key]);
+      return `<li class="${on ? "" : "is-off"}">${on ? iconOn() : iconOff()} ${label}</li>`;
+    }).join("");
+  }
+  // Planos de empresa não têm "features" booleanas, têm limite de vagas
+  const limitLabel = plan.max_active_jobs === null
+    ? "Vagas ativas ilimitadas"
+    : `Até ${plan.max_active_jobs} vaga${plan.max_active_jobs > 1 ? "s" : ""} ativa${plan.max_active_jobs > 1 ? "s" : ""} simultaneamente`;
+  return `<li>${iconOn()} ${limitLabel}</li>`;
+}
+
+let plansData = [];
+let pendingPlan = null;
+
+function renderPlans(plans, currentCode) {
+  const grid = document.getElementById("plans-grid");
+  grid.innerHTML = "";
+
+  plans.forEach(plan => {
+    const isCurrent = plan.code === currentCode;
+    const card = document.createElement("article");
+    card.className = `card plan-card ${isCurrent ? "is-current" : ""}`;
+    card.innerHTML = `
+      ${isCurrent ? `<span class="plan-card-current-badge">Seu plano atual</span>` : ""}
+      <span class="plan-name">${plan.name}</span>
+      <span class="plan-price">${formatPrice(plan.price_cents)}${plan.price_cents > 0 ? "<span>/mês</span>" : ""}</span>
+      <ul class="plan-features">${renderFeatures(plan)}</ul>
+      <button type="button" class="plan-cta ${isCurrent ? "is-current" : "is-primary"}" ${isCurrent ? "disabled" : ""}>
+        ${isCurrent ? "Plano atual" : (plan.price_cents === 0 ? "Usar plano gratuito" : "Assinar")}
+      </button>
+    `;
+    if (!isCurrent) {
+      card.querySelector(".plan-cta").addEventListener("click", () => openCheckout(plan));
+    }
+    grid.appendChild(card);
+  });
+}
+
+function openCheckout(plan) {
+  pendingPlan = plan;
+  document.getElementById("checkout-plan-name").textContent = plan.name;
+  document.getElementById("checkout-plan-price").textContent = plan.price_cents === 0 ? "Grátis" : `${formatPrice(plan.price_cents)}/mês`;
+  document.getElementById("checkout-overlay").hidden = false;
+}
+
+function closeCheckout() {
+  pendingPlan = null;
+  document.getElementById("checkout-overlay").hidden = true;
+}
+
+document.getElementById("checkout-cancel").addEventListener("click", closeCheckout);
+document.getElementById("checkout-overlay").addEventListener("click", (e) => {
+  if (e.target.id === "checkout-overlay") closeCheckout();
+});
+
+document.getElementById("checkout-confirm").addEventListener("click", async () => {
+  if (!pendingPlan) return;
+  const btn = document.getElementById("checkout-confirm");
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/plans/subscribe", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan_code: pendingPlan.code }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro ao assinar o plano.");
+
+    closeCheckout();
+    showToast(`Plano ${data.plan.name} ativado!`);
+    await reload();
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+let toastTimer = null;
+function showToast(msg, isErr = false) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.style.borderColor = isErr ? "rgba(248,81,73,.35)" : "var(--border-lite)";
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+
+async function reload() {
+  const res = await fetch("/api/plans");
+  if (!res.ok) throw new Error();
+  const { plans, current_plan_code } = await res.json();
+  plansData = plans;
+  renderPlans(plans, current_plan_code);
+}
+
+async function init() {
+  try {
+    await reload();
+    document.getElementById("loading").hidden = true;
+    document.getElementById("content").hidden = false;
+  } catch (err) {
+    console.error(err);
+    document.getElementById("loading").innerHTML = `
+      <section style="text-align:center">
+        <p style="color:var(--red);margin-bottom:10px">Erro ao carregar os planos.</p>
+        <a href="/dashboard" style="color:var(--blue);font-size:.9rem">← Voltar</a>
+      </section>`;
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>

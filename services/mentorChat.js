@@ -58,6 +58,15 @@ async function getHistory(userId) {
   return rows;
 }
 
+// Apaga todo o histórico do mentor de um usuário — chamado no login
+// (ver controllers/authController.js e usersController.js), pra cada
+// sessão nova começar uma conversa do zero, sem continuar de onde a
+// anterior parou. Decisão de produto: o histórico nunca é preservado
+// entre logins, para nenhum usuário.
+async function clearHistory(userId) {
+  await db.query("DELETE FROM mentor_conversas WHERE user_id = ?", [userId]);
+}
+
 // Busca o interaction_id da última resposta do assistente pra esse
 // usuário — é o que encadeia a próxima mensagem como continuação da
 // mesma conversa (previous_interaction_id), em vez de uma conversa nova.
@@ -133,4 +142,4 @@ async function sendMessage(userId, githubId, nivel, userMessage, anexoTexto) {
   return resposta;
 }
 
-module.exports = { getHistory, sendMessage, MAX_HISTORY };
+module.exports = { getHistory, sendMessage, clearHistory, MAX_HISTORY };

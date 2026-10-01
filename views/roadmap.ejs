@@ -102,8 +102,12 @@
     // --------------------------------------------
     // Carrega e renderiza o roadmap
     // --------------------------------------------
-    // FIX: timeout de 10s para evitar carregamento eterno
-    function fetchWithTimeout(url, opts = {}, ms = 10000) {
+    // Timeout de 45s — dá margem pra cadeia de fallback multi-provedor de
+    // IA (services/aiFallback.js) rodar até o fim quando o Gemini falha
+    // (cota esgotada, 5xx): medido em 2026-09-28, o pior caso (Gemini +
+    // vários provedores de fallback) levou ~38s; 10s cortava a resposta
+    // antes do backend terminar, mesmo quando ele acabaria funcionando.
+    function fetchWithTimeout(url, opts = {}, ms = 45000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), ms);
       return fetch(url, { ...opts, signal: controller.signal })
@@ -213,7 +217,7 @@
 
           // Monta os recursos de aprendizado
           const resourcesHtml = skill.locked
-            ? `<p class="no-resources">🔒 Recursos recomendados (cursos, vídeos, projetos) são exclusivos do plano <strong>PRO</strong>. <a href="/perfil#plano">Fazer upgrade</a>.</p>`
+            ? `<p class="no-resources">🔒 Recursos recomendados (cursos, vídeos, projetos) são exclusivos do plano <strong>PRO</strong>. <a href="/planos">Fazer upgrade</a>.</p>`
             : skill.resources?.length
             ? `<ul class="resources" aria-label="Recursos para aprender ${skill.skill_name}">
                 ${skill.resources.map(r => `

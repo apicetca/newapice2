@@ -308,7 +308,7 @@
         <span class="chip ${isPro ? "chip-accent" : "chip-muted"}">${plan.name}${isPro ? "" : " (gratuito)"}</span>
         ${isPro
           ? `<span style="color:var(--muted);font-size:.82rem">R$ ${(plan.price_cents / 100).toFixed(2).replace(".", ",")}/mês</span>`
-          : `<span style="color:var(--muted);font-size:.82rem">Fale com o suporte para virar PRO — R$ 19,90/mês.</span>`
+          : `<a href="/planos" style="color:var(--accent);font-size:.82rem">Virar PRO — R$ 19,90/mês</a>`
         }`;
       $("plan-features").textContent = isPro
         ? "Você tem acesso ao roadmap personalizado com recursos recomendados, mentor de carreira, simulador de entrevista e destaque no perfil para empresas."

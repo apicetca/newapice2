@@ -72,7 +72,14 @@ router.get("/health", isAuth, async (req, res) => {
       prompt: "ping",
       maxTokens: 256,
     });
-    res.json({ status: "ok", model: MODEL, respondeu: Boolean(result) });
+    // __provider só existe se a resposta veio do fallback (Groq/Cerebras/
+    // Mistral/OpenRouter) — ausente significa que o Gemini respondeu.
+    res.json({
+      status: "ok",
+      model: result.__provider ? `${result.__provider}/${result.__model}` : MODEL,
+      fallback: Boolean(result.__provider),
+      respondeu: Boolean(result),
+    });
   } catch (err) {
     console.error("[GET /api/ai/health]", err.message);
     res.status(502).json({ status: "erro", model: MODEL, motivo: err.message });

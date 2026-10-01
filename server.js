@@ -17,8 +17,6 @@ const helmet       = require("helmet");
 const rateLimit    = require("express-rate-limit");
 const db           = require("./database/db");
 const { getLatestInsights } = require("./services/marketInsights");
-const { plansForType } = require("./config/plans");
-const { getUserPlanCode } = require("./services/subscriptionService");
 
 const app = express();
 const isProd = process.env.NODE_ENV === "production";
@@ -330,26 +328,12 @@ app.get("/empresa/perfil", requireCompany, (req, res) => {
 });
 
 // ── Planos ────────────────────────────────────────────────
-// Pública (visitante pode comparar antes de criar conta) — quando autenticado,
-// mostra o plano do próprio usuário em destaque.
-app.get("/planos", async (req, res) => {
-  const loggedIn = Boolean(req.session?.user);
-  if (loggedIn && req.session.user.type === "admin") return res.redirect("/admin/dashboard");
-
-  const type = loggedIn
-    ? (req.session.user.type === "empresa" ? "empresa" : "dev")
-    : (req.query.tipo === "empresa" ? "empresa" : "dev");
-
-  const plans = plansForType(type);
-  let currentCode = null;
-  if (loggedIn) {
-    try {
-      currentCode = await getUserPlanCode(req.session.user.id, type);
-    } catch (_) {
-      currentCode = null;
-    }
-  }
-  res.render("planos", { currentPage: "planos", type, plans, currentCode, loggedIn });
+// Acessível por dev ou empresa (não por admin nem visitante) — usa
+// requireAuth em vez de um requireDev/requireCompany específico porque
+// o conteúdo se adapta ao tipo (ver plansController.getPlans).
+app.get("/planos", requireAuth, (req, res) => {
+  if (req.session.user.type === "admin") return res.redirect("/admin/dashboard");
+  res.render("planos", { currentPage: "planos", userType: req.session.user.type });
 });
 
 // ── Rotas modulares ───────────────────────────────────────
@@ -363,6 +347,7 @@ const adminRoutes       = require("./routes/admin");
 const messagesRoutes    = require("./routes/messages");
 const companyPublicRoutes = require("./routes/company-public");
 const aiRoutes           = require("./routes/ai");
+const plansRoutes         = require("./routes/plans");
 
 app.use("/auth",        authRoutes);
 app.use("/api/auth",    authLimiter, userRoutes);
@@ -374,6 +359,7 @@ app.use("/api/admin",   adminRoutes);
 app.use("/api/messages", messagesRoutes);
 app.use("/api/empresas", companyPublicRoutes);
 app.use("/api/ai",      aiLimiter, aiRoutes);
+app.use("/api/plans",   plansRoutes);
 
 // ── 404 ───────────────────────────────────────────────────
 app.use((req, res) => {

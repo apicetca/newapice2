@@ -2,6 +2,7 @@ const axios  = require("axios");
 const crypto = require("crypto");
 const db     = require("../database/db");
 const { matchSkillsFromGitHub } = require("../services/githubAnalyzer");
+const { clearHistory: clearMentorHistory } = require("../services/mentorChat");
 
 // APP_URL é validada em server.js na subida do processo — aqui já é garantida.
 const GITHUB_CALLBACK_PATH = "/auth/github/callback";
@@ -104,6 +105,14 @@ const authController = {
         [internalId]
       );
       const devProfile = devProfiles[0] ?? {};
+
+      // Decisão de produto: o mentor de carreira nunca continua a conversa
+      // de uma sessão anterior — todo login começa do zero. Fire-and-forget
+      // (mesmo padrão de matchSkillsFromGitHub acima): não bloqueia o login
+      // se isso falhar, só loga o erro.
+      clearMentorHistory(internalId).catch(err => {
+        console.error("[mentor-history]", err.message);
+      });
 
       req.session.user = {
         id:          internalId,

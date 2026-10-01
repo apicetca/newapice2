@@ -20,6 +20,7 @@
 // usa esse namespace do SDK, não generateContent.
 // ============================================
 const { GoogleGenAI } = require("@google/genai");
+const { askFallbackJSON } = require("./aiFallback");
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
@@ -58,9 +59,24 @@ function extractFunctionCalls(interaction) {
   return (interaction.steps ?? []).filter(s => s.type === "function_call");
 }
 
+// Timeout aplicado manualmente via Promise.race — a opção nativa do SDK
+// (RequestOptions.timeout_ms) foi testada em 2026-09-28 e não interrompe
+// a chamada de verdade: com timeout_ms:3000, uma chamada que devolveu
+// 429 (rate limit) só retornou depois de 34s, ou seja, a própria API
+// demora a responder o erro e o SDK não aborta antes disso. Sem este
+// timeout manual, uma chamada lenta ao Gemini poderia travar o fallback
+// (services/aiFallback.js) por dezenas de segundos antes dele sequer
+// começar a tentar o próximo provedor.
+const GEMINI_TIMEOUT_MS = 15000;
+
 async function callInteractions(params) {
   try {
-    return await getClient().interactions.create(params);
+    return await Promise.race([
+      getClient().interactions.create(params),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Timeout de ${GEMINI_TIMEOUT_MS}ms excedido.`)), GEMINI_TIMEOUT_MS)
+      ),
+    ]);
   } catch (err) {
     // Nunca logar a API key — só status e mensagem do provedor.
     const status = err.status ?? err.response?.status;
@@ -90,7 +106,22 @@ async function callInteractions(params) {
 // responseSchema: opcional — JSON Schema que a resposta deve seguir.
 //            Reforça (mas não substitui) o formato pedido no prompt.
 // --------------------------------------------
+// Tenta o Gemini primeiro; se falhar (cota esgotada, 5xx, timeout,
+// etc.), cai pro fallback multi-provedor (services/aiFallback.js —
+// Groq/Cerebras/Mistral/OpenRouter, gratuitos, formato OpenAI). Só
+// askGeminiJSON tem esse fallback — chatTurn/sendFunctionResults
+// (usados só pelo mentor, que depende de memória/tools nativos do
+// Gemini) continuam exclusivamente no Gemini.
 async function askGeminiJSON({ system, prompt, maxTokens = 2048, responseSchema }) {
+  try {
+    return await askGeminiJSONOnly({ system, prompt, maxTokens, responseSchema });
+  } catch (err) {
+    console.error(`[gemini-client] Gemini falhou, tentando fallback multi-provedor:`, err.message);
+    return askFallbackJSON({ system, prompt, maxTokens });
+  }
+}
+
+async function askGeminiJSONOnly({ system, prompt, maxTokens = 2048, responseSchema }) {
   const interaction = await callInteractions({
     model: MODEL,
     input: prompt,
@@ -167,7 +198,7 @@ async function sendFunctionResults({ system, previousInteractionId, results, too
   const interaction = await callInteractions({
     model: MODEL,
     input: results.map(r => ({
-      type: "function_response",
+      type: "function_result",
       id: r.id,
       name: r.name,
       response: r.response,
