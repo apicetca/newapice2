@@ -178,7 +178,8 @@
 .skill-row.has  { border-color: rgba(124,58,237,.2); background: var(--accent-dim); }
 .skill-row.miss { border-color: var(--border); }
 
-.skill-row-icon { flex-shrink: 0; font-size: .9rem; }
+.skill-row-icon { flex-shrink: 0; display: flex; color: var(--muted); }
+.skill-row.has .skill-row-icon { color: var(--teal); }
 .skill-row-name { flex: 1; font-size: .84rem; font-weight: 500; }
 .skill-row-badge {
   font-size: .68rem; font-weight: 700; padding: 2px 8px;

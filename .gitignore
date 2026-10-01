@@ -11,3 +11,4 @@ run-qa-loop.sh
 README.md
 issues.json
 CHANGELOG-QA.md
+.claude/skills/fix-qa/SKILL.md

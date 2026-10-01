@@ -29,9 +29,6 @@ main#main-content {
 /* [hidden] tem a mesma especificidade de um id — sem isto, o JS marca
    o estado como hidden, mas ele continua com display:flex e fica
    "preso" na tela por cima do conteúdo já carregado. */
-#state-loading[hidden],
-#state-error[hidden] { display: none; }
-
 /* display:flex acima (seletor de ID) vence o display:none nativo do
    atributo hidden — sem isso, os estados loading/error/content da
    página aparecem sobrepostos em vez de um por vez. */

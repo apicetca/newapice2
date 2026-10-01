@@ -142,16 +142,20 @@
 }
 
 .repo-action-btn {
-  width: 32px;
-  height: 32px;
+  height: 30px;
+  padding: 0 12px;
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 99px;
   color: var(--muted);
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: .78rem;
+  font-weight: 600;
+  white-space: nowrap;
   transition: background .12s, border-color .12s, color .12s;
 }
 .repo-action-btn:hover {
@@ -159,10 +163,17 @@
   border-color: var(--border-lite);
   color: var(--text);
 }
-.repo-action-btn--danger:hover {
+
+/* Excluir: vermelho já no estado normal, não só no hover */
+.repo-action-btn--danger {
   color: #f87171;
-  border-color: rgba(248, 113, 113, .35);
-  background: rgba(248, 113, 113, .07);
+  background: rgba(248, 113, 113, .06);
+  border-color: rgba(248, 113, 113, .28);
+}
+.repo-action-btn--danger:hover {
+  color: #fff;
+  background: #ef4444;
+  border-color: #ef4444;
 }
 
 /* ── Estado vazio ────────────────────────── */
@@ -434,6 +445,19 @@
   transition: border-color .14s;
 }
 .edit-field textarea:focus { border-color: var(--accent-border); }
+
+.edit-field input[type="text"] {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  padding: 9px 14px;
+  outline: none;
+  transition: border-color .14s;
+}
+.edit-field input[type="text"]:focus { border-color: var(--accent-border); }
 
 /* ── Botão de visibilidade (Publicar / No perfil) ──── */
 .repo-visibility-btn {

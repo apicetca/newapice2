@@ -119,16 +119,29 @@ router.patch("/repos/:id/visibility", isAuth, async (req, res) => {
   }
 });
 
-// PATCH /api/user/repos/:id — edita descrição customizada
+// PATCH /api/user/repos/:id — edita título (repo_name) e/ou descrição customizados.
+// repo_name é o que define como o repositório aparece no perfil (inclusive para
+// empresas que virem esse perfil), por isso não pode ficar vazio quando enviado.
 router.patch("/repos/:id", isAuth, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: "ID inválido." });
 
-  const { description } = req.body;
+  const { description, repo_name } = req.body;
+  if (repo_name !== undefined && !String(repo_name).trim()) {
+    return res.status(400).json({ error: "O título não pode ficar vazio." });
+  }
+
+  const fields = [];
+  const values = [];
+  if (description !== undefined) { fields.push("description = ?"); values.push(description ?? null); }
+  if (repo_name   !== undefined) { fields.push("repo_name = ?");   values.push(String(repo_name).trim().slice(0, 255)); }
+  if (!fields.length) return res.status(400).json({ error: "Nenhum campo para atualizar." });
+
   try {
+    values.push(id, req.session.user.id);
     const [result] = await db.query(
-      "UPDATE user_repositories SET description = ? WHERE id = ? AND user_id = ?",
-      [description ?? null, id, req.session.user.id]
+      `UPDATE user_repositories SET ${fields.join(", ")} WHERE id = ? AND user_id = ?`,
+      values
     );
     if (result.affectedRows === 0) return res.status(404).json({ error: "Repositório não encontrado." });
     res.json({ ok: true });

@@ -111,19 +111,14 @@ app.use(exposeUser);
 
 // ── Páginas públicas ──────────────────────────────────────
 app.get("/", async (req, res) => {
-  let stats      = { devs: 0, jobs: 0, skills: 0 };
-  let recentJobs = [];
+  let stats = { devs: 0, jobs: 0, skills: 0 };
   try {
     const [[d]] = await db.query("SELECT COUNT(*) AS n FROM users WHERE type = 'dev'");
     const [[j]] = await db.query("SELECT COUNT(*) AS n FROM jobs WHERE active = 1");
     const [[s]] = await db.query("SELECT COUNT(*) AS n FROM skills");
-    const [jobs] = await db.query(
-      "SELECT id, title, company, level, location, modality FROM jobs WHERE active = 1 ORDER BY created_at DESC LIMIT 6"
-    );
-    stats      = { devs: d.n, jobs: j.n, skills: s.n };
-    recentJobs = jobs;
+    stats = { devs: d.n, jobs: j.n, skills: s.n };
   } catch (_) {}
-  res.render("index", { stats, recentJobs });
+  res.render("index", { stats });
 });
 
 app.get("/login",    redirectIfAuth, (req, res) => res.render("login"));
