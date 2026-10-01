@@ -129,6 +129,12 @@
 }
 .score-lbl { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 
+.match-ia-explicacao {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: .82rem; color: var(--text); line-height: 1.5;
+}
+
 .match-login-prompt {
   text-align: center; padding: 16px;
   font-size: .85rem; color: var(--muted);

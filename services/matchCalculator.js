@@ -10,7 +10,7 @@
 // (não penalizam o score quando informação não disponível).
 // ============================================
 const db = require("../database/db");
-const { askClaudeJSON } = require("./anthropicClient");
+const { askGeminiJSON } = require("./geminiClient");
 
 const MATCH_IA_SYSTEM_PROMPT = `Você explica, em português, de forma breve (2-3 frases) e
 direta, por que um candidato tem um determinado percentual de compatibilidade com uma vaga
@@ -153,10 +153,10 @@ async function getMatchExplanation(githubId, jobId, profileData = {}) {
     })),
   };
 
-  const result = await askClaudeJSON({
+  const result = await askGeminiJSON({
     system: MATCH_IA_SYSTEM_PROMPT,
     prompt: `Dados do match candidato-vaga:\n${JSON.stringify(payload)}`,
-    maxTokens: 512,
+    maxTokens: 1536,
   });
 
   const percentualIa = Number.isInteger(result.percentual_ia) ? result.percentual_ia : match.match;

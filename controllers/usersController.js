@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const db     = require("../database/db");
 const User   = require("../models/User");
 const { sendPasswordResetEmail } = require("../services/emailService");
+const { clearHistory: clearMentorHistory } = require("../services/mentorChat");
 const {
   validateRegister, validateLogin,
   validateForgotPassword, validateResetPassword,
@@ -106,6 +107,12 @@ const usersController = {
           req.session.user.github_login = profile.github_login;
           req.session.user.nivel        = profile.nivel;
         }
+
+        // Decisão de produto: o mentor de carreira nunca continua a
+        // conversa de uma sessão anterior — todo login começa do zero.
+        clearMentorHistory(user.id).catch(err => {
+          console.error("[mentor-history]", err.message);
+        });
       } else if (user.type === "empresa") {
         const profile = await User.findCompanyProfile(user.id);
         if (profile) {

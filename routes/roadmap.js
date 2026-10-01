@@ -18,5 +18,6 @@ router.post("/vagas/:id/candidatar",   isAuth, ...intParam("id"),    roadmapCont
 router.get("/roadmap/:jobId",          isAuth, ...intParam("jobId"), roadmapController.getRoadmap);
 router.patch("/roadmap/:jobId/skill/:skillId", isAuth, validateUpdateProgress, roadmapController.updateSkillStatus);
 router.get("/dashboard",               isAuth, roadmapController.getDashboard);
+router.get("/user/languages",          isAuth, roadmapController.getLanguageDistribution);
 
 module.exports = router;

@@ -5,7 +5,7 @@
 // ============================================
 const db                = require("../database/db");
 const { calculateJobMatch } = require("./matchCalculator");
-const { askClaudeJSON }     = require("./anthropicClient");
+const { askGeminiJSON }      = require("./geminiClient");
 
 const ROADMAP_IA_SYSTEM_PROMPT = `Você é um mentor técnico que explica, de forma breve e
 motivadora, por que cada tecnologia é importante pro candidato aprender pra uma vaga
@@ -23,10 +23,10 @@ async function enrichWithAI(needsToLearn) {
   const payload = needsToLearn.map(s => ({ tecnologia: s.skill_name, tipo: s.skill_type }));
 
   try {
-    const result = await askClaudeJSON({
+    const result = await askGeminiJSON({
       system: ROADMAP_IA_SYSTEM_PROMPT,
       prompt: `Gap de skills do candidato pra essa vaga:\n${JSON.stringify(payload)}`,
-      maxTokens: 1024,
+      maxTokens: 3072,
     });
 
     const trilha = Array.isArray(result.trilha) ? result.trilha : [];

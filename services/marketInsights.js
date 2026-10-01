@@ -1,18 +1,21 @@
 // ============================================
 // services/marketInsights.js
 // Analisa as vagas cadastradas e gera um resumo
-// das tecnologias mais demandadas. Pensado como
-// rotina periódica — hoje disparado sob demanda
-// (não há cron configurado no projeto ainda; o
-// ideal seria agendar isso, ex: 1x por dia).
+// das tecnologias mais demandadas. Sem cron/worker
+// separado no projeto — a "periodicidade" é lazy:
+// GET /api/ai/insights-mercado regenera sob demanda
+// quando o cache passa de MAX_CACHE_AGE_MS, em vez
+// de exigir um processo agendado à parte.
 // ============================================
 const db = require("../database/db");
-const { askClaudeJSON } = require("./anthropicClient");
+const { askGeminiJSON } = require("./geminiClient");
 
 const SYSTEM_PROMPT = `Você analisa dados agregados do mercado de vagas de tecnologia e
 escreve um resumo curto (3-5 frases, em português) sobre quais tecnologias estão mais em
 alta e por quê. Responda SEMPRE em JSON puro (sem markdown) no formato exato:
 { "resumo": "string" }`;
+
+const MAX_CACHE_AGE_MS = 24 * 60 * 60 * 1000; // 24h
 
 async function getLatestInsights() {
   const [[row]] = await db.query(
@@ -20,6 +23,28 @@ async function getLatestInsights() {
   );
   if (!row) return null;
   return { ...row, tecnologias_top: JSON.parse(row.tecnologias_top) };
+}
+
+function isStale(insights) {
+  return Date.now() - new Date(insights.gerado_em).getTime() > MAX_CACHE_AGE_MS;
+}
+
+// Serve o cache mais recente, regenerando primeiro se estiver velho
+// (>24h) ou inexistente. Se a regeneração falhar (ex: erro da IA), cai
+// de volta pro cache velho em vez de quebrar a página — só propaga o
+// erro se não houver nenhum cache pra servir.
+async function getInsightsFreshOrCached() {
+  const cached = await getLatestInsights();
+
+  if (!cached) return generateInsights();
+  if (!isStale(cached)) return cached;
+
+  try {
+    return await generateInsights();
+  } catch (err) {
+    console.error("[marketInsights] Falha ao regenerar, servindo cache velho:", err.message);
+    return cached;
+  }
 }
 
 // Lock em memória (QA-005): sem isso, N requisições concorrentes com a
@@ -55,10 +80,10 @@ async function doGenerateInsights() {
 
   const tecnologiasTop = rows.map(r => ({ nome: r.name, tipo: r.type, vagas: r.total_vagas }));
 
-  const result = await askClaudeJSON({
+  const result = await askGeminiJSON({
     system: SYSTEM_PROMPT,
     prompt: `Tecnologias mais demandadas nas vagas ativas (ordenado por frequência):\n${JSON.stringify(tecnologiasTop)}`,
-    maxTokens: 512,
+    maxTokens: 1536,
   });
 
   const resumo = result.resumo ?? "";
@@ -71,4 +96,4 @@ async function doGenerateInsights() {
   return { resumo, tecnologias_top: tecnologiasTop };
 }
 
-module.exports = { getLatestInsights, generateInsights };
+module.exports = { getLatestInsights, generateInsights, getInsightsFreshOrCached };

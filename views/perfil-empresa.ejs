@@ -249,8 +249,8 @@
           ${plan.price_cents > 0 ? `R$ ${(plan.price_cents / 100).toFixed(2).replace(".", ",")}/mês · ` : ""}
           ${limitLabel} vaga(s) ativa(s) simultaneamente
         </span>`;
-      $("plan-features").textContent = plan.code === "empresa_free"
-        ? "Fale com o suporte para fazer upgrade e publicar mais vagas ao mesmo tempo."
+      $("plan-features").innerHTML = plan.code === "empresa_free"
+        ? `<a href="/planos" style="color:var(--accent)">Fazer upgrade</a> para publicar mais vagas ao mesmo tempo.`
         : "";
     }
 

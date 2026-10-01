@@ -5,7 +5,11 @@ const axios = require("axios");
 const multer = require("multer");
 const db    = require("../database/db");
 const { matchSkillsFromGitHub } = require("../services/githubAnalyzer");
-const { getUserPlan } = require("../services/subscriptionService");
+const { getUserPlan, setUserPlan } = require("../services/subscriptionService");
+
+// Planos de dev que o próprio usuário pode ativar via setPlan — nunca
+// planos de empresa, mesmo com ALLOW_SELF_PLAN_SWITCH ligada.
+const SELF_SWITCHABLE_PLANS = ["dev_free", "dev_pro"];
 
 // ── Avatar upload (multer) ────────────────────────────────
 const UPLOAD_DIR = path.join(__dirname, "../public/uploads/avatars");
@@ -285,6 +289,31 @@ const profileController = {
       );
       res.json({ data: skills, total, page, pageSize, pages: Math.ceil(total / pageSize) });
     } catch (err) {
+      res.status(500).json({ error: "Erro interno." });
+    }
+  },
+
+  // Troca o próprio plano sem checkout — só existe enquanto
+  // ALLOW_SELF_PLAN_SWITCH=true no ambiente, pra facilitar testar
+  // funcionalidades PRO (mentor, entrevista) sem depender do admin.
+  // Nunca fica ligada em produção a menos que essa env var seja
+  // definida lá de propósito.
+  setPlan: async (req, res) => {
+    if (process.env.ALLOW_SELF_PLAN_SWITCH !== "true") {
+      return res.status(404).json({ error: "Não encontrado." });
+    }
+
+    const { plan_code } = req.body;
+    if (!SELF_SWITCHABLE_PLANS.includes(plan_code)) {
+      return res.status(400).json({ error: "Plano inválido." });
+    }
+
+    try {
+      await setUserPlan(req.session.user.id, plan_code);
+      const plan = await getUserPlan(req.session.user.id, "dev");
+      res.json({ plan: { code: plan.code, name: plan.name, price_cents: plan.price_cents, features: plan.features } });
+    } catch (err) {
+      console.error("Erro ao trocar plano:", err.message);
       res.status(500).json({ error: "Erro interno." });
     }
   },

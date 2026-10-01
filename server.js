@@ -1,4 +1,14 @@
 require("dotenv").config();
+
+if (!process.env.APP_URL) {
+  console.error(
+    "[config] Variável de ambiente APP_URL não definida. Defina-a explicitamente " +
+    "(ex.: http://localhost:3000 em dev, https://newapice22.onrender.com em produção) " +
+    "— ela é usada para montar a redirect_uri do login GitHub OAuth."
+  );
+  process.exit(1);
+}
+
 const express      = require("express");
 const session      = require("express-session");
 const path         = require("path");
@@ -7,8 +17,6 @@ const helmet       = require("helmet");
 const rateLimit    = require("express-rate-limit");
 const db           = require("./database/db");
 const { getLatestInsights } = require("./services/marketInsights");
-const { plansForType } = require("./config/plans");
-const { getUserPlanCode } = require("./services/subscriptionService");
 
 const app = express();
 const isProd = process.env.NODE_ENV === "production";
@@ -40,11 +48,36 @@ const authLimiter = rateLimit({
   legacyHeaders:   false,
 });
 
+// ── Rate limiting: IA (chamadas ao Gemini custam tokens reais,
+// e o mentor com function calling pode disparar múltiplas chamadas
+// por mensagem) ────────────────────────────────────────────
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max:      30,
+  message:  { error: "Muitas requisições à IA. Aguarde alguns minutos e tente novamente." },
+  standardHeaders: true,
+  legacyHeaders:   false,
+});
+
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 app.use(express.static("public"));
 app.use(express.json());
+
+// Rotas de API nunca devem ser cacheadas pelo navegador. Cache-Control
+// sozinho não basta: o Express calcula e envia ETag mesmo assim, e no
+// próximo request o navegador manda If-None-Match — o servidor responde
+// 304 sem corpo, e todo fetch() que espera JSON (res.json()) quebra
+// tentando parsear um corpo vazio. Apagar o header aqui não adianta (o
+// ETag só existe depois que a rota chama res.json()) — em vez disso,
+// removemos o If-None-Match recebido, então o Express nunca considera
+// a resposta "fresca" e nunca decide responder 304.
+app.use("/api", (req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  delete req.headers["if-none-match"];
+  next();
+});
 app.get("/favicon.ico", (req, res) => {
   res.type("image/webp").sendFile(path.join(__dirname, "public", "img", "principal-gradiente.webp"));
 });
@@ -237,6 +270,12 @@ app.get("/empresa/vagas/:id/editar", requireCompany, async (req, res) => {
   }
 });
 
+app.get("/empresa/vagas/:id/candidaturas", requireCompany, (req, res) => {
+  const jobId = Number(req.params.id);
+  if (!Number.isInteger(jobId) || jobId <= 0) return res.redirect("/empresa/vagas");
+  res.render("empresa-candidaturas", { currentPage: "empresa-vagas", jobId });
+});
+
 // Vaga pública individual
 // SEO (QA-020): busca título/descrição no servidor pra título, meta
 // description, Open Graph e <h1> existirem no HTML inicial — o resto
@@ -284,26 +323,12 @@ app.get("/empresa/perfil", requireCompany, (req, res) => {
 });
 
 // ── Planos ────────────────────────────────────────────────
-// Pública (visitante pode comparar antes de criar conta) — quando autenticado,
-// mostra o plano do próprio usuário em destaque.
-app.get("/planos", async (req, res) => {
-  const loggedIn = Boolean(req.session?.user);
-  if (loggedIn && req.session.user.type === "admin") return res.redirect("/admin/dashboard");
-
-  const type = loggedIn
-    ? (req.session.user.type === "empresa" ? "empresa" : "dev")
-    : (req.query.tipo === "empresa" ? "empresa" : "dev");
-
-  const plans = plansForType(type);
-  let currentCode = null;
-  if (loggedIn) {
-    try {
-      currentCode = await getUserPlanCode(req.session.user.id, type);
-    } catch (_) {
-      currentCode = null;
-    }
-  }
-  res.render("planos", { currentPage: "planos", type, plans, currentCode, loggedIn });
+// Acessível por dev ou empresa (não por admin nem visitante) — usa
+// requireAuth em vez de um requireDev/requireCompany específico porque
+// o conteúdo se adapta ao tipo (ver plansController.getPlans).
+app.get("/planos", requireAuth, (req, res) => {
+  if (req.session.user.type === "admin") return res.redirect("/admin/dashboard");
+  res.render("planos", { currentPage: "planos", userType: req.session.user.type });
 });
 
 // ── Rotas modulares ───────────────────────────────────────
@@ -317,6 +342,7 @@ const adminRoutes       = require("./routes/admin");
 const messagesRoutes    = require("./routes/messages");
 const companyPublicRoutes = require("./routes/company-public");
 const aiRoutes           = require("./routes/ai");
+const plansRoutes         = require("./routes/plans");
 
 app.use("/auth",        authRoutes);
 app.use("/api/auth",    authLimiter, userRoutes);
@@ -327,7 +353,8 @@ app.use("/api/empresa", empresaRoutes);
 app.use("/api/admin",   adminRoutes);
 app.use("/api/messages", messagesRoutes);
 app.use("/api/empresas", companyPublicRoutes);
-app.use("/api/ai",      aiRoutes);
+app.use("/api/ai",      aiLimiter, aiRoutes);
+app.use("/api/plans",   plansRoutes);
 
 // ── 404 ───────────────────────────────────────────────────
 app.use((req, res) => {
