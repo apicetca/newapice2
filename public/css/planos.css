@@ -1,0 +1,112 @@
+/* =============================================
+   planos.css — Página de planos (dev / empresa)
+============================================= */
+
+.page-header {
+  margin-bottom: 28px;
+  animation: fadeUp .4s ease both;
+}
+.page-title {
+  font-family: var(--font-display); font-size: 1.4rem;
+  font-weight: 800; letter-spacing: -.025em; margin-bottom: 4px;
+}
+.page-sub { font-size: .86rem; color: var(--muted); max-width: 46ch; }
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  max-width: 920px;
+}
+
+.plan-card {
+  position: relative;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 22px;
+  display: flex; flex-direction: column;
+  animation: fadeUp .35s ease both;
+}
+.plan-card.is-highlight { border-color: var(--accent-border); }
+.plan-card.is-current   { border-color: var(--teal-border); background: var(--teal-dim); }
+
+.plan-card-tag {
+  position: absolute; top: -11px; left: 22px;
+  background: var(--accent); color: #fff;
+  font-size: .68rem; font-weight: 700; letter-spacing: .02em;
+  padding: 3px 10px; border-radius: 99px;
+}
+
+.plan-card-name {
+  font-family: var(--font-display); font-size: 1.05rem;
+  font-weight: 700; margin-bottom: 10px;
+}
+
+.plan-card-price { margin-bottom: 18px; }
+.plan-card-price-val {
+  font-family: var(--font-display); font-size: 1.6rem;
+  font-weight: 800; letter-spacing: -.02em; color: var(--text);
+}
+.plan-card-price-period { font-size: .8rem; color: var(--muted); margin-left: 2px; }
+
+.plan-card-features {
+  list-style: none; display: flex; flex-direction: column; gap: 10px;
+  margin-bottom: 20px; flex: 1;
+}
+.plan-card-features li {
+  display: flex; align-items: flex-start; gap: 9px;
+  font-size: .84rem; line-height: 1.45;
+}
+.plan-card-features li.is-included { color: var(--text); }
+.plan-card-features li.is-included svg { color: var(--teal); flex-shrink: 0; margin-top: 2px; }
+.plan-card-features li.is-locked { color: var(--muted); }
+.plan-card-features li.is-locked svg { color: var(--border-lite); flex-shrink: 0; margin-top: 2px; }
+
+.plan-card-current {
+  display: inline-flex; align-items: center; gap: 6px;
+  align-self: flex-start;
+  padding: 6px 12px; border-radius: 99px;
+  background: var(--teal-dim); border: 1px solid var(--teal-border); color: var(--teal);
+  font-size: .78rem; font-weight: 600;
+}
+
+.plans-note {
+  margin-top: 24px; max-width: 640px;
+  font-size: .82rem; color: var(--muted); line-height: 1.6;
+}
+
+/* Alternância dev/empresa — só aparece pra visitante deslogado */
+.plans-type-tabs {
+  display: inline-flex; gap: 4px; margin-bottom: 28px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 4px;
+}
+.plans-type-tab {
+  padding: 8px 18px; border-radius: var(--radius-sm);
+  font-size: .84rem; font-weight: 600; color: var(--muted);
+  text-decoration: none; transition: all .15s;
+}
+.plans-type-tab:hover { color: var(--text); }
+.plans-type-tab.active {
+  background: var(--accent-dim); color: var(--accent-hv);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+/* CTA de criar conta — só aparece pra visitante deslogado */
+.plans-cta {
+  margin-top: 28px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.plans-cta .plans-note { margin-top: 0; }
+.plans-cta-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: var(--radius-md);
+  background: var(--accent); color: #fff; text-decoration: none;
+  font-family: var(--font-display); font-size: .85rem; font-weight: 700;
+  transition: background .15s, transform .15s, box-shadow .15s;
+}
+.plans-cta-btn:hover { background: var(--accent-hv); transform: translateY(-1px); box-shadow: 0 8px 24px var(--accent-glow); }
+
+@media (max-width: 520px) {
+  .plans-grid { grid-template-columns: 1fr; }
+}

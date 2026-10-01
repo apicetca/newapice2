@@ -63,6 +63,7 @@ main {
 .lp-left-inner > *:nth-child(5) { animation-delay: 0.33s; }
 .lp-left-inner > *:nth-child(6) { animation-delay: 0.4s; }
 .lp-left-inner > *:nth-child(7) { animation-delay: 0.47s; }
+.lp-left-inner > *:nth-child(8) { animation-delay: 0.54s; }
 
 .lp-left-footer {
   padding: 20px clamp(24px, 5vw, 48px);
@@ -148,74 +149,15 @@ main {
   z-index: 0;
 }
 
-/* Orbs */
-.lp-orb {
+/* Realce único e estático (substitui os antigos orbs/anéis animados) */
+.lp-right-glow {
   position: absolute;
+  top: -160px; right: -120px;
+  width: 480px; height: 480px;
   border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
-}
-.lp-orb-1 {
-  width: 520px; height: 520px;
-  background: radial-gradient(circle, rgba(124,58,237,0.38) 0%, transparent 70%);
-  top: -180px; right: -140px;
-}
-.lp-orb-2 {
-  width: 340px; height: 340px;
-  background: radial-gradient(circle, rgba(83,223,62,0.1) 0%, transparent 70%);
-  bottom: -100px; left: -80px;
-}
-.lp-orb-3 {
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%);
-  top: 48%; left: 12%;
-  transform: translateY(-50%);
-}
-
-/* Decorações flutuantes */
-.lp-deco { position: absolute; pointer-events: none; z-index: 0; }
-
-.lp-deco-ring {
-  border-radius: 50%;
-  border: 1px solid rgba(124,58,237,0.18);
-}
-.lp-deco-ring-1 {
-  width: 200px; height: 200px;
-  bottom: 80px; right: -60px;
-  animation: spin-slow 28s linear infinite;
-}
-.lp-deco-ring-2 {
-  width: 120px; height: 120px;
-  top: 60px; left: 40px;
-  border-color: rgba(83,223,62,0.12);
-  animation: spin-slow 20s linear infinite reverse;
-}
-
-.lp-deco-cross {
-  width: 12px; height: 12px;
-  opacity: 0.4;
-}
-.lp-deco-cross::before, .lp-deco-cross::after {
-  content: ""; position: absolute;
-  background: rgba(124,58,237,0.8);
-  border-radius: 1px;
-}
-.lp-deco-cross::before { width: 100%; height: 1.5px; top: 50%; transform: translateY(-50%); }
-.lp-deco-cross::after  { height: 100%; width: 1.5px; left: 50%; transform: translateX(-50%); }
-.lp-deco-cross-1 { top: 30%; right: 15%; }
-.lp-deco-cross-2 { bottom: 25%; left: 22%; }
-
-.lp-deco-dot {
-  border-radius: 50%;
-  background: rgba(124,58,237,0.5);
-}
-.lp-deco-dot-1 { width: 5px; height: 5px; top: 22%; left: 30%; }
-.lp-deco-dot-2 { width: 4px; height: 4px; top: 65%; right: 28%; background: rgba(83,223,62,0.5); }
-.lp-deco-dot-3 { width: 6px; height: 6px; bottom: 35%; left: 18%; }
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
 }
 
 /* Preview container */
@@ -416,6 +358,52 @@ main {
   transition: width 1s ease;
 }
 .lp-skill-fill--green { background: linear-gradient(90deg, #22c55e, #53df3e); }
+
+/* Painel editorial: título + passos (substitui o mockup de dashboard) */
+.lp-right-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.6vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.28;
+  color: rgba(248,248,255,0.94);
+  margin: 10px 0 30px;
+}
+
+.lp-steps-mini {
+  display: flex; flex-direction: column;
+  list-style: none; margin: 0; padding: 0;
+}
+.lp-steps-mini li {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 15px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.lp-steps-mini li:first-child { border-top: none; padding-top: 0; }
+.lp-steps-mini-num {
+  font-family: var(--font-display);
+  font-size: 0.78rem; font-weight: 700;
+  color: var(--accent-hv);
+  flex-shrink: 0; width: 22px; padding-top: 1px;
+}
+.lp-steps-mini-title {
+  font-size: 0.86rem; font-weight: 600;
+  color: rgba(248,248,255,0.9);
+  margin-bottom: 3px;
+}
+.lp-steps-mini-desc {
+  font-size: 0.76rem; color: rgba(255,255,255,0.42); line-height: 1.5;
+}
+
+/* Link de voltar ao início */
+.lp-back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.79rem; font-weight: 500; color: var(--muted);
+  text-decoration: none; margin-bottom: 20px;
+  transition: color .15s, gap .15s;
+}
+.lp-back-link:hover { color: var(--text); gap: 9px; }
+.lp-back-link svg { flex-shrink: 0; }
 
 /* Bottom label */
 .lp-right-label {
@@ -713,8 +701,6 @@ footer.site-footer {
   .lp-left-inner > *,
   .lp-preview > *,
   .lp-right-label,
-  .lp-deco-ring-1,
-  .lp-deco-ring-2,
   .lp-status-dot {
     opacity: 1 !important;
     transform: none !important;

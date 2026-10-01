@@ -1,0 +1,135 @@
+/* =============================================
+   sobre.css — Página institucional "Sobre nós"
+============================================= */
+
+/* ── Hero ── */
+.page-hero {
+  max-width: 760px; margin: 0 auto; padding: 56px 24px 8px; text-align: center;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 13px; border-radius: 99px;
+  background: var(--accent-dim); border: 1px solid var(--accent-border);
+  font-size: .72rem; font-weight: 600; color: var(--accent-text);
+  letter-spacing: .06em; text-transform: uppercase; margin-bottom: 20px;
+}
+.hero-title {
+  font-family: var(--font-display); font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 800; letter-spacing: -.025em; line-height: 1.2; margin-bottom: 16px;
+}
+.hero-title em { font-style: normal; color: var(--accent-hv); }
+.hero-sub { font-size: .98rem; color: var(--muted); line-height: 1.65; max-width: 60ch; margin: 0 auto; }
+
+/* ── Seções de conteúdo (missão / motivação) ── */
+.about-section {
+  max-width: 760px; margin: 0 auto; padding: 40px 24px;
+}
+.about-section h2 {
+  font-family: var(--font-display); font-size: 1.3rem; font-weight: 700;
+  letter-spacing: -.02em; margin-bottom: 14px;
+}
+.about-section p { font-size: .92rem; color: var(--text); line-height: 1.75; margin-bottom: 14px; }
+.about-section p:last-child { margin-bottom: 0; }
+.about-section p.muted { color: var(--muted); }
+
+/* ── Pilares (o que fazemos) ── */
+.pillars-section { max-width: 1040px; margin: 0 auto; padding: 48px 24px; }
+.pillars-section > h2 {
+  text-align: center; font-family: var(--font-display); font-size: 1.3rem;
+  font-weight: 700; letter-spacing: -.02em; margin-bottom: 32px;
+}
+.pillars-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
+}
+.pillar-card {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 22px; animation: fadeUp .4s ease both;
+}
+.pillar-icon {
+  width: 38px; height: 38px; border-radius: var(--radius-md);
+  background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent-hv);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+}
+.pillar-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 8px; }
+.pillar-card p { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+/* ── Estatísticas reais ── */
+.about-stats { max-width: 760px; margin: 0 auto; padding: 24px 24px 48px; }
+.about-stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px;
+  text-align: center; list-style: none;
+}
+.about-stats-grid li {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px 12px;
+}
+.about-stat-val {
+  display: block; font-family: var(--font-display); font-size: 1.7rem; font-weight: 800;
+  color: var(--accent-hv); letter-spacing: -.02em;
+}
+.about-stat-lbl { display: block; font-size: .74rem; color: var(--muted); margin-top: 4px; }
+
+/* ── Time ── */
+.team-section { max-width: 1040px; margin: 0 auto; padding: 16px 24px 56px; }
+.team-section > h2 {
+  text-align: center; font-family: var(--font-display); font-size: 1.3rem;
+  font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px;
+}
+.team-section > p.muted {
+  text-align: center; font-size: .85rem; color: var(--muted); margin-bottom: 32px;
+}
+.team-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;
+}
+.team-card {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px 14px; text-align: center; animation: fadeUp .4s ease both;
+}
+.team-avatar {
+  width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-dim); border: 1px solid var(--accent-border);
+  font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--accent-hv);
+}
+.team-name { font-size: .86rem; font-weight: 700; margin-bottom: 3px; }
+.team-role { font-size: .74rem; color: var(--muted); }
+
+/* ── CTA final ── */
+.about-cta {
+  max-width: 640px; margin: 0 auto; padding: 8px 24px 72px;
+  text-align: center;
+}
+.about-cta h2 {
+  font-family: var(--font-display); font-size: 1.4rem; font-weight: 800;
+  letter-spacing: -.02em; margin-bottom: 10px;
+}
+.about-cta p { font-size: .9rem; color: var(--muted); margin-bottom: 22px; }
+.about-cta-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+.about-cta .btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px; border-radius: var(--radius-md);
+  background: var(--accent); color: #fff; font-family: var(--font-display);
+  font-size: .88rem; font-weight: 700; text-decoration: none;
+  transition: background .15s, transform .15s, box-shadow .15s;
+}
+.about-cta .btn-primary:hover { background: var(--accent-hv); transform: translateY(-1px); box-shadow: 0 8px 24px var(--accent-glow); }
+
+.about-cta .btn-ghost-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px; border-radius: var(--radius-md);
+  background: transparent; border: 1px solid var(--border-lite); color: var(--text);
+  font-size: .88rem; font-weight: 600; text-decoration: none;
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.about-cta .btn-ghost-outline:hover { border-color: var(--muted); background: rgba(255,255,255,.04); transform: translateY(-1px); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 520px) {
+  .page-hero { padding: 40px 20px 4px; }
+  .about-section, .pillars-section, .team-section, .about-stats, .about-cta { padding-left: 20px; padding-right: 20px; }
+}

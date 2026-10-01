@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <meta name="description" content="Conheça os planos da Ápice para desenvolvedores e empresas." />
+  <title>Ápice — Planos</title>
+  <meta name="robots" content="<%= loggedIn ? 'noindex, nofollow' : 'index, follow' %>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/dev.css" />
+  <link rel="stylesheet" href="/css/planos.css" />
+</head>
+<body>
+
+  <% if (!loggedIn) { %>
+    <%- include('partials/header') %>
+  <% } else if (type === 'empresa') { %>
+    <%- include('partials/header-company', { currentPage: 'planos' }) %>
+  <% } else { %>
+    <%- include('partials/header-dev', { currentPage: 'planos' }) %>
+  <% } %>
+
+  <main class="page-content" id="main-content">
+
+    <header class="page-header">
+      <hgroup>
+        <h1 class="page-title">Planos</h1>
+        <p class="page-sub">
+          <% if (type === 'empresa') { %>
+            Escolha o plano que acompanha o ritmo de contratação da sua empresa.
+          <% } else { %>
+            Escolha o plano que acompanha o seu momento de carreira.
+          <% } %>
+        </p>
+      </hgroup>
+    </header>
+
+    <% if (!loggedIn) { %>
+    <div class="plans-type-tabs" role="tablist" aria-label="Tipo de conta">
+      <a href="/planos?tipo=dev"     class="plans-type-tab <%= type === 'dev' ? 'active' : '' %>"     role="tab" aria-selected="<%= type === 'dev' %>">Desenvolvedor</a>
+      <a href="/planos?tipo=empresa" class="plans-type-tab <%= type === 'empresa' ? 'active' : '' %>" role="tab" aria-selected="<%= type === 'empresa' %>">Empresa</a>
+    </div>
+    <% } %>
+
+    <%
+      const devFeatureLabels = {
+        roadmap_personalizado: "Roadmap personalizado, com cursos e recursos recomendados",
+        destaque_perfil:       "Perfil em destaque para as empresas",
+        mentor_carreira:       "Mentor de carreira com IA",
+        simulador_entrevista:  "Simulador de entrevista técnica com IA",
+      };
+      const devBaseFeatures = [
+        "Perfil conectado ao GitHub, com skills detectadas automaticamente",
+        "Candidaturas e match com vagas ilimitados",
+        "Acompanhamento de progresso por skill",
+      ];
+    %>
+
+    <div class="plans-grid">
+      <% plans.forEach(plan => {
+        const isCurrent = plan.code === currentCode;
+        const isPriced  = plan.price_cents > 0;
+      %>
+      <article class="plan-card <%= isCurrent ? 'is-current' : '' %> <%= isPriced ? 'is-highlight' : '' %>">
+        <% if (isPriced) { %><span class="plan-card-tag">Recomendado</span><% } %>
+
+        <h2 class="plan-card-name"><%= plan.name %></h2>
+
+        <p class="plan-card-price">
+          <% if (isPriced) { %>
+            <span class="plan-card-price-val">R$ <%= (plan.price_cents / 100).toFixed(2).replace('.', ',') %></span>
+            <span class="plan-card-price-period">/mês</span>
+          <% } else { %>
+            <span class="plan-card-price-val">Grátis</span>
+          <% } %>
+        </p>
+
+        <ul class="plan-card-features">
+          <% if (type === 'dev') { %>
+            <% devBaseFeatures.forEach(label => { %>
+              <li class="is-included">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                <%= label %>
+              </li>
+            <% }) %>
+            <% Object.entries(devFeatureLabels).forEach(([key, label]) => {
+              const included = Boolean(plan.features?.[key]);
+            %>
+              <li class="<%= included ? 'is-included' : 'is-locked' %>">
+                <% if (included) { %>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                <% } else { %>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <% } %>
+                <%= label %>
+              </li>
+            <% }) %>
+          <% } else { %>
+            <li class="is-included">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              <%= plan.max_active_jobs == null ? "Vagas ativas ilimitadas" : `Até ${plan.max_active_jobs} vaga${plan.max_active_jobs > 1 ? "s" : ""} ativa${plan.max_active_jobs > 1 ? "s" : ""}` %>
+            </li>
+            <li class="is-included">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Vitrine pública de vagas e match automático com candidatos
+            </li>
+            <li class="is-included">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Mensagens diretas com desenvolvedores
+            </li>
+          <% } %>
+        </ul>
+
+        <% if (isCurrent) { %>
+          <span class="plan-card-current">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Seu plano atual
+          </span>
+        <% } %>
+      </article>
+      <% }) %>
+    </div>
+
+    <% if (loggedIn) { %>
+    <p class="plans-note">
+      Ainda não temos assinatura automática — a troca de plano é feita manualmente pelo time Ápice.
+      <% if (type === 'dev') { %>
+        Fale com o suporte para virar PRO.
+      <% } else { %>
+        Fale com o suporte para mudar o plano da sua empresa.
+      <% } %>
+    </p>
+    <% } else { %>
+    <div class="plans-cta">
+      <p class="plans-note">Comece no plano gratuito agora — sem cartão, sem compromisso.</p>
+      <a href="/cadastro<%= type === 'empresa' ? '#empresa' : '' %>" class="plans-cta-btn">
+        Criar conta grátis
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <% } %>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Ápice. Todos os direitos reservados.</p>
+  </footer>
+
+</body>
+</html>
