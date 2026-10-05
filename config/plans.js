@@ -21,6 +21,13 @@ const PLANS = {
       mentor_carreira:       false,
       simulador_entrevista:  false,
     },
+    // Limites do sistema de Roadmap (fases/etapas via IA — docs/roadmap-spec.md,
+    // seção "Planos Free e PRO"). Mesmo padrão de max_active_jobs abaixo:
+    // limite numérico fica no plano, não espalhado pelo código.
+    roadmap: {
+      max_ativos:           1,
+      regen_intervalo_dias: 30, // 1 regeneração por mês
+    },
   },
   dev_pro: {
     type: "dev",
@@ -32,6 +39,10 @@ const PLANS = {
       destaque_perfil:       true,
       mentor_carreira:       true, // chatbot de mentoria de carreira (IA)
       simulador_entrevista:  true, // simulador de entrevista técnica (IA)
+    },
+    roadmap: {
+      max_ativos:           5,
+      regen_intervalo_dias: 7, // 1 regeneração por semana
     },
   },
 

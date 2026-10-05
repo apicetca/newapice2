@@ -1,0 +1,46 @@
+{
+  "_comentario": "Habilidades de referência por área, usadas como requisitos quando o objetivo do roadmap é uma área (não uma vaga). nivel_esperado é o nível esperado de quem já está pronto para uma vaga de estágio nessa área — serve de baseline para calcular o gap do autodiagnóstico/perfil técnico.",
+  "front-end": [
+    { "habilidade": "HTML", "nivel_esperado": "intermediario" },
+    { "habilidade": "CSS", "nivel_esperado": "intermediario" },
+    { "habilidade": "JavaScript", "nivel_esperado": "intermediario" },
+    { "habilidade": "TypeScript", "nivel_esperado": "iniciante" },
+    { "habilidade": "Git", "nivel_esperado": "iniciante" },
+    { "habilidade": "React", "nivel_esperado": "iniciante" },
+    { "habilidade": "Responsividade", "nivel_esperado": "iniciante" },
+    { "habilidade": "Acessibilidade Web", "nivel_esperado": "iniciante" },
+    { "habilidade": "APIs REST", "nivel_esperado": "iniciante" }
+  ],
+  "back-end": [
+    { "habilidade": "JavaScript", "nivel_esperado": "intermediario" },
+    { "habilidade": "Node.js", "nivel_esperado": "iniciante" },
+    { "habilidade": "SQL", "nivel_esperado": "iniciante" },
+    { "habilidade": "Git", "nivel_esperado": "iniciante" },
+    { "habilidade": "APIs REST", "nivel_esperado": "intermediario" },
+    { "habilidade": "Autenticação e Segurança Básica", "nivel_esperado": "iniciante" },
+    { "habilidade": "Docker", "nivel_esperado": "iniciante" },
+    { "habilidade": "Lógica de Programação", "nivel_esperado": "intermediario" },
+    { "habilidade": "Testes Automatizados", "nivel_esperado": "iniciante" }
+  ],
+  "full-stack": [
+    { "habilidade": "HTML", "nivel_esperado": "iniciante" },
+    { "habilidade": "CSS", "nivel_esperado": "iniciante" },
+    { "habilidade": "JavaScript", "nivel_esperado": "intermediario" },
+    { "habilidade": "TypeScript", "nivel_esperado": "iniciante" },
+    { "habilidade": "Node.js", "nivel_esperado": "iniciante" },
+    { "habilidade": "SQL", "nivel_esperado": "iniciante" },
+    { "habilidade": "React", "nivel_esperado": "iniciante" },
+    { "habilidade": "Git", "nivel_esperado": "iniciante" },
+    { "habilidade": "APIs REST", "nivel_esperado": "iniciante" }
+  ],
+  "dados": [
+    { "habilidade": "Python", "nivel_esperado": "intermediario" },
+    { "habilidade": "SQL", "nivel_esperado": "intermediario" },
+    { "habilidade": "Lógica de Programação", "nivel_esperado": "intermediario" },
+    { "habilidade": "Estatística Básica", "nivel_esperado": "iniciante" },
+    { "habilidade": "Pandas", "nivel_esperado": "iniciante" },
+    { "habilidade": "Visualização de Dados", "nivel_esperado": "iniciante" },
+    { "habilidade": "Excel Avançado", "nivel_esperado": "iniciante" },
+    { "habilidade": "Git", "nivel_esperado": "iniciante" }
+  ]
+}

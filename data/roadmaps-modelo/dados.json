@@ -1,0 +1,66 @@
+{
+  "area": "dados",
+  "origem": "modelo",
+  "fases": [
+    {
+      "ordem": 1,
+      "nome": "Fundamentos de Python e lógica",
+      "objetivo": "Aprender lógica de programação e a sintaxe básica do Python.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Lógica de programação", "descricao": "Variáveis, condicionais, laços e funções na prática.", "habilidade": "Lógica de Programação", "horas_estimadas": 8 },
+        { "ordem": 2, "titulo": "Python básico", "descricao": "Sintaxe, tipos de dados e estruturas básicas do Python.", "habilidade": "Python", "horas_estimadas": 10 },
+        { "ordem": 3, "titulo": "Git e GitHub", "descricao": "Versionar o código e publicar o primeiro repositório.", "habilidade": "Git", "horas_estimadas": 4 },
+        { "ordem": 4, "titulo": "Manipulação de arquivos simples", "descricao": "Ler e escrever arquivos de texto e CSV com Python.", "habilidade": "Python", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Escrever um script em Python que lê um arquivo CSV simples e imprime um resumo dos dados.",
+        "habilidades": ["Python", "Lógica de Programação", "Git"]
+      }
+    },
+    {
+      "ordem": 2,
+      "nome": "Consultas e manipulação de dados",
+      "objetivo": "Extrair e transformar dados de bancos relacionais e planilhas.",
+      "etapas": [
+        { "ordem": 1, "titulo": "SQL para consultas", "descricao": "Escrever consultas SQL para filtrar, agrupar e ordenar dados.", "habilidade": "SQL", "horas_estimadas": 8 },
+        { "ordem": 2, "titulo": "Excel avançado", "descricao": "Fórmulas, tabelas dinâmicas e filtros avançados no Excel.", "habilidade": "Excel Avançado", "horas_estimadas": 6 },
+        { "ordem": 3, "titulo": "Introdução ao Pandas", "descricao": "Carregar e explorar dados tabulares com a biblioteca Pandas.", "habilidade": "Pandas", "horas_estimadas": 8 },
+        { "ordem": 4, "titulo": "Limpeza de dados", "descricao": "Tratar valores ausentes, duplicados e inconsistentes em uma base de dados.", "habilidade": "Pandas", "horas_estimadas": 6 }
+      ],
+      "projeto": {
+        "enunciado": "Gerar um relatório com dados extraídos de um banco SQL, tratados e organizados com Pandas.",
+        "habilidades": ["SQL", "Pandas"]
+      }
+    },
+    {
+      "ordem": 3,
+      "nome": "Análise e visualização",
+      "objetivo": "Analisar dados estatisticamente e comunicar resultados de forma visual.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Estatística básica", "descricao": "Medidas de tendência central, dispersão e distribuição de dados.", "habilidade": "Estatística Básica", "horas_estimadas": 8 },
+        { "ordem": 2, "titulo": "Análise exploratória com Pandas", "descricao": "Explorar uma base de dados em busca de padrões e relações.", "habilidade": "Pandas", "horas_estimadas": 8 },
+        { "ordem": 3, "titulo": "Visualização de dados", "descricao": "Construir gráficos que comuniquem os resultados encontrados.", "habilidade": "Visualização de Dados", "horas_estimadas": 8 },
+        { "ordem": 4, "titulo": "Storytelling com dados", "descricao": "Organizar os achados da análise em uma narrativa clara.", "habilidade": "Visualização de Dados", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Fazer uma análise exploratória completa de uma base de dados pública, com gráficos e conclusões.",
+        "habilidades": ["Estatística Básica", "Pandas", "Visualização de Dados"]
+      }
+    },
+    {
+      "ordem": 4,
+      "nome": "Preparação para o mercado",
+      "objetivo": "Consolidar o portfólio de dados e as boas práticas do dia a dia.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Versionamento de notebooks", "descricao": "Organizar notebooks e scripts de análise em um repositório Git.", "habilidade": "Git", "horas_estimadas": 3 },
+        { "ordem": 2, "titulo": "Documentação de projetos de dados", "descricao": "Escrever um README claro explicando o problema, os dados e as conclusões.", "habilidade": "Portfólio Técnico", "horas_estimadas": 3 },
+        { "ordem": 3, "titulo": "Apresentação de resultados", "descricao": "Preparar uma apresentação curta dos resultados para um público não técnico.", "habilidade": "Visualização de Dados", "horas_estimadas": 4 },
+        { "ordem": 4, "titulo": "Revisão de portfólio", "descricao": "Revisar os projetos construídos e preparar a apresentação para recrutadores.", "habilidade": "Portfólio Técnico", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Publicar um estudo de caso de análise de dados completo em um repositório público, bem documentado.",
+        "habilidades": ["Portfólio Técnico", "Git"]
+      }
+    }
+  ]
+}
