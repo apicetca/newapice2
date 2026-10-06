@@ -32,6 +32,7 @@ router.post("/",    limiteRoadmapsAtivos, trilhaController.criar);
 
 router.get("/:id",                    trilhaController.carregarRoadmap, trilhaController.detalhe);
 router.post("/:id/etapas/:etapaId",   trilhaController.carregarRoadmap, trilhaController.atualizarEtapa);
+router.post("/:id/fases/:faseId/projeto", trilhaController.carregarRoadmap, trilhaController.enviarProjeto);
 router.post("/:id/regenerar",         trilhaController.carregarRoadmap, limiteRegeneracao, trilhaController.regenerar);
 router.post("/:id/arquivar",          trilhaController.carregarRoadmap, trilhaController.arquivar);
 

@@ -16,6 +16,7 @@ const fs   = require("fs");
 const path = require("path");
 const db   = require("../database/db");
 const { askGeminiJSON } = require("./geminiClient");
+const { verificarRepoPublico, verificarHabilidadesNoRepo } = require("./githubAnalyzer");
 
 const HABILIDADES_REFERENCIA_PATH = path.join(__dirname, "..", "data", "habilidades-referencia.json");
 const ROADMAPS_MODELO_DIR         = path.join(__dirname, "..", "data", "roadmaps-modelo");
@@ -534,11 +535,193 @@ async function regenerarRoadmap(roadmapId, novaHorasSemana) {
   }
 }
 
+// ──────────────────────────────────────────────────────────
+// Verificação do projeto prático de uma fase (docs/roadmap-spec.md,
+// "Progresso e verificação") — exclusiva do plano PRO. Free usa
+// fecharProjetoSemVerificar, mais abaixo.
+// ──────────────────────────────────────────────────────────
+
+// Aceita a URL completa (com ou sem protocolo/www, com ou sem .git/barra
+// final) e devolve "dono/repo", ou null se não for uma URL de repositório
+// do GitHub reconhecível.
+function extrairRepoFullNameDoUrl(url) {
+  const match = String(url ?? "").trim()
+    .match(/^(?:https?:\/\/)?(?:www\.)?github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/i);
+  return match ? `${match[1]}/${match[2]}` : null;
+}
+
+async function carregarFaseComDono(faseId) {
+  const [rows] = await db.query(
+    `SELECT rf.*, r.usuario_id
+     FROM roadmap_fases rf
+     JOIN roadmaps r ON r.id = rf.roadmap_id
+     WHERE rf.id = ?`,
+    [faseId]
+  );
+  return rows[0] ?? null;
+}
+
+// roadmap_fases não guarda a lista de habilidades do projeto separadamente
+// (a IA/modelo gera fase.projeto.habilidades, mas hoje só o enunciado é
+// persistido — ver docs/roadmap-diagnostico.md). Na falta dessa coluna,
+// usa as habilidades das próprias etapas da fase: é exatamente o que o
+// projeto prático deveria demonstrar, já que é construído a partir do que
+// foi estudado nela.
+async function habilidadesExigidasNaFase(faseId) {
+  const [rows] = await db.query(
+    "SELECT DISTINCT habilidade FROM roadmap_etapas WHERE fase_id = ?",
+    [faseId]
+  );
+  return rows.map(r => r.habilidade);
+}
+
+// Registra a verificação aprovada em perfil_tecnico_ia — a única tabela de
+// "perfil técnico" hoje (user_skills é por skill_id/confidence, não por
+// texto); como boas_praticas é uma lista de strings livres, a confirmação
+// entra como mais um item nela.
+async function registrarProjetoVerificadoNoPerfil(usuarioId, nomeFase, habilidadesConfirmadas) {
+  const [[perfilAtual]] = await db.query(
+    "SELECT boas_praticas FROM perfil_tecnico_ia WHERE user_id = ?",
+    [usuarioId]
+  );
+  const boasPraticas = perfilAtual ? JSON.parse(perfilAtual.boas_praticas || "[]") : [];
+  boasPraticas.push(
+    `Projeto da fase "${nomeFase}" verificado por análise de repositório — habilidades confirmadas: ${habilidadesConfirmadas.join(", ")}.`
+  );
+
+  await db.query(
+    `INSERT INTO perfil_tecnico_ia (user_id, boas_praticas, pontos_melhoria)
+     VALUES (?, ?, '[]')
+     ON DUPLICATE KEY UPDATE boas_praticas = ?`,
+    [usuarioId, JSON.stringify(boasPraticas), JSON.stringify(boasPraticas)]
+  );
+}
+
+/**
+ * Verifica o projeto prático de uma fase contra um repositório do GitHub —
+ * exclusivo do plano PRO (o gate de plano é responsabilidade do chamador,
+ * igual ao resto do app — ver middlewares/roadmapLimites.js). accessToken
+ * é o do próprio usuário (nunca persistido em banco — vem da sessão, como
+ * em todo outro serviço que chama a API do GitHub nesse projeto).
+ *
+ * Retorna sempre um objeto { status, mensagem, ... }, nunca lança por causa
+ * de link/repo inválido — só por erro de fato inesperado (fase não existe).
+ */
+async function verificarProjeto(faseId, repoUrl, accessToken) {
+  const fase = await carregarFaseComDono(faseId);
+  if (!fase) throw new Error(`Fase ${faseId} não encontrada.`);
+
+  const repoFullName = extrairRepoFullNameDoUrl(repoUrl);
+  if (!repoFullName) {
+    return {
+      status: "erro",
+      mensagem: "Link inválido. Use a URL completa do repositório no GitHub (ex.: https://github.com/usuario/repositorio).",
+    };
+  }
+
+  const { existe, privado } = await verificarRepoPublico(accessToken, repoFullName);
+  if (!existe) {
+    await db.query("UPDATE roadmap_fases SET projeto_repo_url = ? WHERE id = ?", [repoUrl, faseId]);
+    return {
+      status: "erro",
+      mensagem: "Não encontramos esse repositório. Confira o link (e, se for privado, torne-o público antes de enviar).",
+    };
+  }
+  if (privado) {
+    await db.query("UPDATE roadmap_fases SET projeto_repo_url = ? WHERE id = ?", [repoUrl, faseId]);
+    return {
+      status: "erro",
+      mensagem: "Esse repositório está privado. Torne-o público no GitHub e envie o link novamente.",
+    };
+  }
+
+  const habilidadesAlvo = await habilidadesExigidasNaFase(faseId);
+  const [skillRows] = habilidadesAlvo.length
+    ? await db.query(
+        "SELECT name, github_signals FROM skills WHERE name IN (?) AND github_signals IS NOT NULL",
+        [habilidadesAlvo]
+      )
+    : [[]];
+  const habilidadesComSinais = skillRows.map(s => ({
+    habilidade: s.name,
+    sinais: s.github_signals.split(",").map(x => x.trim()),
+  }));
+
+  let resultadoAnalise;
+  try {
+    resultadoAnalise = habilidadesComSinais.length
+      ? await verificarHabilidadesNoRepo(accessToken, repoFullName, habilidadesComSinais)
+      : [];
+  } catch (err) {
+    console.error("[verificarProjeto] falha ao analisar o repositório:", err.message);
+    return {
+      status: "erro",
+      mensagem: "Não foi possível analisar o repositório agora. Tente novamente em alguns instantes.",
+    };
+  }
+
+  const faltando = resultadoAnalise.filter(r => !r.encontrada).map(r => r.habilidade);
+
+  // Sem nenhuma habilidade verificável tecnicamente (ex. fase só com
+  // habilidades "soft", sem github_signals cadastrado) — nada ficou de
+  // fora do que dava pra checar, então aprova.
+  if (faltando.length === 0) {
+    await db.query(
+      `UPDATE roadmap_fases
+       SET projeto_repo_url = ?, projeto_status = 'verificado', verificado_em = NOW()
+       WHERE id = ?`,
+      [repoUrl, faseId]
+    );
+    if (habilidadesComSinais.length) {
+      await registrarProjetoVerificadoNoPerfil(fase.usuario_id, fase.nome, habilidadesComSinais.map(h => h.habilidade));
+    }
+    return {
+      status: "aprovado",
+      mensagem: "Projeto aprovado! As habilidades da fase foram confirmadas no seu repositório.",
+    };
+  }
+
+  // Não aprovado — a fase continua aberta (nunca "reprovada"), com a lista
+  // do que ainda falta, em tom de orientação.
+  await db.query(
+    "UPDATE roadmap_fases SET projeto_repo_url = ?, projeto_status = 'em_revisao' WHERE id = ?",
+    [repoUrl, faseId]
+  );
+  return {
+    status: "faltando",
+    mensagem: "Quase lá! Algumas habilidades ainda não apareceram no repositório — continue trabalhando nelas e envie de novo quando quiser.",
+    faltando,
+  };
+}
+
+/**
+ * Plano Free: não verifica nada (sem acesso à análise de repositório) —
+ * só registra o link e fecha a fase por autodeclaração, com o selo "não
+ * verificada" (docs/roadmap-spec.md, "Progresso e verificação").
+ */
+async function fecharProjetoSemVerificar(faseId, repoUrl) {
+  const fase = await carregarFaseComDono(faseId);
+  if (!fase) throw new Error(`Fase ${faseId} não encontrada.`);
+
+  await db.query(
+    "UPDATE roadmap_fases SET projeto_repo_url = ?, projeto_status = 'nao_verificado' WHERE id = ?",
+    [repoUrl, faseId]
+  );
+  return {
+    status: "nao_verificado",
+    mensagem: "Projeto registrado — a fase foi fechada por autodeclaração (selo \"não verificada\"). "
+             + "Faça upgrade para PRO para ter o projeto verificado automaticamente.",
+  };
+}
+
 module.exports = {
   montarGap,
   gerarRoadmap,
   regenerarRoadmap,
   inferirAreaDaVaga,
+  verificarProjeto,
+  fecharProjetoSemVerificar,
+  extrairRepoFullNameDoUrl,
   // Exportados à parte para facilitar teste unitário isolado (sem precisar
   // passar pela transação inteira pra validar só a estrutura do JSON).
   validarEstruturaRoadmap,

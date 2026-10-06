@@ -13,12 +13,15 @@ jest.mock("../database/db", () => ({
   ready: Promise.resolve(),
 }));
 
-// gerarRoadmap/regenerarRoadmap não são o foco aqui (já cobertos em
-// tests/roadmapService.test.js) — só precisamos que existam pra não
-// quebrar o require do controller.
+// gerarRoadmap/regenerarRoadmap/verificarProjeto/fecharProjetoSemVerificar
+// não são o foco aqui (verificarProjeto/fecharProjetoSemVerificar já têm
+// tests/verificarProjeto.test.js próprio) — só precisamos que existam pra
+// não quebrar o require do controller.
 jest.mock("../services/roadmapService", () => ({
   gerarRoadmap: jest.fn(),
   regenerarRoadmap: jest.fn(),
+  verificarProjeto: jest.fn(),
+  fecharProjetoSemVerificar: jest.fn(),
 }));
 
 const db = require("../database/db");
@@ -160,5 +163,37 @@ describe("POST /trilha — envio real do <form> (application/x-www-form-urlencod
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe("/trilha/42");
     expect(gerarRoadmap).toHaveBeenCalledWith(DEV_USER.id, { tipo: "area", area: "front-end" }, 10);
+  });
+});
+
+describe("POST /trilha/:id/fases/:faseId/projeto — gate de plano", () => {
+  const { verificarProjeto, fecharProjetoSemVerificar } = require("../services/roadmapService");
+
+  function mockDbParaEnvioDeProjeto(roadmap) {
+    db.query.mockImplementation(async (sql) => {
+      const s = sql.toLowerCase();
+      if (s.includes("from roadmaps where id")) return [[roadmap]];
+      if (s.includes("from roadmap_fases where id")) return [[{ id: 7 }]];
+      if (s.includes("from jobs where id")) return [[]];
+      if (s.includes("from roadmap_fases where roadmap_id")) return [[]];
+      if (s.includes("from roadmap_etapas re")) return [[]];
+      if (s.includes("from user_subscriptions")) return [[]]; // sem assinatura ativa → dev_free
+      throw new Error(`rota não mapeada: ${sql}`);
+    });
+  }
+
+  test("usuário Free → fecha por autodeclaração, nunca chama verificarProjeto", async () => {
+    mockDbParaEnvioDeProjeto({ id: 1, usuario_id: 1 });
+    fecharProjetoSemVerificar.mockResolvedValue({ status: "nao_verificado", mensagem: "ok" });
+
+    const app = montarApp(DEV_USER);
+    const res = await request(app)
+      .post("/trilha/1/fases/7/projeto")
+      .type("form")
+      .send({ repoUrl: "https://github.com/dev/projeto" });
+
+    expect(res.status).toBe(200);
+    expect(fecharProjetoSemVerificar).toHaveBeenCalledWith(7, "https://github.com/dev/projeto");
+    expect(verificarProjeto).not.toHaveBeenCalled();
   });
 });

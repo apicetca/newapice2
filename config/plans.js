@@ -20,6 +20,7 @@ const PLANS = {
       destaque_perfil:       false,
       mentor_carreira:       false,
       simulador_entrevista:  false,
+      verificacao_projetos:  false, // análise de repositório do projeto da fase — Free fecha por autodeclaração
     },
     // Limites do sistema de Roadmap (fases/etapas via IA — docs/roadmap-spec.md,
     // seção "Planos Free e PRO"). Mesmo padrão de max_active_jobs abaixo:
@@ -39,6 +40,7 @@ const PLANS = {
       destaque_perfil:       true,
       mentor_carreira:       true, // chatbot de mentoria de carreira (IA)
       simulador_entrevista:  true, // simulador de entrevista técnica (IA)
+      verificacao_projetos:  true,
     },
     roadmap: {
       max_ativos:           5,

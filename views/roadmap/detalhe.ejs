@@ -127,6 +127,27 @@
               <span class="badge <%= fase.projeto_status === 'verificado' ? 'badge-green' : fase.projeto_status === 'em_revisao' ? 'badge-yellow' : 'badge-muted' %>">
                 <%= fase.projeto_status === 'verificado' ? 'Verificado' : fase.projeto_status === 'nao_verificado' ? 'Não verificado' : fase.projeto_status === 'em_revisao' ? 'Em revisão' : 'Pendente' %>
               </span>
+
+              <% if (resultadoProjeto && resultadoProjeto.faseId === fase.id) { %>
+                <div class="rm-alert <%= resultadoProjeto.status === 'erro' ? 'rm-alert--erro' : resultadoProjeto.status === 'aprovado' ? 'rm-alert--info' : 'rm-alert--aviso' %>" role="<%= resultadoProjeto.status === 'erro' ? 'alert' : 'status' %>">
+                  <p><%= resultadoProjeto.mensagem %></p>
+                  <% if (resultadoProjeto.faltando && resultadoProjeto.faltando.length) { %>
+                    <p>Ainda não encontramos no repositório: <%= resultadoProjeto.faltando.join(', ') %>.</p>
+                  <% } %>
+                </div>
+              <% } %>
+
+              <% if (fase.projeto_status !== 'verificado') { %>
+                <form method="POST" action="/trilha/<%= roadmap.id %>/fases/<%= fase.id %>/projeto" class="rm-projeto-form">
+                  <label class="rm-label" for="repoUrl-<%= fase.id %>">Link do repositório no GitHub</label>
+                  <input
+                    type="url" name="repoUrl" id="repoUrl-<%= fase.id %>" class="rm-select"
+                    placeholder="https://github.com/usuario/repositorio"
+                    value="<%= fase.projeto_repo_url ?? '' %>"
+                  />
+                  <button type="submit" class="btn-ghost">Enviar projeto</button>
+                </form>
+              <% } %>
             </div>
           </li>
         <% }); %>

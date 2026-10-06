@@ -6,7 +6,8 @@
 // docs/roadmap-diagnostico.md).
 // ============================================
 const db = require("../database/db");
-const { gerarRoadmap, regenerarRoadmap } = require("../services/roadmapService");
+const { gerarRoadmap, regenerarRoadmap, verificarProjeto, fecharProjetoSemVerificar } = require("../services/roadmapService");
+const { hasFeature } = require("../services/subscriptionService");
 
 const STATUS_ETAPA_VALIDOS = ["pendente", "em_andamento", "concluida"];
 
@@ -154,64 +155,113 @@ async function criar(req, res) {
   }
 }
 
+/**
+ * Monta todos os dados que a view roadmap/detalhe precisa. Extraído de
+ * detalhe() pra ser reaproveitado por enviarProjeto() — depois de
+ * processar o envio do projeto, a tela é re-renderizada com o resultado
+ * (aprovado/faltando/erro), sem precisar de um mecanismo de flash message.
+ */
+async function montarDadosDetalhe(roadmap, resultadoProjeto) {
+  let job = null;
+  if (roadmap.tipo_objetivo === "vaga" && roadmap.vaga_id) {
+    const [rows] = await db.query("SELECT title, active FROM jobs WHERE id = ?", [roadmap.vaga_id]);
+    job = rows[0] ?? null;
+  }
+
+  const [fases] = await db.query(
+    "SELECT * FROM roadmap_fases WHERE roadmap_id = ? ORDER BY ordem",
+    [roadmap.id]
+  );
+  const [etapas] = await db.query(
+    `SELECT re.*, rec.titulo AS recurso_titulo, rec.url AS recurso_url
+     FROM roadmap_etapas re
+     JOIN roadmap_fases rf   ON rf.id = re.fase_id
+     LEFT JOIN recursos rec ON rec.id = re.recurso_id
+     WHERE rf.roadmap_id = ?
+     ORDER BY rf.ordem, re.ordem`,
+    [roadmap.id]
+  );
+
+  const etapasPorFase = {};
+  for (const e of etapas) (etapasPorFase[e.fase_id] ??= []).push(e);
+
+  let totalEtapas = 0, etapasConcluidas = 0, horasRestantes = 0;
+  const fasesComEtapas = fases.map(f => {
+    const etapasDaFase = etapasPorFase[f.id] ?? [];
+    const concluidasFase = etapasDaFase.filter(e => e.status === "concluida").length;
+    totalEtapas += etapasDaFase.length;
+    etapasConcluidas += concluidasFase;
+    horasRestantes += etapasDaFase
+      .filter(e => e.status !== "concluida")
+      .reduce((soma, e) => soma + Number(e.horas_estimadas), 0);
+
+    return {
+      ...f,
+      etapas: etapasDaFase,
+      pct: etapasDaFase.length ? Math.round((concluidasFase / etapasDaFase.length) * 100) : 0,
+    };
+  });
+
+  const pctTotal = totalEtapas ? Math.round((etapasConcluidas / totalEtapas) * 100) : 0;
+  const semanasRestantes = roadmap.horas_semana > 0 ? Math.ceil(horasRestantes / roadmap.horas_semana) : null;
+
+  return {
+    currentPage: "trilha",
+    roadmap,
+    job,
+    label: objetivoLabel({ ...roadmap, vaga_title: job?.title }),
+    fases: fasesComEtapas,
+    pctTotal,
+    semanasRestantes,
+    resultadoProjeto: resultadoProjeto ?? null,
+  };
+}
+
 /** GET /trilha/:id — detalhe. Espera req.roadmap (carregarRoadmap). */
 async function detalhe(req, res) {
-  const roadmap = req.roadmap;
   try {
-    let job = null;
-    if (roadmap.tipo_objetivo === "vaga" && roadmap.vaga_id) {
-      const [rows] = await db.query("SELECT title, active FROM jobs WHERE id = ?", [roadmap.vaga_id]);
-      job = rows[0] ?? null;
-    }
-
-    const [fases] = await db.query(
-      "SELECT * FROM roadmap_fases WHERE roadmap_id = ? ORDER BY ordem",
-      [roadmap.id]
-    );
-    const [etapas] = await db.query(
-      `SELECT re.*, rec.titulo AS recurso_titulo, rec.url AS recurso_url
-       FROM roadmap_etapas re
-       JOIN roadmap_fases rf   ON rf.id = re.fase_id
-       LEFT JOIN recursos rec ON rec.id = re.recurso_id
-       WHERE rf.roadmap_id = ?
-       ORDER BY rf.ordem, re.ordem`,
-      [roadmap.id]
-    );
-
-    const etapasPorFase = {};
-    for (const e of etapas) (etapasPorFase[e.fase_id] ??= []).push(e);
-
-    let totalEtapas = 0, etapasConcluidas = 0, horasRestantes = 0;
-    const fasesComEtapas = fases.map(f => {
-      const etapasDaFase = etapasPorFase[f.id] ?? [];
-      const concluidasFase = etapasDaFase.filter(e => e.status === "concluida").length;
-      totalEtapas += etapasDaFase.length;
-      etapasConcluidas += concluidasFase;
-      horasRestantes += etapasDaFase
-        .filter(e => e.status !== "concluida")
-        .reduce((soma, e) => soma + Number(e.horas_estimadas), 0);
-
-      return {
-        ...f,
-        etapas: etapasDaFase,
-        pct: etapasDaFase.length ? Math.round((concluidasFase / etapasDaFase.length) * 100) : 0,
-      };
-    });
-
-    const pctTotal = totalEtapas ? Math.round((etapasConcluidas / totalEtapas) * 100) : 0;
-    const semanasRestantes = roadmap.horas_semana > 0 ? Math.ceil(horasRestantes / roadmap.horas_semana) : null;
-
-    res.render("roadmap/detalhe", {
-      currentPage: "trilha",
-      roadmap,
-      job,
-      label: objetivoLabel({ ...roadmap, vaga_title: job?.title }),
-      fases: fasesComEtapas,
-      pctTotal,
-      semanasRestantes,
-    });
+    res.render("roadmap/detalhe", await montarDadosDetalhe(req.roadmap, null));
   } catch (err) {
     console.error("[GET /trilha/:id]", err.message);
+    res.status(500).render("500");
+  }
+}
+
+/**
+ * POST /trilha/:id/fases/:faseId/projeto — envia o projeto prático de uma
+ * fase. Free fecha por autodeclaração (fecharProjetoSemVerificar); PRO
+ * passa pela verificação de repositório de verdade (verificarProjeto).
+ */
+async function enviarProjeto(req, res) {
+  const roadmap = req.roadmap;
+  const faseId  = Number(req.params.faseId);
+  const { repoUrl } = req.body ?? {};
+
+  if (!Number.isInteger(faseId) || faseId <= 0) {
+    return res.status(404).render("404");
+  }
+
+  try {
+    const [[fase]] = await db.query(
+      "SELECT id FROM roadmap_fases WHERE id = ? AND roadmap_id = ?",
+      [faseId, roadmap.id]
+    );
+    if (!fase) return res.status(404).render("404");
+
+    let resultadoProjeto;
+    if (!repoUrl || typeof repoUrl !== "string" || !repoUrl.trim()) {
+      resultadoProjeto = { faseId, status: "erro", mensagem: "Informe o link do repositório." };
+    } else {
+      const podeVerificar = await hasFeature(req.session.user.id, "verificacao_projetos");
+      const resultado = podeVerificar
+        ? await verificarProjeto(faseId, repoUrl.trim(), req.session.user.accessToken)
+        : await fecharProjetoSemVerificar(faseId, repoUrl.trim());
+      resultadoProjeto = { faseId, ...resultado };
+    }
+
+    res.render("roadmap/detalhe", await montarDadosDetalhe(roadmap, resultadoProjeto));
+  } catch (err) {
+    console.error("[POST /trilha/:id/fases/:faseId/projeto]", err.message);
     res.status(500).render("500");
   }
 }
@@ -280,6 +330,7 @@ module.exports = {
   criar,
   detalhe,
   atualizarEtapa,
+  enviarProjeto,
   regenerar,
   arquivar,
 };
