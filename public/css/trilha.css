@@ -1,0 +1,224 @@
+/* =============================================
+   trilha.css — Sistema de Roadmap novo (/trilha)
+   Identidade Visual: Ápice 2026
+
+   NOME DO ARQUIVO: a tarefa original pedia "public/css/roadmap.css",
+   mas esse arquivo já existe e pertence ao roadmap ANTIGO (gap de skills
+   por vaga, /roadmap — ver docs/roadmap-diagnostico.md). Sobrescrevê-lo
+   quebraria a página antiga. Usei "trilha.css" (mesmo prefixo de rota,
+   /trilha) pra não colidir — nenhum arquivo existente foi tocado.
+
+   Carregado SÓ nas 3 páginas de views/roadmap/*.ejs. Classes específicas
+   prefixadas "rm-" — tudo que não tem o prefixo (badge, btn-primary-dev,
+   btn-ghost, section-title, page-content) já existe em dev.css/header.css
+   e é só reaproveitado aqui.
+============================================= */
+
+.rm-page {
+  position: relative; z-index: 1;
+  max-width: 860px; margin: 0 auto;
+}
+.rm-page--form { max-width: 620px; }
+
+/* ── Cabeçalho da página ── */
+.rm-page-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.rm-breadcrumb {
+  font-size: .8rem; color: var(--muted); margin-bottom: 6px; width: 100%;
+}
+.rm-breadcrumb a:hover { color: var(--accent); }
+
+/* ── Alertas (avisos de vaga encerrada / gerado por modelo / erro) ── */
+.rm-alert {
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: .85rem;
+  font-family: var(--font-display);
+  border: 1px solid var(--border-lite);
+}
+.rm-alert--info  { background: var(--blue-dim);   border-color: rgba(96,165,250,.25); color: var(--text); }
+.rm-alert--aviso { background: var(--yellow-dim); border-color: rgba(251,191,36,.25); color: var(--text); }
+.rm-alert--erro  { background: var(--red-dim);    border-color: rgba(248,113,113,.3); color: var(--text); }
+
+/* ── Lista de cards (index) ── */
+.rm-card-list { display: flex; flex-direction: column; gap: 12px; }
+
+.rm-card {
+  background: rgba(15,15,23,.88);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.rm-card:hover { border-color: var(--border-lite); box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+.rm-card--arquivado { opacity: .6; }
+
+.rm-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.rm-card-info { min-width: 0; }
+.rm-card-title {
+  font-family: var(--font-display);
+  font-size: .98rem; font-weight: 700; line-height: 1.3;
+}
+.rm-card-meta { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+.rm-card-badges { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+
+.rm-card-cta {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  padding: 7px 14px;
+  background: var(--bg-3); border: 1px solid var(--border-lite);
+  border-radius: var(--radius-sm);
+  font-size: .78rem; font-weight: 600;
+  color: var(--muted); transition: all .15s;
+}
+.rm-card-cta:hover { color: var(--accent); border-color: rgba(124,58,237,.30); background: var(--accent-dim); }
+
+/* ── Barra de progresso (reaproveitada no card, no total e por fase) ── */
+.rm-progress { display: flex; flex-direction: column; gap: 5px; }
+.rm-progress-track {
+  height: 7px; background: var(--bg-3);
+  border-radius: 4px; overflow: hidden;
+}
+.rm-progress-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--teal));
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.rm-progress-label { font-size: .75rem; color: var(--muted); }
+.rm-progress--total { margin-bottom: 20px; }
+.rm-progress--fase  { margin: 8px 0 14px; }
+
+/* ── Estado vazio ── */
+.rm-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 56px 24px; text-align: center;
+  border: 1px dashed var(--border-lite); border-radius: var(--radius-xl);
+  color: var(--muted);
+}
+.rm-empty-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--text); }
+.rm-empty-sub   { font-size: .85rem; font-family: var(--font-display); margin-bottom: 10px; }
+
+/* ── Ações (regenerar/arquivar) ── */
+.rm-actions { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+
+/* ── Formulário (novo.ejs) ── */
+.rm-form { display: flex; flex-direction: column; gap: 22px; }
+.rm-fieldset { border: none; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.rm-legend {
+  font-size: .8rem; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.rm-radio-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.rm-radio {
+  display: flex; align-items: center; gap: 7px;
+  font-size: .88rem; font-family: var(--font-display); color: var(--text); cursor: pointer;
+}
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-field[hidden] { display: none; }
+.rm-label { font-size: .82rem; color: var(--muted); }
+.rm-select {
+  background: var(--bg-3); color: var(--text);
+  border: 1px solid var(--border-lite); border-radius: var(--radius-sm);
+  padding: 9px 12px; font-family: var(--font-body); font-size: .88rem;
+}
+.rm-submit { align-self: flex-start; }
+
+/* ── Overlay de carregamento (enquanto a IA gera) ── */
+.rm-loading-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.72);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; color: var(--text); font-size: .9rem; font-family: var(--font-display); text-align: center; padding: 24px;
+}
+.rm-loading-overlay[hidden] { display: none; }
+.rm-spinner {
+  width: 34px; height: 34px;
+  border: 3px solid var(--border-lite); border-top-color: var(--accent);
+  border-radius: 50%; animation: rmSpin .7s linear infinite;
+}
+@keyframes rmSpin { to { transform: rotate(360deg); } }
+
+/* ── Fases/etapas (detalhe.ejs) ── */
+.rm-fase-list { display: flex; flex-direction: column; gap: 22px; }
+.rm-fase {
+  background: rgba(15,15,23,.88);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+.rm-fase-head { display: flex; align-items: flex-start; gap: 12px; }
+.rm-fase-numero {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent-dim); color: var(--accent-text);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: .85rem;
+}
+.rm-fase-info { flex: 1; min-width: 0; }
+.rm-fase-nome { font-family: var(--font-display); font-size: 1rem; font-weight: 700; }
+.rm-fase-objetivo { font-size: .82rem; color: var(--muted); margin-top: 2px; }
+.rm-fase-pct { font-family: var(--font-display); font-weight: 800; color: var(--accent); flex-shrink: 0; }
+
+.rm-etapa-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.rm-etapa {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px; border-radius: var(--radius-md);
+  border: 1px solid var(--border-lite);
+  transition: border-color .15s, background .15s;
+}
+.rm-etapa--concluida { background: var(--accent-dim); border-color: var(--accent-border); }
+.rm-etapa--em_andamento { border-color: rgba(251,191,36,.3); }
+
+.rm-step-toggle {
+  flex-shrink: 0; background: none; border: none; padding: 4px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.rm-step-box {
+  display: block; width: 20px; height: 20px;
+  border: 2px solid var(--border-lite); border-radius: 5px;
+  position: relative; transition: all .15s;
+}
+.rm-etapa--pendente      .rm-step-box { background: transparent; }
+.rm-etapa--em_andamento  .rm-step-box { background: var(--yellow-dim); border-color: var(--yellow); }
+.rm-etapa--em_andamento  .rm-step-box::after {
+  content: ""; position: absolute; inset: 5px; background: var(--yellow); border-radius: 2px;
+}
+.rm-etapa--concluida .rm-step-box { background: var(--accent); border-color: var(--accent); }
+.rm-etapa--concluida .rm-step-box::after {
+  content: ""; position: absolute; left: 5px; top: 1px; width: 5px; height: 10px;
+  border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+
+.rm-etapa-conteudo { flex: 1; min-width: 0; }
+.rm-etapa-titulo { font-weight: 600; font-size: .9rem; font-family: var(--font-display); }
+.rm-etapa--concluida .rm-etapa-titulo { text-decoration: line-through; color: var(--muted); }
+.rm-etapa-descricao { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+.rm-etapa-meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+.rm-etapa-horas { font-size: .76rem; color: var(--muted); }
+.rm-etapa-status-label { font-size: .76rem; color: var(--muted); }
+.rm-etapa-recurso { font-size: .8rem; margin-top: 6px; }
+.rm-etapa-recurso a { color: var(--blue); }
+.rm-etapa-recurso a:hover { color: var(--accent); }
+
+.rm-projeto {
+  border-top: 1px solid var(--border-lite); padding-top: 14px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.rm-projeto-label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.rm-projeto-enunciado { font-size: .85rem; font-family: var(--font-display); }
+.rm-projeto-form {
+  display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-top: 6px;
+}
+.rm-projeto-form .rm-label { width: 100%; }
+.rm-projeto-form input { flex: 1; min-width: 180px; }
+
+/* ── Responsivo ── */
+@media (max-width: 700px) {
+  .rm-page-head { flex-direction: column; align-items: stretch; }
+  .rm-card-top  { flex-wrap: wrap; }
+  .rm-fase-head { flex-wrap: wrap; }
+  .rm-actions   { flex-direction: column; }
+  .rm-actions form, .rm-actions .btn-ghost { width: 100%; }
+}

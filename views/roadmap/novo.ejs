@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <meta name="description" content="Crie um roadmap de carreira personalizado — Ápice." />
+  <title>Ápice — Novo Roadmap</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/dev.css" />
+  <link rel="stylesheet" href="/css/trilha.css" />
+</head>
+<body>
+
+  <%- include('../partials/header-dev') %>
+
+  <main class="page-content" id="main-content">
+    <div class="rm-page rm-page--form">
+
+      <header class="rm-page-head">
+        <p class="rm-breadcrumb"><a href="/trilha">&larr; Meus roadmaps</a></p>
+        <h1 class="section-title">Novo roadmap</h1>
+      </header>
+
+      <% if (!temPerfilTecnico) { %>
+        <div class="rm-alert rm-alert--info" role="status">
+          <p>
+            Você ainda não tem perfil técnico analisado. A trilha ainda vai ser gerada, mas vai
+            considerar que você não possui nenhuma habilidade ainda (gap completo) até você
+            <a href="/repositorios">importar e analisar seus repositórios</a> — isso é o autodiagnóstico:
+            sem essa análise, o sistema simplesmente assume o ponto de partida mais básico.
+          </p>
+        </div>
+      <% } %>
+
+      <% if (erro) { %>
+        <div class="rm-alert rm-alert--erro" role="alert"><p><%= erro %></p></div>
+      <% } %>
+
+      <form method="POST" action="/trilha" class="rm-form" id="rmFormNovo">
+
+        <fieldset class="rm-fieldset">
+          <legend class="rm-legend">Objetivo</legend>
+
+          <div class="rm-radio-row">
+            <label class="rm-radio">
+              <input type="radio" name="tipo" value="area" <%= prefill.tipo === 'area' ? 'checked' : '' %> data-rm-tipo-toggle />
+              Uma área
+            </label>
+            <label class="rm-radio">
+              <input type="radio" name="tipo" value="vaga" <%= prefill.tipo === 'vaga' ? 'checked' : '' %> data-rm-tipo-toggle />
+              Uma vaga específica
+            </label>
+          </div>
+
+          <div class="rm-field" data-rm-tipo-painel="area" <%= prefill.tipo !== 'area' ? 'hidden' : '' %>>
+            <label class="rm-label" for="rmArea">Área</label>
+            <select name="area" id="rmArea" class="rm-select">
+              <% Object.keys(areas).forEach(function(slug) { %>
+                <option value="<%= slug %>" <%= prefill.area === slug ? 'selected' : '' %>><%= areas[slug] %></option>
+              <% }); %>
+            </select>
+          </div>
+
+          <div class="rm-field" data-rm-tipo-painel="vaga" <%= prefill.tipo !== 'vaga' ? 'hidden' : '' %>>
+            <label class="rm-label" for="rmVagaId">Vaga</label>
+            <select name="vagaId" id="rmVagaId" class="rm-select">
+              <% if (!vagas.length) { %>
+                <option value="">Nenhuma vaga ativa no momento</option>
+              <% } %>
+              <% vagas.forEach(function(v) { %>
+                <option value="<%= v.id %>" <%= prefill.vagaId === v.id ? 'selected' : '' %>><%= v.title %> — <%= v.company %></option>
+              <% }); %>
+            </select>
+          </div>
+        </fieldset>
+
+        <fieldset class="rm-fieldset">
+          <legend class="rm-legend">Disponibilidade</legend>
+          <div class="rm-radio-row">
+            <label class="rm-radio"><input type="radio" name="horasSemana" value="5" /> 5h/semana</label>
+            <label class="rm-radio"><input type="radio" name="horasSemana" value="10" checked /> 10h/semana</label>
+            <label class="rm-radio"><input type="radio" name="horasSemana" value="20" /> 20h+/semana</label>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn-primary-dev rm-submit">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Gerar roadmap
+        </button>
+      </form>
+
+      <!-- Estado de carregamento enquanto a IA gera a trilha — mostrado pelo JS
+           no submit do formulário acima; a navegação continua normal (o form
+           não usa fetch), isso é só um overlay visual durante a espera. -->
+      <div class="rm-loading-overlay" id="rmLoadingOverlay" hidden role="status" aria-live="polite">
+        <div class="rm-spinner" aria-hidden="true"></div>
+        <p>Gerando seu roadmap... isso pode levar alguns segundos.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/js/roadmap.js"></script>
+</body>
+</html>

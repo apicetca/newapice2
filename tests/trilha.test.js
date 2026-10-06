@@ -5,6 +5,7 @@
 // router sob teste, igual ao próprio app faria a partir de /trilha.
 const request = require("supertest");
 const express = require("express");
+const path    = require("path");
 
 jest.mock("../database/db", () => ({
   query: jest.fn(),
@@ -25,6 +26,10 @@ const trilhaRoutes = require("../routes/trilha");
 
 function montarApp(sessionUser) {
   const app = express();
+  // mesmo view engine/views do server.js real — os controllers usam
+  // res.render("404")/res.render("500") e as views de views/roadmap/*.
+  app.set("views", path.join(__dirname, "..", "views"));
+  app.set("view engine", "ejs");
   app.use(express.json());
   // Sessão fake — sem express-session/MySQLStore de verdade, só o shape
   // que requireDev/os controllers leem (req.session.user).

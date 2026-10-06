@@ -432,8 +432,8 @@ function renderCompanySideCol(job) {
 function renderSideCol(job, isLoggedIn, userType) {
   if (VIEWER === "empresa") return renderCompanySideCol(job);
   const col  = document.getElementById("vaga-side-col");
-  const ctaHref  = isLoggedIn ? `/roadmap?job=${job.id}` : `/login?next=/vagas/${job.id}`;
-  const ctaLabel = isLoggedIn ? "Ver meu roadmap" : "Ver roadmap";
+  const ctaHref  = isLoggedIn ? `/trilha/novo?tipo=vaga&vagaId=${job.id}` : `/login?next=/vagas/${job.id}`;
+  const ctaLabel = "Gerar roadmap para esta vaga";
 
   const metaItems = [];
   if (job.salary_min || job.salary_max) {
