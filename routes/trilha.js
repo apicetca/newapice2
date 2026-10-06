@@ -17,6 +17,13 @@ const { requireDev } = require("../middlewares/auth");
 const { limiteRoadmapsAtivos, limiteRegeneracao } = require("../middlewares/roadmapLimites");
 const trilhaController = require("../controllers/trilhaController");
 
+// Sem isto, req.body fica vazio no <form method="POST"> de novo.ejs (o
+// navegador manda application/x-www-form-urlencoded, não JSON) — sempre
+// caía no "Escolha um objetivo" porque tipo/area/horasSemana chegavam
+// undefined. Escopado a este router (não em server.js) porque só as
+// rotas de /trilha recebem POST de formulário HTML puro no projeto.
+router.use(express.urlencoded({ extended: false }));
+
 router.use(requireDev);
 
 router.get("/",     trilhaController.listar);

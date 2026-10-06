@@ -31,6 +31,8 @@ function montarApp(sessionUser) {
   app.set("views", path.join(__dirname, "..", "views"));
   app.set("view engine", "ejs");
   app.use(express.json());
+  // express.urlencoded não precisa ser registrado aqui — mora dentro do
+  // próprio trilhaRoutes agora (routes/trilha.js), igual em produção.
   // Sessão fake — sem express-session/MySQLStore de verdade, só o shape
   // que requireDev/os controllers leem (req.session.user).
   app.use((req, res, next) => {
@@ -134,5 +136,29 @@ describe("POST /trilha/:id/regenerar — regra 'fallback não conta no limite'",
     expect(res.status).toBe(402);
     expect(res.text).toMatch(/próxima regeneração/i);
     expect(regenerarRoadmap).not.toHaveBeenCalled();
+  });
+});
+
+describe("POST /trilha — envio real do <form> (application/x-www-form-urlencoded)", () => {
+  const { gerarRoadmap } = require("../services/roadmapService");
+
+  test("área válida → redireciona para /trilha/:id (bug: req.body vinha vazio sem express.urlencoded)", async () => {
+    db.query.mockImplementation(async (sql) => {
+      const s = sql.toLowerCase();
+      if (s.includes("from user_subscriptions")) return [[]]; // dev_free
+      if (s.includes("count(*)") && s.includes("from roadmaps")) return [[{ total: 0 }]];
+      throw new Error(`rota não mapeada: ${sql}`);
+    });
+    gerarRoadmap.mockResolvedValue({ roadmapId: 42 });
+
+    const app = montarApp(DEV_USER);
+    const res = await request(app)
+      .post("/trilha")
+      .type("form") // supertest: Content-Type application/x-www-form-urlencoded, igual ao <form> real
+      .send({ tipo: "area", area: "front-end", horasSemana: "10" });
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe("/trilha/42");
+    expect(gerarRoadmap).toHaveBeenCalledWith(DEV_USER.id, { tipo: "area", area: "front-end" }, 10);
   });
 });
