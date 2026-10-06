@@ -1,0 +1,81 @@
+{
+  "area": "full-stack",
+  "origem": "modelo",
+  "fases": [
+    {
+      "ordem": 1,
+      "nome": "Fundamentos da Web",
+      "objetivo": "Estruturar e estilizar páginas web estáticas e aprender a versionar código.",
+      "etapas": [
+        { "ordem": 1, "titulo": "HTML semântico", "descricao": "Estruturar páginas usando tags semânticas e boas práticas de marcação.", "habilidade": "HTML", "horas_estimadas": 5 },
+        { "ordem": 2, "titulo": "CSS e responsividade", "descricao": "Estilizar e adaptar o layout para diferentes tamanhos de tela.", "habilidade": "CSS", "horas_estimadas": 6 },
+        { "ordem": 3, "titulo": "Git e GitHub", "descricao": "Versionar o código e publicar o primeiro repositório.", "habilidade": "Git", "horas_estimadas": 4 },
+        { "ordem": 4, "titulo": "Lógica de programação", "descricao": "Variáveis, condicionais, laços e funções na prática.", "habilidade": "Lógica de Programação", "horas_estimadas": 6 }
+      ],
+      "projeto": {
+        "enunciado": "Construir uma página estática de apresentação do projeto final, responsiva e versionada no Git.",
+        "habilidades": ["HTML", "CSS", "Git"]
+      }
+    },
+    {
+      "ordem": 2,
+      "nome": "JavaScript dos dois lados",
+      "objetivo": "Usar JavaScript tanto no navegador quanto no servidor com Node.js.",
+      "etapas": [
+        { "ordem": 1, "titulo": "JavaScript no navegador", "descricao": "Manipulação do DOM, eventos e formulários.", "habilidade": "JavaScript", "horas_estimadas": 8 },
+        { "ordem": 2, "titulo": "Introdução ao Node.js", "descricao": "Rodar JavaScript fora do navegador e organizar um projeto com npm.", "habilidade": "Node.js", "horas_estimadas": 6 },
+        { "ordem": 3, "titulo": "Fundamentos de APIs REST", "descricao": "Métodos HTTP, rotas e códigos de status.", "habilidade": "APIs REST", "horas_estimadas": 6 },
+        { "ordem": 4, "titulo": "Consumindo uma API pública", "descricao": "Buscar dados de uma API externa com fetch e exibir na tela.", "habilidade": "APIs REST", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Construir um protótipo de API em Node.js que consome uma API pública (ex. clima) e registra os dados no terminal.",
+        "habilidades": ["Node.js", "APIs REST"]
+      }
+    },
+    {
+      "ordem": 3,
+      "nome": "Banco de dados e back-end",
+      "objetivo": "Persistir dados e construir uma API completa.",
+      "etapas": [
+        { "ordem": 1, "titulo": "SQL na prática", "descricao": "Criar tabelas e escrever consultas SQL básicas.", "habilidade": "SQL", "horas_estimadas": 8 },
+        { "ordem": 2, "titulo": "Construindo uma API com Node.js", "descricao": "Criar rotas de CRUD conectadas a um banco relacional.", "habilidade": "APIs REST", "horas_estimadas": 8 },
+        { "ordem": 3, "titulo": "Validação e tratamento de erros", "descricao": "Validar entradas e padronizar respostas de erro da API.", "habilidade": "APIs REST", "horas_estimadas": 4 },
+        { "ordem": 4, "titulo": "Autenticação básica", "descricao": "Proteger rotas sensíveis da API com autenticação.", "habilidade": "Autenticação e Segurança Básica", "horas_estimadas": 6 }
+      ],
+      "projeto": {
+        "enunciado": "Construir uma API REST completa (CRUD) com banco de dados relacional e autenticação básica.",
+        "habilidades": ["SQL", "APIs REST", "Autenticação e Segurança Básica"]
+      }
+    },
+    {
+      "ordem": 4,
+      "nome": "Front-end com React",
+      "objetivo": "Construir a interface que consome a API criada na fase anterior.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Introdução ao React", "descricao": "Componentes, props e JSX na prática.", "habilidade": "React", "horas_estimadas": 8 },
+        { "ordem": 2, "titulo": "Componentização", "descricao": "Dividir a interface em componentes reutilizáveis e gerenciar estado local.", "habilidade": "React", "horas_estimadas": 6 },
+        { "ordem": 3, "titulo": "Consumo de APIs no front-end", "descricao": "Conectar a interface React à API construída anteriormente.", "habilidade": "APIs REST", "horas_estimadas": 6 },
+        { "ordem": 4, "titulo": "TypeScript básico", "descricao": "Tipar variáveis, funções e objetos simples com TypeScript.", "habilidade": "TypeScript", "horas_estimadas": 5 }
+      ],
+      "projeto": {
+        "enunciado": "Construir a interface em React que consome a API construída na fase anterior.",
+        "habilidades": ["React", "APIs REST", "TypeScript"]
+      }
+    },
+    {
+      "ordem": 5,
+      "nome": "Integração e deploy",
+      "objetivo": "Unir front-end e back-end e publicar o projeto completo.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Integração front-end e back-end", "descricao": "Conectar a interface e a API em um único fluxo funcional.", "habilidade": "APIs REST", "horas_estimadas": 6 },
+        { "ordem": 2, "titulo": "Testes automatizados", "descricao": "Escrever testes básicos para o front-end e para a API.", "habilidade": "Testes Automatizados", "horas_estimadas": 6 },
+        { "ordem": 3, "titulo": "Deploy full-stack", "descricao": "Publicar o front-end e o back-end em serviços de hospedagem gratuitos.", "habilidade": "Deploy de Aplicações", "horas_estimadas": 6 },
+        { "ordem": 4, "titulo": "Revisão de portfólio", "descricao": "Revisar os projetos construídos e preparar a apresentação para recrutadores.", "habilidade": "Portfólio Técnico", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Publicar a aplicação full-stack completa (front e back), com repositório documentado.",
+        "habilidades": ["Deploy de Aplicações", "Testes Automatizados"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "area": "back-end",
+  "origem": "modelo",
+  "fases": [
+    {
+      "ordem": 1,
+      "nome": "Fundamentos de lógica e Node.js",
+      "objetivo": "Entender lógica de programação e rodar os primeiros scripts em Node.js.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Lógica de programação", "descricao": "Variáveis, condicionais, laços e funções na prática.", "habilidade": "Lógica de Programação", "horas_estimadas": 8 },
+        { "ordem": 2, "titulo": "Introdução ao Node.js", "descricao": "Instalar o Node.js e rodar o primeiro script fora do navegador.", "habilidade": "Node.js", "horas_estimadas": 6 },
+        { "ordem": 3, "titulo": "Git e GitHub", "descricao": "Versionar o código e publicar o primeiro repositório.", "habilidade": "Git", "horas_estimadas": 4 },
+        { "ordem": 4, "titulo": "Estrutura de um projeto Node", "descricao": "Organizar pastas, dependências (npm) e scripts de um projeto Node.js.", "habilidade": "Node.js", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Construir uma ferramenta de linha de comando em Node.js que resolve um problema simples (ex. uma calculadora de tarefas).",
+        "habilidades": ["Node.js", "Lógica de Programação", "Git"]
+      }
+    },
+    {
+      "ordem": 2,
+      "nome": "Construindo APIs",
+      "objetivo": "Criar uma API REST funcional com persistência de dados em banco relacional.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Fundamentos de APIs REST", "descricao": "Métodos HTTP, rotas e códigos de status.", "habilidade": "APIs REST", "horas_estimadas": 6 },
+        { "ordem": 2, "titulo": "Banco de dados com SQL", "descricao": "Criar tabelas e escrever consultas SQL básicas.", "habilidade": "SQL", "horas_estimadas": 8 },
+        { "ordem": 3, "titulo": "Conectando Node.js ao banco", "descricao": "Usar um driver/ORM para ler e gravar dados em um banco relacional.", "habilidade": "SQL", "horas_estimadas": 6 },
+        { "ordem": 4, "titulo": "Validação de dados de entrada", "descricao": "Validar o corpo das requisições antes de gravar no banco.", "habilidade": "APIs REST", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Construir uma API REST de cadastro (CRUD completo) com um banco de dados relacional.",
+        "habilidades": ["APIs REST", "SQL", "Node.js"]
+      }
+    },
+    {
+      "ordem": 3,
+      "nome": "Segurança e qualidade",
+      "objetivo": "Proteger a API e garantir que ela continua funcionando como esperado.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Autenticação e segurança básica", "descricao": "Proteger rotas com autenticação (ex. token) e boas práticas de segurança.", "habilidade": "Autenticação e Segurança Básica", "horas_estimadas": 8 },
+        { "ordem": 2, "titulo": "Testes automatizados", "descricao": "Escrever testes para as rotas principais da API.", "habilidade": "Testes Automatizados", "horas_estimadas": 6 },
+        { "ordem": 3, "titulo": "Tratamento de erros", "descricao": "Padronizar respostas de erro e evitar vazamento de detalhes internos.", "habilidade": "APIs REST", "horas_estimadas": 4 },
+        { "ordem": 4, "titulo": "Boas práticas de API", "descricao": "Nomeação de rotas, versionamento e organização de código.", "habilidade": "APIs REST", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Adicionar autenticação e testes automatizados à API construída na fase anterior.",
+        "habilidades": ["Autenticação e Segurança Básica", "Testes Automatizados"]
+      }
+    },
+    {
+      "ordem": 4,
+      "nome": "Preparação para produção",
+      "objetivo": "Empacotar e publicar a aplicação em um ambiente real.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Docker básico", "descricao": "Empacotar a aplicação em um container Docker.", "habilidade": "Docker", "horas_estimadas": 6 },
+        { "ordem": 2, "titulo": "Deploy de aplicações back-end", "descricao": "Publicar a API em um serviço de hospedagem gratuito.", "habilidade": "Deploy de Aplicações", "horas_estimadas": 5 },
+        { "ordem": 3, "titulo": "Documentação de API", "descricao": "Documentar as rotas disponíveis para quem for consumir a API.", "habilidade": "APIs REST", "horas_estimadas": 3 },
+        { "ordem": 4, "titulo": "Revisão de portfólio", "descricao": "Revisar os projetos construídos e preparar a apresentação para recrutadores.", "habilidade": "Portfólio Técnico", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Publicar a API em um serviço gratuito, com Docker e documentação das rotas no repositório.",
+        "habilidades": ["Docker", "Deploy de Aplicações"]
+      }
+    }
+  ]
+}

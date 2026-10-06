@@ -1,0 +1,66 @@
+{
+  "area": "front-end",
+  "origem": "modelo",
+  "fases": [
+    {
+      "ordem": 1,
+      "nome": "Fundamentos da Web",
+      "objetivo": "Estruturar e estilizar páginas web estáticas com HTML e CSS.",
+      "etapas": [
+        { "ordem": 1, "titulo": "HTML semântico", "descricao": "Estruturar páginas usando tags semânticas e boas práticas de marcação.", "habilidade": "HTML", "horas_estimadas": 6 },
+        { "ordem": 2, "titulo": "CSS: seletores e box model", "descricao": "Estilizar elementos e entender o modelo de caixas do CSS.", "habilidade": "CSS", "horas_estimadas": 8 },
+        { "ordem": 3, "titulo": "Layout responsivo", "descricao": "Construir layouts que se adaptam a diferentes tamanhos de tela com Flexbox e Grid.", "habilidade": "Responsividade", "horas_estimadas": 8 },
+        { "ordem": 4, "titulo": "Git e GitHub", "descricao": "Versionar o código e publicar o primeiro repositório no GitHub.", "habilidade": "Git", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Construir uma página de portfólio estático, responsiva, publicada em um repositório público no GitHub.",
+        "habilidades": ["HTML", "CSS", "Responsividade", "Git"]
+      }
+    },
+    {
+      "ordem": 2,
+      "nome": "JavaScript na prática",
+      "objetivo": "Manipular o DOM e aplicar lógica de programação direto no navegador.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Lógica de programação com JavaScript", "descricao": "Variáveis, condicionais, laços e funções aplicados a problemas pequenos.", "habilidade": "Lógica de Programação", "horas_estimadas": 8 },
+        { "ordem": 2, "titulo": "Manipulação do DOM", "descricao": "Selecionar, criar e atualizar elementos da página dinamicamente.", "habilidade": "JavaScript", "horas_estimadas": 8 },
+        { "ordem": 3, "titulo": "Eventos e formulários", "descricao": "Capturar interações do usuário e validar formulários no navegador.", "habilidade": "JavaScript", "horas_estimadas": 6 },
+        { "ordem": 4, "titulo": "Consumindo uma API pública", "descricao": "Buscar dados de uma API REST externa com fetch e exibir na tela.", "habilidade": "APIs REST", "horas_estimadas": 6 }
+      ],
+      "projeto": {
+        "enunciado": "Construir uma lista de tarefas (to-do list) que consome uma API pública para buscar ou salvar dados.",
+        "habilidades": ["JavaScript", "APIs REST"]
+      }
+    },
+    {
+      "ordem": 3,
+      "nome": "Ecossistema moderno",
+      "objetivo": "Aprender as ferramentas mais usadas no mercado de front-end hoje.",
+      "etapas": [
+        { "ordem": 1, "titulo": "TypeScript básico", "descricao": "Tipar variáveis, funções e objetos simples com TypeScript.", "habilidade": "TypeScript", "horas_estimadas": 6 },
+        { "ordem": 2, "titulo": "Introdução ao React", "descricao": "Componentes, props e JSX na prática.", "habilidade": "React", "horas_estimadas": 10 },
+        { "ordem": 3, "titulo": "Componentização e estado", "descricao": "Dividir a interface em componentes reutilizáveis e gerenciar estado local.", "habilidade": "React", "horas_estimadas": 8 },
+        { "ordem": 4, "titulo": "Acessibilidade na interface", "descricao": "Aplicar boas práticas de acessibilidade (contraste, foco, leitura por teclado) na interface.", "habilidade": "Acessibilidade Web", "horas_estimadas": 5 }
+      ],
+      "projeto": {
+        "enunciado": "Refazer o projeto da fase anterior em React com TypeScript, aplicando boas práticas de acessibilidade.",
+        "habilidades": ["React", "TypeScript", "Acessibilidade Web"]
+      }
+    },
+    {
+      "ordem": 4,
+      "nome": "Preparação para o mercado",
+      "objetivo": "Consolidar o portfólio e aprender a publicar uma aplicação front-end.",
+      "etapas": [
+        { "ordem": 1, "titulo": "Testes automatizados básicos", "descricao": "Escrever testes simples para componentes e funções.", "habilidade": "Testes Automatizados", "horas_estimadas": 6 },
+        { "ordem": 2, "titulo": "Deploy de aplicações front-end", "descricao": "Publicar uma aplicação React em um serviço de hospedagem gratuito.", "habilidade": "Deploy de Aplicações", "horas_estimadas": 4 },
+        { "ordem": 3, "titulo": "Boas práticas de versionamento", "descricao": "Organizar commits, branches e um README claro no repositório.", "habilidade": "Git", "horas_estimadas": 3 },
+        { "ordem": 4, "titulo": "Revisão de portfólio", "descricao": "Revisar os projetos construídos e preparar a apresentação para recrutadores.", "habilidade": "Portfólio Técnico", "horas_estimadas": 4 }
+      ],
+      "projeto": {
+        "enunciado": "Publicar o projeto React em produção, com repositório documentado e link ativo no portfólio.",
+        "habilidades": ["Deploy de Aplicações", "Git"]
+      }
+    }
+  ]
+}

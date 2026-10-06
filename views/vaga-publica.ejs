@@ -202,7 +202,7 @@ function renderHero(job) {
   document.head.appendChild(jld);
 }
 
-function renderMatch(match, isLoggedIn) {
+function renderMatch(match, isLoggedIn, matchProjetado) {
   const card = document.getElementById("match-card");
 
   // Empresa não tem match nem candidatura: o card de compatibilidade é só do fluxo dev.
@@ -236,6 +236,9 @@ function renderMatch(match, isLoggedIn) {
       <div class="match-bar-fill ${cls}" id="match-fill" style="width:0%"></div>
     </div>
     <p class="match-tip">${matchTip(pct)}</p>
+    ${matchProjetado != null && matchProjetado > pct
+      ? `<p class="match-roadmap-tip">📈 Sua compatibilidade sobe para ~${matchProjetado}% ao concluir este roadmap.</p>`
+      : ""}
     <div class="match-scores">
       <div class="score-item">
         <span class="score-val">${match.scores.skills}%</span>
@@ -432,8 +435,8 @@ function renderCompanySideCol(job) {
 function renderSideCol(job, isLoggedIn, userType) {
   if (VIEWER === "empresa") return renderCompanySideCol(job);
   const col  = document.getElementById("vaga-side-col");
-  const ctaHref  = isLoggedIn ? `/roadmap?job=${job.id}` : `/login?next=/vagas/${job.id}`;
-  const ctaLabel = isLoggedIn ? "Ver meu roadmap" : "Ver roadmap";
+  const ctaHref  = isLoggedIn ? `/trilha/novo?tipo=vaga&vagaId=${job.id}` : `/login?next=/vagas/${job.id}`;
+  const ctaLabel = "Gerar roadmap para esta vaga";
 
   const metaItems = [];
   if (job.salary_min || job.salary_max) {
@@ -517,7 +520,7 @@ async function init() {
     const user       = isLoggedIn ? await userRes.json() : null;
 
     renderHero(job);
-    renderMatch(job.match, isLoggedIn);
+    renderMatch(job.match, isLoggedIn, job.matchProjetado);
     renderMainCol(job, job.match, isLoggedIn && VIEWER === "dev");
     renderSideCol(job, isLoggedIn, user?.type);
 

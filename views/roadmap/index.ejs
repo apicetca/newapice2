@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <meta name="description" content="Seus roadmaps de carreira — Ápice." />
+  <title>Ápice — Meus Roadmaps</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/dev.css" />
+  <link rel="stylesheet" href="/css/trilha.css" />
+</head>
+<body>
+
+  <%- include('../partials/header-dev') %>
+
+  <main class="page-content" id="main-content">
+    <div class="rm-page">
+
+      <header class="rm-page-head">
+        <h1 class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Meus roadmaps
+        </h1>
+        <a href="/trilha/novo" class="btn-primary-dev">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo roadmap
+        </a>
+      </header>
+
+      <% if (!roadmaps.length) { %>
+        <div class="rm-empty">
+          <p class="rm-empty-title">Você ainda não tem nenhum roadmap.</p>
+          <p class="rm-empty-sub">Escolha uma área ou uma vaga e deixe a IA montar sua trilha de estudos.</p>
+          <a href="/trilha/novo" class="btn-primary-dev">Criar meu primeiro roadmap</a>
+        </div>
+      <% } else { %>
+        <div class="rm-card-list" role="list" aria-label="Seus roadmaps">
+          <% roadmaps.forEach(function(r) { %>
+            <article class="rm-card <%= r.status === 'arquivado' ? 'rm-card--arquivado' : '' %>" role="listitem">
+              <div class="rm-card-top">
+                <div class="rm-card-info">
+                  <p class="rm-card-title"><%= r.label %></p>
+                  <p class="rm-card-meta"><%= r.horas_semana %>h/semana &middot; versão <%= r.versao %></p>
+                </div>
+                <div class="rm-card-badges">
+                  <% if (r.status === 'arquivado') { %>
+                    <span class="badge badge-muted">Arquivado</span>
+                  <% } else if (r.pct >= 100) { %>
+                    <span class="badge badge-green">Concluído</span>
+                  <% } else { %>
+                    <span class="badge badge-blue">Ativo</span>
+                  <% } %>
+                  <% if (r.origem === 'modelo') { %>
+                    <span class="badge badge-yellow" title="Gerado pelo roadmap-modelo (a IA não respondeu desta vez)">Modelo</span>
+                  <% } %>
+                </div>
+              </div>
+
+              <div class="rm-progress" role="progressbar" aria-valuenow="<%= r.pct %>" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso de <%= r.label %>">
+                <div class="rm-progress-track">
+                  <div class="rm-progress-fill" style="width:<%= r.pct %>%"></div>
+                </div>
+                <span class="rm-progress-label"><%= r.pct %>% concluído</span>
+              </div>
+
+              <a href="/trilha/<%= r.id %>" class="rm-card-cta">
+                Ver roadmap
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </article>
+          <% }); %>
+        </div>
+      <% } %>
+
+    </div>
+  </main>
+
+</body>
+</html>

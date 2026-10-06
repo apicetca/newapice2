@@ -9,6 +9,35 @@ function getUserId(req) {
   return req.session.user.github_id ?? req.session.user.id;
 }
 
+// "Sua compatibilidade sobe para ~Y% ao concluir este roadmap"
+// (docs/roadmap-spec.md, "Integrações") — só quando existe um roadmap
+// ATIVO com essa vaga específica como objetivo. Reaproveita a MESMA
+// calculateJobMatch, passando as habilidades das etapas do roadmap como
+// profileData.habilidadesAdquiridas (ver services/matchCalculator.js).
+async function calcularMatchProjetadoComRoadmap(usuarioId, jobId, skillsId, profileData) {
+  const [[roadmap]] = await db.query(
+    `SELECT id FROM roadmaps
+     WHERE usuario_id = ? AND tipo_objetivo = 'vaga' AND vaga_id = ? AND status = 'ativo'
+     ORDER BY gerado_em DESC LIMIT 1`,
+    [usuarioId, jobId]
+  );
+  if (!roadmap) return null;
+
+  const [etapas] = await db.query(
+    `SELECT DISTINCT re.habilidade
+     FROM roadmap_etapas re JOIN roadmap_fases rf ON rf.id = re.fase_id
+     WHERE rf.roadmap_id = ?`,
+    [roadmap.id]
+  );
+  if (!etapas.length) return null;
+
+  const projetado = await calculateJobMatch(skillsId, jobId, {
+    ...profileData,
+    habilidadesAdquiridas: etapas.map(e => e.habilidade),
+  });
+  return projetado.match;
+}
+
 const roadmapController = {
   listJobs: async (req, res) => {
     try {
@@ -124,8 +153,9 @@ const roadmapController = {
         WHERE js.job_id = ? ORDER BY js.importance DESC, js.learn_order
       `, [jobId]);
 
-      let match   = null;
-      let applied = false;
+      let match          = null;
+      let matchProjetado = null;
+      let applied        = false;
       if (req.session?.user?.type === "dev") {
         const uid = getUserId(req);
         const profileData = {
@@ -139,9 +169,17 @@ const roadmapController = {
           [jobId, uid]
         );
         applied = appliedRows.length > 0;
+
+        // Isolado em try/catch: se der erro, o match normal (já calculado
+        // acima) continua valendo como antes.
+        try {
+          matchProjetado = await calcularMatchProjetadoComRoadmap(req.session.user.id, jobId, uid, profileData);
+        } catch (err) {
+          console.error("[GET /api/jobs/:id] falha ao calcular match projetado:", err.message);
+        }
       }
 
-      res.json({ ...job, skills: jobSkills, match, applied });
+      res.json({ ...job, skills: jobSkills, match, matchProjetado, applied });
     } catch (err) {
       console.error("[GET /api/jobs/:id]", err.message);
       res.status(500).json({ error: "Erro interno. Tente novamente." });

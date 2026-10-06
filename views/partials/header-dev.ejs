@@ -47,6 +47,12 @@
       Roadmap
     </a>
 
+    <a href="/trilha"
+       class="header-link<% if (locals.currentPage === 'trilha') { %> is-active<% } %>"
+       <% if (locals.currentPage === 'trilha') { %>aria-current="page"<% } %>>
+      Roadmap (novo)
+    </a>
+
     <a href="/mentor"
        class="header-link<% if (locals.currentPage === 'mentor') { %> is-active<% } %>"
        <% if (locals.currentPage === 'mentor') { %>aria-current="page"<% } %>>
@@ -219,6 +225,16 @@
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
       </svg>
       Roadmap
+    </a>
+
+    <a href="/trilha"
+       class="drawer-link<% if (locals.currentPage === 'trilha') { %> is-active<% } %>"
+       <% if (locals.currentPage === 'trilha') { %>aria-current="page"<% } %>>
+      <svg class="drawer-link-ico" width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      Roadmap (novo)
     </a>
 
     <a href="/mentor"

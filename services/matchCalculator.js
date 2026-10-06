@@ -79,6 +79,17 @@ async function calculateJobMatch(skillsId, jobId, profileData = {}) {
   const userSkillMap = {};
   for (const s of userSkillRows) userSkillMap[s.skill_id] = s.confidence;
 
+  // "Compatibilidade ao concluir o roadmap" (docs/roadmap-spec.md,
+  // "Integrações"): projeta as habilidades do roadmap ativo como já
+  // adquiridas (100%), reaproveitando a MESMA função/fórmula de match —
+  // sem efeito pra quem não passa esse campo (todo chamador existente).
+  if (profileData.habilidadesAdquiridas?.length) {
+    const nomesAdquiridos = new Set(profileData.habilidadesAdquiridas);
+    for (const js of jobSkills) {
+      if (nomesAdquiridos.has(js.name)) userSkillMap[js.skill_id] = 100;
+    }
+  }
+
   // ── 3. Breakdown por skill (para o roadmap) ───────
   const breakdown = jobSkills.map(js => {
     const confidence = userSkillMap[js.skill_id] ?? 0;

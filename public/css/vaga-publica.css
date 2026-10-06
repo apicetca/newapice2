@@ -115,6 +115,7 @@
 .match-bar-fill.low    { background: linear-gradient(90deg, var(--red),    #f87171); }
 
 .match-tip { font-size: .82rem; color: var(--muted); margin-bottom: 14px; }
+.match-roadmap-tip { font-size: .82rem; color: var(--teal); margin-bottom: 14px; margin-top: -6px; }
 
 .match-scores {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;

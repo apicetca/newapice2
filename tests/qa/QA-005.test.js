@@ -5,12 +5,12 @@
 jest.mock('../../database/db', () => ({
   query: jest.fn(),
 }));
-jest.mock('../../services/anthropicClient', () => ({
-  askClaudeJSON: jest.fn(),
+jest.mock('../../services/geminiClient', () => ({
+  askGeminiJSON: jest.fn(),
 }));
 
 const db = require('../../database/db');
-const { askClaudeJSON } = require('../../services/anthropicClient');
+const { askGeminiJSON } = require('../../services/geminiClient');
 const { generateInsights } = require('../../services/marketInsights');
 
 beforeEach(() => {
@@ -26,7 +26,7 @@ beforeEach(() => {
     return [[]];
   });
 
-  askClaudeJSON.mockImplementation(
+  askGeminiJSON.mockImplementation(
     () => new Promise(resolve => setTimeout(() => resolve({ resumo: 'resumo gerado' }), 20))
   );
 });
@@ -39,7 +39,7 @@ describe('QA-005 — generateInsights() faz lock de chamadas concorrentes', () =
       generateInsights(),
     ]);
 
-    expect(askClaudeJSON).toHaveBeenCalledTimes(1);
+    expect(askGeminiJSON).toHaveBeenCalledTimes(1);
     expect(r1).toEqual(r2);
     expect(r2).toEqual(r3);
   });
@@ -48,6 +48,6 @@ describe('QA-005 — generateInsights() faz lock de chamadas concorrentes', () =
     await generateInsights();
     await generateInsights();
 
-    expect(askClaudeJSON).toHaveBeenCalledTimes(2);
+    expect(askGeminiJSON).toHaveBeenCalledTimes(2);
   });
 });

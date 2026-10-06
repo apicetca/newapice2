@@ -343,6 +343,7 @@ const messagesRoutes    = require("./routes/messages");
 const companyPublicRoutes = require("./routes/company-public");
 const aiRoutes           = require("./routes/ai");
 const plansRoutes         = require("./routes/plans");
+const trilhaRoutes        = require("./routes/trilha");
 
 app.use("/auth",        authRoutes);
 app.use("/api/auth",    authLimiter, userRoutes);
@@ -355,6 +356,7 @@ app.use("/api/messages", messagesRoutes);
 app.use("/api/empresas", companyPublicRoutes);
 app.use("/api/ai",      aiLimiter, aiRoutes);
 app.use("/api/plans",   plansRoutes);
+app.use("/trilha",      trilhaRoutes);
 
 // ── 404 ───────────────────────────────────────────────────
 app.use((req, res) => {

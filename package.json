@@ -4,7 +4,9 @@
   "main": "server.js",
   "scripts": {
     "test": "jest --passWithNoTests",
-    "start": "node server.js"
+    "start": "node server.js",
+    "migrate:roadmap": "node migrations/run-roadmap-migration.js",
+    "seed:roadmap": "node seeds/run-roadmap-seed.js"
   },
   "keywords": [],
   "author": "",

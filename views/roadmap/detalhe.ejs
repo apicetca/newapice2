@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <meta name="description" content="Detalhe do roadmap de carreira — Ápice." />
+  <title>Ápice — <%= label %></title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/dev.css" />
+  <link rel="stylesheet" href="/css/trilha.css" />
+</head>
+<body>
+
+  <%- include('../partials/header-dev') %>
+
+  <main class="page-content" id="main-content" data-rm-roadmap-id="<%= roadmap.id %>">
+    <div class="rm-page">
+
+      <header class="rm-page-head">
+        <p class="rm-breadcrumb"><a href="/trilha">&larr; Meus roadmaps</a></p>
+        <h1 class="section-title"><%= label %></h1>
+        <p class="rm-card-meta">
+          <%= roadmap.horas_semana %>h/semana &middot; versão <%= roadmap.versao %>
+          &middot; status: <%= roadmap.status === 'ativo' ? 'ativo' : 'arquivado' %>
+        </p>
+      </header>
+
+      <% if (roadmap.tipo_objetivo === 'vaga' && job && !job.active) { %>
+        <div class="rm-alert rm-alert--aviso" role="status">
+          <p>Essa vaga foi encerrada. Seu roadmap continua ativo — considere trocar o objetivo para uma área na próxima regeneração.</p>
+        </div>
+      <% } %>
+
+      <% if (roadmap.origem === 'modelo') { %>
+        <div class="rm-alert rm-alert--info" role="status">
+          <p>Esta trilha foi montada a partir do roadmap-modelo (a IA não respondeu desta vez) — você pode tentar regenerar para uma versão personalizada.</p>
+        </div>
+      <% } %>
+
+      <div class="rm-progress rm-progress--total" role="progressbar" aria-valuenow="<%= pctTotal %>" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso total do roadmap">
+        <div class="rm-progress-track">
+          <div class="rm-progress-fill" style="width:<%= pctTotal %>%"></div>
+        </div>
+        <span class="rm-progress-label">
+          <%= pctTotal %>% concluído
+          <% if (semanasRestantes != null) { %>
+            &middot; previsão: ~<%= semanasRestantes %> semana<%= semanasRestantes === 1 ? '' : 's' %> restante<%= semanasRestantes === 1 ? '' : 's' %>
+          <% } %>
+        </span>
+      </div>
+
+      <div class="rm-actions">
+        <form method="POST" action="/trilha/<%= roadmap.id %>/regenerar">
+          <button type="submit" class="btn-ghost">Regenerar roadmap</button>
+        </form>
+        <% if (roadmap.status === 'ativo') { %>
+          <form method="POST" action="/trilha/<%= roadmap.id %>/arquivar">
+            <button type="submit" class="btn-ghost">Arquivar</button>
+          </form>
+        <% } %>
+      </div>
+
+      <ol class="rm-fase-list">
+        <% fases.forEach(function(fase, i) { %>
+          <li class="rm-fase">
+            <div class="rm-fase-head">
+              <span class="rm-fase-numero"><%= i + 1 %></span>
+              <div class="rm-fase-info">
+                <h2 class="rm-fase-nome"><%= fase.nome %></h2>
+                <p class="rm-fase-objetivo"><%= fase.objetivo %></p>
+              </div>
+              <span class="rm-fase-pct"><%= fase.pct %>%</span>
+            </div>
+
+            <div class="rm-progress rm-progress--fase" role="progressbar" aria-valuenow="<%= fase.pct %>" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso da fase <%= fase.nome %>">
+              <div class="rm-progress-track">
+                <div class="rm-progress-fill" style="width:<%= fase.pct %>%"></div>
+              </div>
+            </div>
+
+            <ul class="rm-etapa-list" aria-label="Etapas da fase <%= fase.nome %>">
+              <% fase.etapas.forEach(function(etapa) { %>
+                <li class="rm-etapa rm-etapa--<%= etapa.status %>" data-rm-etapa-item data-etapa-id="<%= etapa.id %>">
+                  <button
+                    type="button"
+                    class="rm-step-toggle"
+                    data-rm-toggle
+                    data-etapa-id="<%= etapa.id %>"
+                    data-status="<%= etapa.status %>"
+                    aria-pressed="<%= etapa.status === 'concluida' %>"
+                    aria-label="<%= etapa.titulo %> — status atual: <%= etapa.status === 'pendente' ? 'pendente' : etapa.status === 'em_andamento' ? 'em andamento' : 'concluída' %>. Clique para avançar o status."
+                  >
+                    <span class="rm-step-box" aria-hidden="true"></span>
+                  </button>
+
+                  <div class="rm-etapa-conteudo">
+                    <p class="rm-etapa-titulo"><%= etapa.titulo %></p>
+                    <p class="rm-etapa-descricao"><%= etapa.descricao %></p>
+                    <div class="rm-etapa-meta">
+                      <span class="badge badge-blue"><%= etapa.habilidade %></span>
+                      <span class="rm-etapa-horas">~<%= etapa.horas_estimadas %>h</span>
+                      <span class="rm-etapa-status-label" data-rm-status-label>
+                        <%= etapa.status === 'pendente' ? 'Pendente' : etapa.status === 'em_andamento' ? 'Em andamento' : 'Concluída' %>
+                      </span>
+                    </div>
+                    <p class="rm-etapa-recurso">
+                      <% if (etapa.recurso_id && etapa.recurso_url) { %>
+                        <a href="<%= etapa.recurso_url %>" target="_blank" rel="noopener noreferrer"><%= etapa.recurso_titulo %></a>
+                      <% } else { %>
+                        <a href="https://www.google.com/search?q=<%= encodeURIComponent(etapa.habilidade + ' ' + etapa.titulo) %>" target="_blank" rel="noopener noreferrer">buscar sobre este tema</a>
+                      <% } %>
+                    </p>
+                  </div>
+                </li>
+              <% }); %>
+            </ul>
+
+            <div class="rm-projeto">
+              <p class="rm-projeto-label">Projeto prático</p>
+              <p class="rm-projeto-enunciado"><%= fase.projeto_enunciado ?? 'Sem enunciado definido.' %></p>
+              <span class="badge <%= fase.projeto_status === 'verificado' ? 'badge-green' : fase.projeto_status === 'em_revisao' ? 'badge-yellow' : 'badge-muted' %>">
+                <%= fase.projeto_status === 'verificado' ? 'Verificado' : fase.projeto_status === 'nao_verificado' ? 'Não verificado' : fase.projeto_status === 'em_revisao' ? 'Em revisão' : 'Pendente' %>
+              </span>
+
+              <% if (resultadoProjeto && resultadoProjeto.faseId === fase.id) { %>
+                <div class="rm-alert <%= resultadoProjeto.status === 'erro' ? 'rm-alert--erro' : resultadoProjeto.status === 'aprovado' ? 'rm-alert--info' : 'rm-alert--aviso' %>" role="<%= resultadoProjeto.status === 'erro' ? 'alert' : 'status' %>">
+                  <p><%= resultadoProjeto.mensagem %></p>
+                  <% if (resultadoProjeto.faltando && resultadoProjeto.faltando.length) { %>
+                    <p>Ainda não encontramos no repositório: <%= resultadoProjeto.faltando.join(', ') %>.</p>
+                  <% } %>
+                </div>
+              <% } %>
+
+              <% if (fase.projeto_status !== 'verificado') { %>
+                <form method="POST" action="/trilha/<%= roadmap.id %>/fases/<%= fase.id %>/projeto" class="rm-projeto-form">
+                  <label class="rm-label" for="repoUrl-<%= fase.id %>">Link do repositório no GitHub</label>
+                  <input
+                    type="url" name="repoUrl" id="repoUrl-<%= fase.id %>" class="rm-select"
+                    placeholder="https://github.com/usuario/repositorio"
+                    value="<%= fase.projeto_repo_url ?? '' %>"
+                  />
+                  <button type="submit" class="btn-ghost">Enviar projeto</button>
+                </form>
+              <% } %>
+            </div>
+          </li>
+        <% }); %>
+      </ol>
+
+    </div>
+  </main>
+
+  <script src="/js/roadmap.js"></script>
+</body>
+</html>
