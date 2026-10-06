@@ -71,6 +71,51 @@ async function getRoadmapProgressSummary(githubId) {
   return rows.map(r => ({ skill: r.skill_name, status: r.status, vaga: r.job_title }));
 }
 
+// Resumo do roadmap ATIVO do sistema novo (fases/etapas via IA, /trilha —
+// docs/roadmap-spec.md, "Integrações": "recebe o roadmap ativo e a etapa
+// atual como contexto"). Função separada de getRoadmapProgressSummary
+// acima, que é do sistema antigo (gap de skills por vaga) — os dois
+// convivem, ver docs/roadmap-diagnostico.md.
+async function getRoadmapAtivoSummary(usuarioId) {
+  const [[roadmap]] = await db.query(
+    `SELECT id, tipo_objetivo, area, vaga_id FROM roadmaps
+     WHERE usuario_id = ? AND status = 'ativo'
+     ORDER BY gerado_em DESC LIMIT 1`,
+    [usuarioId]
+  );
+  if (!roadmap) return null;
+
+  let objetivo;
+  if (roadmap.tipo_objetivo === "area") {
+    objetivo = `área de ${roadmap.area}`;
+  } else {
+    const [[job]] = await db.query("SELECT title FROM jobs WHERE id = ?", [roadmap.vaga_id]);
+    objetivo = job ? `vaga "${job.title}"` : "uma vaga";
+  }
+
+  const [fases] = await db.query(
+    "SELECT id, nome FROM roadmap_fases WHERE roadmap_id = ? ORDER BY ordem",
+    [roadmap.id]
+  );
+  if (!fases.length) return { objetivo, faseAtual: null, etapaAtual: null, faltam: 0 };
+
+  const [etapas] = await db.query(
+    "SELECT fase_id, titulo, status FROM roadmap_etapas WHERE fase_id IN (?) ORDER BY fase_id, ordem",
+    [fases.map(f => f.id)]
+  );
+  const etapasPorFase = {};
+  for (const e of etapas) (etapasPorFase[e.fase_id] ??= []).push(e);
+
+  // "fase atual" = a primeira com alguma etapa não concluída.
+  let faseAtual = null, etapaAtual = null, faltam = 0;
+  for (const f of fases) {
+    const pendentes = (etapasPorFase[f.id] ?? []).filter(e => e.status !== "concluida");
+    if (!faseAtual && pendentes.length) { faseAtual = f.nome; etapaAtual = pendentes[0].titulo; }
+    faltam += pendentes.length;
+  }
+  return { objetivo, faseAtual, etapaAtual, faltam };
+}
+
 // Monta o bloco de texto "CONTEXTO DO USUÁRIO" pra injetar no prompt —
 // só com as seções pedidas em `include`, pra nunca mandar mais dado do
 // que a pergunta atual precisa.
@@ -111,6 +156,22 @@ async function buildUserContextBlock(user, include = ["skills", "nivel"]) {
     }
   }
 
+  // Try/catch isolado: uma falha aqui (ex. banco fora do ar num detalhe
+  // específico) nunca derruba o restante do contexto (skills/nível), nem
+  // o mentor — ele só segue sem a linha de roadmap, como se não houvesse.
+  if (include.includes("roadmapAtivo")) {
+    try {
+      const r = await getRoadmapAtivoSummary(user.id);
+      if (r) {
+        parts.push(r.faseAtual
+          ? `Roadmap ativo: ${r.objetivo} — fase atual "${r.faseAtual}", etapa atual "${r.etapaAtual}", ${r.faltam} etapa(s) restante(s).`
+          : `Roadmap ativo: ${r.objetivo} — todas as etapas concluídas.`);
+      }
+    } catch (err) {
+      console.error("[userContextService] falha ao montar resumo do roadmap ativo:", err.message);
+    }
+  }
+
   if (!parts.length) return "";
   return `CONTEXTO DO USUÁRIO\n${parts.join("\n")}`;
 }
@@ -120,5 +181,6 @@ module.exports = {
   getReposSummary,
   getNivel,
   getRoadmapProgressSummary,
+  getRoadmapAtivoSummary,
   buildUserContextBlock,
 };

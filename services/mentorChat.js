@@ -94,7 +94,7 @@ async function sendMessage(userId, githubId, nivel, userMessage, anexoTexto) {
   );
 
   const previousInteractionId = await getLastInteractionId(userId);
-  const userContext = await buildUserContextBlock({ id: userId, github_id: githubId }, ["nivel", "skills"]);
+  const userContext = await buildUserContextBlock({ id: userId, github_id: githubId }, ["nivel", "skills", "roadmapAtivo"]);
   const system = userContext ? `${SYSTEM_INSTRUCTION}\n\n${userContext}` : SYSTEM_INSTRUCTION;
 
   const ctx = { userId, githubId, nivel };
