@@ -69,7 +69,19 @@
 <script src="/js/escape-html.js"></script>
 <script>
 const NIVEL_LABEL = { iniciante: "Iniciante", intermediario: "Intermediário", avancado: "Avançado" };
+const PLAN_LABEL  = { dev_free: "Gratuito", dev_pro: "PRO" };
 let allUsers = [];
+
+// A mesma pessoa pode ter uma conta do login com GitHub e outra de e-mail e
+// senha; o plano vale por conta, então o admin precisa saber por qual ela entra.
+function loginLabel(u) {
+  if (u.login_github && u.login_email) return "entra pelo GitHub ou com e-mail e senha";
+  return u.login_github ? "entra pelo GitHub" : "entra com e-mail e senha";
+}
+
+function contaLabel(o) {
+  return `${o.email} (${o.login_github ? "entra pelo GitHub" : "e-mail e senha"})`;
+}
 let activeFilter = "todos";
 
 function formatDate(raw) {
@@ -100,9 +112,11 @@ function renderTable(users) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td data-label="Nome">${u.nome ? escapeHtml(`${u.nome} ${u.sobrenome ?? ""}`.trim()) : "—"}</td>
-      <td data-label="E-mail">${u.email}</td>
+      <td data-label="E-mail">${escapeHtml(u.email)}<br><small style="color:var(--muted)">${loginLabel(u)}</small></td>
       <td data-label="Nível"><span class="badge badge-muted">${NIVEL_LABEL[u.nivel] ?? "—"}</span></td>
-      <td data-label="GitHub">${u.github_login ? `<a href="https://github.com/${u.github_login}" target="_blank" rel="noopener" style="color:var(--blue)">@${u.github_login}</a>` : "—"}</td>
+      <td data-label="GitHub">${u.github_login ? `<a href="https://github.com/${u.github_login}" target="_blank" rel="noopener" style="color:var(--blue)">@${u.github_login}</a>` : "—"}${u.outras_contas.length
+        ? `<br><small style="color:var(--yellow)">⚠ mesmo GitHub de: ${u.outras_contas.map(o => escapeHtml(contaLabel(o))).join(", ")}</small>`
+        : ""}</td>
       <td data-label="Plano">
         <select class="form-select" style="padding:4px 24px 4px 8px;font-size:.78rem" onchange="changePlan(${u.id}, this.value)">
           <option value="dev_free" ${u.plan_code === "dev_free" ? "selected" : ""}>Gratuito</option>
@@ -154,17 +168,34 @@ async function reload() {
 }
 
 async function changePlan(id, planCode) {
+  // Se a pessoa tem outra conta com o mesmo GitHub, o plano trocado só nesta
+  // não vale quando ela entra pela outra — oferece aplicar em todas.
+  const user   = allUsers.find(u => u.id === id);
+  const outras = (user?.outras_contas ?? []).filter(o => o.plan_code !== planCode);
+  const ids    = [id];
+  if (outras.length && confirm(
+    `Esta pessoa parece ter outra(s) conta(s) com o mesmo GitHub:\n` +
+    outras.map(o => `• ${contaLabel(o)}`).join("\n") +
+    `\n\nAplicar o plano ${PLAN_LABEL[planCode]} nelas também? ` +
+    `Se não, ela continua no plano antigo quando entrar por essa(s) conta(s).`
+  )) {
+    ids.push(...outras.map(o => o.id));
+  }
+
   try {
-    const res = await fetch(`/api/admin/users/${id}/plan`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan_code: planCode }),
-    });
-    if (!res.ok) throw new Error();
-    showToast("Plano atualizado.");
-    await reload();
+    for (const target of ids) {
+      const res = await fetch(`/api/admin/users/${target}/plan`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan_code: planCode }),
+      });
+      if (!res.ok) throw new Error();
+    }
+    showToast(ids.length > 1 ? `Plano atualizado em ${ids.length} contas.` : "Plano atualizado.");
   } catch {
     showToast("Erro ao atualizar o plano.", true);
   }
+  // Recarrega mesmo no erro, pra o seletor não ficar mostrando um plano que não foi salvo.
+  await reload();
 }
 
 let toastTimer = null;

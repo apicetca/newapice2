@@ -3,6 +3,18 @@ const { computeMatch } = require("../services/matchCalculator");
 const { setUserPlan, getPlanCodesBulk } = require("../services/subscriptionService");
 const { plansForType } = require("../config/plans");
 
+// Identifica o GitHub de uma conta dev, para achar outras contas da mesma
+// pessoa: o login do GitHub cria uma conta pelo e-mail que o GitHub
+// informa (ou <login>@users.noreply.github.com), separada de uma conta de
+// e-mail e senha que a pessoa já tenha. O github_login das contas de
+// e-mail é digitado pelo usuário, então isso indica "provavelmente a mesma
+// pessoa" — o painel só avisa e deixa o admin decidir.
+function githubKey(row) {
+  const noreply = /^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$/i.exec(row.email ?? "");
+  const login = row.github_login || noreply?.[1] || "";
+  return login.trim().toLowerCase() || null;
+}
+
 const adminController = {
   getDashboard: async (req, res) => {
     try {
@@ -49,15 +61,35 @@ const adminController = {
   getUsers: async (req, res) => {
     try {
       const [rows] = await db.query(`
-        SELECT u.id, u.email, u.active, u.created_at,
-               p.nome, p.sobrenome, p.nivel, p.github_login
+        SELECT u.id, u.email, u.active, u.created_at, (u.password_hash IS NOT NULL) AS tem_senha,
+               p.nome, p.sobrenome, p.nivel, p.github_login, p.github_id
         FROM users u
         LEFT JOIN user_dev_profiles p ON p.user_id = u.id
         WHERE u.type = 'dev'
         ORDER BY u.created_at DESC
       `);
       const planCodes = await getPlanCodesBulk(rows.map(r => r.id), "dev");
-      res.json(rows.map(r => ({ ...r, active: Boolean(r.active), plan_code: planCodes[r.id] })));
+
+      const porGithub = {};
+      for (const r of rows) {
+        const key = githubKey(r);
+        if (key) (porGithub[key] ??= []).push(r);
+      }
+
+      res.json(rows.map(({ tem_senha, github_id, ...r }) => {
+        const key = githubKey(r);
+        const outras = key ? porGithub[key].filter(o => o.id !== r.id) : [];
+        return {
+          ...r,
+          active:       Boolean(r.active),
+          plan_code:    planCodes[r.id],
+          login_github: github_id != null, // github_id só é gravado pelo login com GitHub
+          login_email:  Boolean(tem_senha),
+          outras_contas: outras.map(o => ({
+            id: o.id, email: o.email, login_github: o.github_id != null, plan_code: planCodes[o.id],
+          })),
+        };
+      }));
     } catch (err) {
       console.error("[GET /api/admin/users]", err.message);
       res.status(500).json({ error: "Erro interno. Tente novamente." });
