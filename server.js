@@ -151,18 +151,27 @@ app.get("/vagas", async (req, res) => {
 
 // Página pública de apresentação dos planos para devs (menu "Para Devs").
 app.get("/para-devs", (req, res) => {
-  const pro = Math.round(getPlan("dev_pro").price_cents / 100);
+  // Preço do config/plans.js — o mesmo cobrado no Mercado Pago (só mensal).
+  const pro = (getPlan("dev_pro").price_cents / 100).toFixed(2).replace(".", ",").replace(/,00$/, "");
   res.render("para-devs", {
     currentPage: "para-devs",
-    prices: { free: 0, pro, proAnnual: Math.round(pro * 0.8) },
+    prices: { free: 0, pro },
   });
 });
 
 // Página pública de apresentação dos planos para empresas (menu "Para Empresas").
 app.get("/para-empresas", (req, res) => {
+  // Preços e limites vêm de config/plans.js — os mesmos cobrados no Mercado Pago.
+  const reais = (cents) => (cents / 100).toFixed(2).replace(".", ",").replace(/,00$/, "");
+  const basico  = getPlan("empresa_basico");
+  const premium = getPlan("empresa_premium");
   res.render("para-empresas", {
     currentPage: "para-empresas",
-    prices: { free: 0, pro: 100, proAnnual: 80 },
+    planos: {
+      free:    { vagas: getPlan("empresa_free").max_active_jobs },
+      basico:  { preco: reais(basico.price_cents), vagas: basico.max_active_jobs },
+      premium: { preco: reais(premium.price_cents) },
+    },
   });
 });
 
