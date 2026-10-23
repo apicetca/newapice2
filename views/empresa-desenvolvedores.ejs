@@ -170,7 +170,10 @@
     function renderCard(dev) {
       const shown = (dev.skills || []).slice(0, 3);
       const extra = (dev.skills || []).length - 3;
-      const skillItems = shown.map(s => `<li class="skill-tag">${s}</li>`).join("") +
+      const skillItems = shown.map(s => {
+        const declarada = dev.skillsOrigem?.[s] === "manual";
+        return `<li class="skill-tag">${escapeHtml(s)}<span class="skill-origem ${declarada ? "skill-origem--declarada" : "skill-origem--github"}">${declarada ? "declarada" : "detectada no GitHub"}</span></li>`;
+      }).join("") +
         (extra > 0 ? `<li class="skill-tag skill-tag--more">+${extra}</li>` : "");
 
       const avatarColor = AVATAR_COLORS[Math.abs(dev.id ?? 0) % AVATAR_COLORS.length];

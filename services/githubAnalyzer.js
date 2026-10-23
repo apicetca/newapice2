@@ -9,6 +9,7 @@ const {
   GitHubIndisponivelError, ehFalhaDeLeitura, registrarFalha,
 } = require("./githubErrors");
 const { ARQUIVOS_DEPENDENCIAS, extrairPacotes } = require("./dependencyParser");
+const { combinar, lerDeclaracoes, declaradaDe } = require("./skillOrigem");
 
 // Sem timeout o axios espera para sempre; uma resposta que não chega é uma
 // falha de leitura, não "repositório sem dados".
@@ -273,8 +274,10 @@ async function analisarGitHub(accessToken, githubId, repos, opcoes = {}) {
 // Grava skills e evidências numa TRANSAÇÃO.
 // - Leitura completa: as evidências antigas do dev são substituídas pelas novas.
 // - Leitura parcial: só as evidências dos repositórios lidos agora são
-//   substituídas, e a confiança só sobe (GREATEST) — o que ficou de fora pode
-//   ter pontuado antes.
+//   substituídas, e a confiança só sobe — o que ficou de fora pode ter
+//   pontuado antes.
+// - A confiança gravada é a maior entre a detectada agora e a declarada pelo
+//   dev (Etapa 7); `source` é a origem desse valor.
 // Se a tabela de evidências ainda não existe (migração não rodada), as skills
 // são gravadas normalmente e o problema vai para o log.
 // --------------------------------------------
@@ -304,15 +307,28 @@ async function gravarResultado(githubId, detectedSkills, evidencias, { parcial, 
       );
     }
 
-    const atualiza = parcial
-      ? "confidence = GREATEST(confidence, VALUES(confidence))"
-      : "confidence = VALUES(confidence)";
-    for (const skill of detectedSkills) {
-      await conn.query(`
-        INSERT INTO user_skills (github_id, skill_id, source, confidence)
-        VALUES (?, ?, 'github', ?)
-        ON DUPLICATE KEY UPDATE ${atualiza}
-      `, [githubId, skill.skill_id, skill.confidence]);
+    // Detectada × declarada (services/skillOrigem.js): a parte detectada é a
+    // desta análise; a declaração do dev serve de piso; `source` é a origem do
+    // valor que ficou.
+    if (detectedSkills.length) {
+      const declaracoes = await lerDeclaracoes(conn, githubId);
+      const [linhas] = await conn.query(
+        "SELECT skill_id, source, confidence FROM user_skills WHERE github_id = ?",
+        [githubId]
+      );
+      const atuais = new Map(linhas.map(l => [Number(l.skill_id), l]));
+
+      for (const skill of detectedSkills) {
+        const atual = atuais.get(Number(skill.skill_id));
+        const final = combinar(skill.confidence, declaradaDe(declaracoes, skill.skill_id, atual));
+        // Leitura parcial: nunca reduz — o que ficou de fora pode ter pontuado antes.
+        if (parcial && atual && Number(atual.confidence) >= final.confidence) continue;
+        await conn.query(`
+          INSERT INTO user_skills (github_id, skill_id, source, confidence)
+          VALUES (?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE source = VALUES(source), confidence = VALUES(confidence)
+        `, [githubId, skill.skill_id, final.source, final.confidence]);
+      }
     }
 
     if (evidencias.length) {

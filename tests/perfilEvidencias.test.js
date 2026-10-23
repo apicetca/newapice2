@@ -27,6 +27,10 @@ function instalarFakeDb({ evidencias = [], semTabela = false } = {}) {
       if (semTabela) { const e = new Error("no table"); e.code = "ER_NO_SUCH_TABLE"; throw e; }
       return [evidencias];
     }
+    if (s.includes("from user_skill_declaracoes")) {
+      if (semTabela) { const e = new Error("no table"); e.code = "ER_NO_SUCH_TABLE"; throw e; }
+      return [[{ skill_id: 9, nivel: "avancado" }]];
+    }
     if (s.includes("from user_skills")) return [SKILLS.map(x => ({ ...x }))];
     throw new Error(`fakeDb: rota não mapeada: ${sql}`);
   });

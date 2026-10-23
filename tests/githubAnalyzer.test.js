@@ -79,9 +79,13 @@ function instalarFakeGitHub(repos) {
 // A conexão da transação (getConnection) usa o mesmo db.query, então
 // gravacoes()/evidenciasGravadas() enxergam tudo; begin/commit/rollback ficam em `transacao`.
 let transacao;
-function instalarFakeDb(skills, { importados = [], semTabelaEvidencias = false } = {}) {
+// atuais: linhas já em user_skills ({ skill_id, source, confidence }).
+// declaracoes: autodiagnóstico ({ skill_id, confidence }) em user_skill_declaracoes.
+function instalarFakeDb(skills, { importados = [], semTabelaEvidencias = false, atuais = [], declaracoes = [] } = {}) {
   db.query.mockImplementation(async (sql) => {
     if (/from skills/i.test(sql)) return [skills];
+    if (/from user_skill_declaracoes/i.test(sql)) return [declaracoes];
+    if (/^\s*select[\s\S]*from user_skills\b/i.test(sql)) return [atuais];
     if (/from user_repositories/i.test(sql)) return [importados.map(n => ({ repo_full_name: n }))];
     if (/user_skill_evidencias/i.test(sql)) {
       if (semTabelaEvidencias) {
@@ -112,10 +116,16 @@ const evidenciasGravadas = () =>
 const apagouEvidencias = () =>
   db.query.mock.calls.filter(([sql]) => /delete from user_skill_evidencias/i.test(sql));
 
+// INSERT em user_skills: (github_id, skill_id, source, confidence) — Etapa 7
+// passou a gravar a origem do valor que ficou.
 const gravacoes = () =>
   db.query.mock.calls
     .filter(([sql]) => /insert into user_skills/i.test(sql))
-    .map(([, params]) => ({ githubId: params[0], skillId: params[1], confidence: params[2] }));
+    .map(([, params]) => ({ githubId: params[0], skillId: params[1], confidence: params[3] }));
+const gravacoesComOrigem = () =>
+  db.query.mock.calls
+    .filter(([sql]) => /insert into user_skills/i.test(sql))
+    .map(([, params]) => ({ skillId: params[1], source: params[2], confidence: params[3] }));
 
 const repoList = (...nomes) => nomes.map((full_name) => ({ full_name }));
 
@@ -138,8 +148,8 @@ describe("matchSkillsFromGitHub — exemplo da seção 1 do doc (React = 40)", (
 
     expect(detectadas).toEqual([{ skill_id: 7, confidence: 40 }]);
     expect(gravacoes()).toEqual([{ githubId: GITHUB_ID, skillId: 7, confidence: 40 }]);
-    const insert = db.query.mock.calls.find(([sql]) => /insert into user_skills/i.test(sql))[0];
-    expect(insert).toMatch(/'github'/);
+    // Etapa 7: a origem passou a ser parâmetro (era o literal 'github' no SQL)
+    expect(gravacoesComOrigem()).toEqual([{ skillId: 7, source: "github", confidence: 40 }]);
   });
 });
 
@@ -292,23 +302,24 @@ describe("matchSkillsFromGitHub — falha da API não é 'não encontrado' (Etap
     expect(r.skills).toEqual([{ skill_id: 1, confidence: 80 }]); // 40 + 40; o "b" ficou de fora
   });
 
-  test("leitura parcial nunca REDUZ a confiança já gravada (GREATEST); leitura completa substitui", async () => {
-    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+  // Etapa 7: o GREATEST saiu do SQL e virou regra no código (para combinar com
+  // a declaração do dev); o comportamento da leitura parcial é o mesmo.
+  test("leitura parcial nunca REDUZ a confiança já gravada; leitura completa substitui", async () => {
+    const atuais = [{ skill_id: 1, source: "github", confidence: 80 }];
+    instalarFakeDb([{ id: 1, github_signals: "python" }], { atuais });
     instalarFakeGitHub({
       "u/a": { languages: { Python: 1 }, readme: null },
       "u/b": { languagesErro: erroHttp(500), readme: null },
     });
     jest.spyOn(console, "error").mockImplementation(() => {});
     await ana(repoList("u/a", "u/b"));
-    const sqlParcial = db.query.mock.calls.find(([sql]) => /insert into user_skills/i.test(sql))[0];
-    expect(sqlParcial).toMatch(/GREATEST\(confidence, VALUES\(confidence\)\)/);
+    expect(gravacoes()).toEqual([]); // 40 < 80 já gravado → não reduz
 
     jest.clearAllMocks();
-    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeDb([{ id: 1, github_signals: "python" }], { atuais });
     instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null } });
     await ana(repoList("u/a"));
-    const sqlCompleto = db.query.mock.calls.find(([sql]) => /insert into user_skills/i.test(sql))[0];
-    expect(sqlCompleto).not.toMatch(/GREATEST/);
+    expect(gravacoes()).toEqual([{ githubId: GITHUB_ID, skillId: 1, confidence: 40 }]); // completa: substitui
   });
 
   test("a falha é registrada no log com status e repositório, sem o token", async () => {
@@ -659,6 +670,8 @@ describe("evidências por skill (Etapa 6)", () => {
     expect(ordem).toEqual([
       "select * from",                   // skills
       "delete from user_skill_evidencias",
+      "select skill_id, confidence",     // declarações (Etapa 7)
+      "select skill_id, source,",        // linhas atuais de user_skills (Etapa 7)
       "insert into user_skills",
       "insert into user_skill_evidencias",
     ]);
@@ -765,5 +778,47 @@ describe("repositórios escolhidos em /repositorios (Etapa 6)", () => {
     instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null } });
     await matchSkillsFromGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
     expect(db.query.mock.calls.some(([sql]) => /user_repositories/i.test(sql))).toBe(false);
+  });
+});
+
+// ETAPA 7 — detectada × declarada (opção B: a parte detectada é recalculada
+// a cada análise; a declaração do dev serve de piso).
+describe("análise × autodiagnóstico (Etapa 7)", () => {
+  const PY = [{ id: 1, github_signals: "python" }];
+  const umRepoPython = () => instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: "python" } }); // 60
+
+  test("declarada 30 + GitHub 60 → 60, source github", async () => {
+    instalarFakeDb(PY, { declaracoes: [{ skill_id: 1, confidence: 30 }], atuais: [{ skill_id: 1, source: "manual", confidence: 30 }] });
+    umRepoPython();
+    await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(gravacoesComOrigem()).toEqual([{ skillId: 1, source: "github", confidence: 60 }]);
+  });
+
+  test("declarada 85 + GitHub 20 → 85, source manual (a análise não rebaixa a declaração)", async () => {
+    instalarFakeDb(PY, { declaracoes: [{ skill_id: 1, confidence: 85 }], atuais: [{ skill_id: 1, source: "manual", confidence: 85 }] });
+    instalarFakeGitHub({ "u/a": { languages: {}, readme: "python" } }); // 20
+    await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(gravacoesComOrigem()).toEqual([{ skillId: 1, source: "manual", confidence: 85 }]);
+  });
+
+  test("skill só do GitHub é recalculada: 60 → 20 quando o repositório muda", async () => {
+    instalarFakeDb(PY, { atuais: [{ skill_id: 1, source: "github", confidence: 60 }] });
+    instalarFakeGitHub({ "u/a": { languages: {}, readme: "python" } }); // 20
+    await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(gravacoesComOrigem()).toEqual([{ skillId: 1, source: "github", confidence: 20 }]);
+  });
+
+  test("empate fica com a origem github", async () => {
+    instalarFakeDb(PY, { declaracoes: [{ skill_id: 1, confidence: 60 }] });
+    umRepoPython();
+    await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(gravacoesComOrigem()).toEqual([{ skillId: 1, source: "github", confidence: 60 }]);
+  });
+
+  test("skill manual antiga (70, sem declaração registrada) continua valendo como declaração", async () => {
+    instalarFakeDb(PY, { atuais: [{ skill_id: 1, source: "manual", confidence: 70 }] });
+    instalarFakeGitHub({ "u/a": { languages: {}, readme: "python" } }); // 20
+    await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(gravacoesComOrigem()).toEqual([{ skillId: 1, source: "manual", confidence: 70 }]);
   });
 });
