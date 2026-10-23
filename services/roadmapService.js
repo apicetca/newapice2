@@ -646,16 +646,35 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
         [habilidadesAlvo]
       )
     : [[]];
-  const habilidadesComSinais = skillRows.map(s => ({
-    habilidade: s.name,
-    sinais: s.github_signals.split(",").map(x => x.trim()),
-  }));
+  // "Verificável" = habilidade com skill de mesmo nome e github_signals
+  // cadastrados; só essas dá pra checar no repositório. As demais são
+  // devolvidas na resposta para o usuário saber o que não foi checado.
+  const habilidadesComSinais = skillRows
+    .map(s => ({
+      habilidade: s.name,
+      sinais: s.github_signals.split(",").map(x => x.trim()).filter(Boolean),
+    }))
+    .filter(h => h.sinais.length > 0);
+  const nomesVerificaveis = new Set(habilidadesComSinais.map(h => h.habilidade.toLowerCase()));
+  const naoVerificaveis = habilidadesAlvo.filter(h => !nomesVerificaveis.has(String(h).toLowerCase()));
+
+  // Nenhuma habilidade verificável: NÃO aprova sem checagem (limitação 10 do
+  // doc). A fase fecha com o selo "não verificada", o mesmo do plano Free.
+  if (habilidadesComSinais.length === 0) {
+    await db.query(
+      "UPDATE roadmap_fases SET projeto_repo_url = ?, projeto_status = 'nao_verificado' WHERE id = ?",
+      [repoUrl, faseId]
+    );
+    return {
+      status: "nao_verificavel",
+      mensagem: "Não conseguimos verificar este projeto automaticamente. A fase foi concluída com o selo 'não verificada'.",
+      naoVerificaveis,
+    };
+  }
 
   let resultadoAnalise;
   try {
-    resultadoAnalise = habilidadesComSinais.length
-      ? await verificarHabilidadesNoRepo(accessToken, repoFullName, habilidadesComSinais)
-      : [];
+    resultadoAnalise = await verificarHabilidadesNoRepo(accessToken, repoFullName, habilidadesComSinais);
   } catch (err) {
     // Nunca devolver "faltando" quando a causa foi falha da API: o status do
     // projeto continua como estava.
@@ -671,9 +690,8 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
 
   const faltando = resultadoAnalise.filter(r => !r.encontrada).map(r => r.habilidade);
 
-  // Sem nenhuma habilidade verificável tecnicamente (ex. fase só com
-  // habilidades "soft", sem github_signals cadastrado) — nada ficou de
-  // fora do que dava pra checar, então aprova.
+  // Todas as habilidades verificáveis foram encontradas → aprova. As não
+  // verificáveis não entram na decisão, mas são listadas no resultado.
   if (faltando.length === 0) {
     await db.query(
       `UPDATE roadmap_fases
@@ -681,12 +699,11 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
        WHERE id = ?`,
       [repoUrl, faseId]
     );
-    if (habilidadesComSinais.length) {
-      await registrarProjetoVerificadoNoPerfil(fase.usuario_id, fase.nome, habilidadesComSinais.map(h => h.habilidade));
-    }
+    await registrarProjetoVerificadoNoPerfil(fase.usuario_id, fase.nome, habilidadesComSinais.map(h => h.habilidade));
     return {
       status: "aprovado",
       mensagem: "Projeto aprovado! As habilidades da fase foram confirmadas no seu repositório.",
+      naoVerificaveis,
     };
   }
 
@@ -700,6 +717,7 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
     status: "faltando",
     mensagem: "Quase lá! Algumas habilidades ainda não apareceram no repositório — continue trabalhando nelas e envie de novo quando quiser.",
     faltando,
+    naoVerificaveis,
   };
 }
 
