@@ -124,7 +124,9 @@ router.get("/jobs/:id/match-explicacao", isAuth, ...intParam("id"), async (req, 
   const jobId    = req.params.id;
 
   try {
-    const explanation = await getMatchExplanation(githubId, jobId);
+    // Mesmo profileData da página da vaga (nível do dev), para o percentual
+    // explicado ser o mesmo que o dev vê — e o cache comparar com ele.
+    const explanation = await getMatchExplanation(githubId, jobId, { nivel: req.session.user.nivel });
     res.json(explanation);
   } catch (err) {
     console.error("[GET /api/ai/jobs/:id/match-explicacao]", err.message);
