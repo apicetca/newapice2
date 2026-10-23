@@ -8,6 +8,7 @@ const db    = require("../database/db");
 const {
   GitHubIndisponivelError, ehFalhaDeLeitura, registrarFalha,
 } = require("./githubErrors");
+const { ARQUIVOS_DEPENDENCIAS, extrairPacotes } = require("./dependencyParser");
 
 // Sem timeout o axios espera para sempre; uma resposta que não chega é uma
 // falha de leitura, não "repositório sem dados".
@@ -57,6 +58,59 @@ async function lerReadme(accessToken, repoFullName) {
 }
 
 // --------------------------------------------
+// Pacotes declarados nos arquivos de dependências da RAIZ do repositório
+// (package.json, requirements.txt…): UMA chamada para listar a raiz e uma por
+// arquivo encontrado. Mesma regra de falha das outras leituras: repositório
+// vazio (404) não é falha; limite de uso, token inválido, rede etc. são.
+// Arquivo mal formado é ignorado (extrairPacotes nunca lança).
+// --------------------------------------------
+const ARQUIVOS_PROCURADOS = new Set(ARQUIVOS_DEPENDENCIAS.map(n => n.toLowerCase()));
+
+async function lerDependencias(accessToken, repoFullName) {
+  let raiz;
+  try {
+    const res = await axios.get(
+      `https://api.github.com/repos/${repoFullName}/contents`,
+      { headers: { Authorization: `Bearer ${accessToken}` }, timeout: GITHUB_TIMEOUT_MS }
+    );
+    raiz = Array.isArray(res.data) ? res.data : [];
+  } catch (err) {
+    if (ehFalhaDeLeitura(err)) {
+      registrarFalha("lista de arquivos", repoFullName, err);
+      return { falha: true, valor: [] };
+    }
+    return { falha: false, valor: [] }; // repositório vazio — sem dependências
+  }
+
+  const arquivos = raiz.filter(item =>
+    item && item.type === "file" && ARQUIVOS_PROCURADOS.has(String(item.name).toLowerCase())
+  );
+
+  const pacotes = new Set();
+  for (const arquivo of arquivos) {
+    try {
+      const res = await axios.get(
+        `https://api.github.com/repos/${repoFullName}/contents/${encodeURIComponent(arquivo.name)}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/vnd.github.raw" },
+          timeout: GITHUB_TIMEOUT_MS,
+          transformResponse: [dados => dados], // texto puro: package.json mal formado não pode quebrar aqui
+        }
+      );
+      const texto = typeof res.data === "string" ? res.data : JSON.stringify(res.data ?? "");
+      for (const pacote of extrairPacotes(arquivo.name, texto)) pacotes.add(pacote);
+    } catch (err) {
+      if (ehFalhaDeLeitura(err)) {
+        registrarFalha(arquivo.name, repoFullName, err);
+        return { falha: true, valor: [] };
+      }
+      // 404 entre a listagem e o download: segue sem esse arquivo
+    }
+  }
+  return { falha: false, valor: [...pacotes] };
+}
+
+// --------------------------------------------
 // Versões "simples" (mantidas para os outros chamadores — aiProfileAnalyzer,
 // portfolioDescriber): devolvem [] / "" também em caso de falha, que fica
 // registrada no log.
@@ -72,11 +126,12 @@ async function fetchRepoReadme(accessToken, repoFullName) {
 // --------------------------------------------
 // Pontuação de UMA skill em UM repositório — única fórmula, usada pela
 // análise do perfil e pela verificação de projetos:
-//   +40 se QUALQUER sinal da skill está nas linguagens do repositório
+//   +40 se QUALQUER sinal da skill está nas linguagens do repositório OU é o
+//       nome de um pacote dos arquivos de dependências (não soma duas vezes)
 //   +20 se QUALQUER sinal aparece no README como palavra inteira
 // Sinônimos (react, reactjs, jsx) não somam entre si.
 // --------------------------------------------
-const PONTOS_LINGUAGEM = 40;
+const PONTOS_LINGUAGEM = 40; // também vale para dependência
 const PONTOS_README    = 20;
 const CONFIANCA_MAXIMA = 100;
 
@@ -96,10 +151,10 @@ function normalizarSinais(sinais) {
   return sinais.map(s => String(s).trim().toLowerCase()).filter(Boolean);
 }
 
-function pontuarSkillNoRepo(sinais, languages, readme) {
+function pontuarSkillNoRepo(sinais, languages, readme, dependencias = []) {
   const lista = normalizarSinais(sinais);
   let pontos = 0;
-  if (lista.some(s => languages.includes(s))) pontos += PONTOS_LINGUAGEM;
+  if (lista.some(s => languages.includes(s) || dependencias.includes(s))) pontos += PONTOS_LINGUAGEM;
   if (lista.some(s => aparecePalavraInteira(readme, s))) pontos += PONTOS_README;
   return pontos;
 }
@@ -119,19 +174,28 @@ async function analisarGitHub(accessToken, githubId, repos) {
     "SELECT * FROM skills WHERE github_signals IS NOT NULL"
   );
 
-  // Para cada repositório, busca linguagens e README (em lotes de 5)
+  // Forks ficam de fora: o código não foi escrito pelo dev.
+  const proprios = repos.filter(repo => !repo.fork);
+
+  // Para cada repositório, busca linguagens, README e dependências (em lotes de 5)
   const BATCH = 5;
   const repoData = [];
   let reposComFalha = 0;
-  for (let i = 0; i < repos.length; i += BATCH) {
-    const batch = repos.slice(i, i + BATCH);
+  for (let i = 0; i < proprios.length; i += BATCH) {
+    const batch = proprios.slice(i, i + BATCH);
     const results = await Promise.all(
       batch.map(async (repo) => {
-        const [linguagens, readme] = await Promise.all([
+        const [linguagens, readme, dependencias] = await Promise.all([
           lerLinguagens(accessToken, repo.full_name),
           lerReadme(accessToken, repo.full_name),
+          lerDependencias(accessToken, repo.full_name),
         ]);
-        return { falha: linguagens.falha || readme.falha, languages: linguagens.valor, readme: readme.valor };
+        return {
+          falha:        linguagens.falha || readme.falha || dependencias.falha,
+          languages:    linguagens.valor,
+          readme:       readme.valor,
+          dependencias: dependencias.valor,
+        };
       })
     );
     for (const r of results) {
@@ -140,8 +204,8 @@ async function analisarGitHub(accessToken, githubId, repos) {
     }
   }
 
-  if (repos.length > 0 && repoData.length === 0) {
-    console.error(`[github-analyzer] leitura indisponível: ${reposComFalha} de ${repos.length} repositório(s) falharam; nada foi gravado`);
+  if (proprios.length > 0 && repoData.length === 0) {
+    console.error(`[github-analyzer] leitura indisponível: ${reposComFalha} de ${proprios.length} repositório(s) falharam; nada foi gravado`);
     return { status: "indisponivel", skills: [], reposComFalha };
   }
 
@@ -152,11 +216,11 @@ async function analisarGitHub(accessToken, githubId, repos) {
     // Ex: "express,node,nodejs" → ["express", "node", "nodejs"]
     const signals = skill.github_signals.split(",").map(s => s.trim());
 
-    // Soma, repositório a repositório, +40 (linguagem) e +20 (README por
-    // palavra inteira) — ver pontuarSkillNoRepo.
+    // Soma, repositório a repositório, +40 (linguagem ou dependência) e +20
+    // (README por palavra inteira) — ver pontuarSkillNoRepo.
     let confidence = 0;
     for (const repo of repoData) {
-      confidence += pontuarSkillNoRepo(signals, repo.languages, repo.readme);
+      confidence += pontuarSkillNoRepo(signals, repo.languages, repo.readme, repo.dependencias);
     }
 
     // Só considera detectada se a confiança for maior que zero
@@ -231,18 +295,20 @@ async function verificarRepoPublico(accessToken, repoFullName) {
 // habilidadesComSinais: [{ habilidade: "JavaScript", sinais: ["javascript","js"] }]
 // --------------------------------------------
 async function verificarHabilidadesNoRepo(accessToken, repoFullName, habilidadesComSinais) {
-  const [linguagens, leitura] = await Promise.all([
+  const [linguagens, leitura, deps] = await Promise.all([
     lerLinguagens(accessToken, repoFullName),
     lerReadme(accessToken, repoFullName),
+    lerDependencias(accessToken, repoFullName),
   ]);
   // Falha de leitura nunca vira "habilidade faltando": quem chama trata como
   // GitHub indisponível e não mexe no status do projeto.
-  if (linguagens.falha || leitura.falha) throw new GitHubIndisponivelError(repoFullName);
-  const languages = linguagens.valor;
-  const readme    = leitura.valor;
+  if (linguagens.falha || leitura.falha || deps.falha) throw new GitHubIndisponivelError(repoFullName);
+  const languages    = linguagens.valor;
+  const readme       = leitura.valor;
+  const dependencias = deps.valor;
 
   return habilidadesComSinais.map(({ habilidade, sinais }) => {
-    const confidence = Math.min(pontuarSkillNoRepo(sinais, languages, readme), CONFIANCA_MAXIMA);
+    const confidence = Math.min(pontuarSkillNoRepo(sinais, languages, readme, dependencias), CONFIANCA_MAXIMA);
     return { habilidade, confidence, encontrada: confidence > 0 };
   });
 }
@@ -250,5 +316,5 @@ async function verificarHabilidadesNoRepo(accessToken, repoFullName, habilidades
 module.exports = {
   matchSkillsFromGitHub, analisarGitHub, fetchRepoLanguages, fetchRepoReadme,
   verificarRepoPublico, verificarHabilidadesNoRepo,
-  pontuarSkillNoRepo, aparecePalavraInteira,
+  pontuarSkillNoRepo, aparecePalavraInteira, lerDependencias,
 };

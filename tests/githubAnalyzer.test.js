@@ -10,6 +10,7 @@ const db = require("../database/db");
 const {
   matchSkillsFromGitHub, analisarGitHub, fetchRepoLanguages, fetchRepoReadme,
   verificarRepoPublico, verificarHabilidadesNoRepo, pontuarSkillNoRepo, aparecePalavraInteira,
+  lerDependencias,
 } = require("../services/githubAnalyzer");
 const fs = require("fs");
 const path = require("path");
@@ -33,20 +34,38 @@ function erroDeRede() {
 
 // repos: { "dono/repo": {
 //   languages: {JavaScript: 123}, readme: "texto" | null (404),
-//   languagesErro / readmeErro: true (erro de rede) ou um erro pronto (erroHttp(...)),
+//   arquivos: { "package.json": "<conteúdo>" }   (arquivos na raiz; padrão: nenhum),
+//   languagesErro / readmeErro / contentsErro / arquivoErro:
+//     true (erro de rede) ou um erro pronto (erroHttp(...)),
 // } }
 function instalarFakeGitHub(repos) {
   axios.get.mockImplementation(async (url) => {
-    const m = url.match(/repos\/(.+)\/(languages|readme)$/);
+    const m = url.match(/repos\/([^/]+\/[^/]+)\/(languages|readme|contents)(?:\/(.+))?$/);
     if (!m) throw new Error(`fakeGitHub: URL não mapeada: ${url}`);
-    const [, nome, recurso] = m;
+    const [, nome, recurso, arquivo] = m;
     const repo = repos[nome];
     if (!repo) throw erroHttp(404);
-    const erro = recurso === "languages" ? repo.languagesErro : repo.readmeErro;
-    if (erro) throw (erro === true ? erroDeRede() : erro);
-    if (recurso === "languages") return { data: repo.languages ?? {} };
-    if (repo.readme == null) throw erroHttp(404); // repositório sem README
-    return { data: repo.readme };
+    const lancar = (erro) => { throw (erro === true ? erroDeRede() : erro); };
+    if (recurso === "languages") {
+      if (repo.languagesErro) lancar(repo.languagesErro);
+      return { data: repo.languages ?? {} };
+    }
+    if (recurso === "readme") {
+      if (repo.readmeErro) lancar(repo.readmeErro);
+      if (repo.readme == null) throw erroHttp(404); // repositório sem README
+      return { data: repo.readme };
+    }
+    // contents
+    const arquivos = repo.arquivos ?? {};
+    if (!arquivo) {
+      if (repo.contentsErro) lancar(repo.contentsErro);
+      if (repo.vazio) throw erroHttp(404); // repositório sem nenhum commit
+      return { data: Object.keys(arquivos).map(n => ({ name: n, path: n, type: "file" })) };
+    }
+    if (repo.arquivoErro) lancar(repo.arquivoErro);
+    const nomeArquivo = decodeURIComponent(arquivo);
+    if (!(nomeArquivo in arquivos)) throw erroHttp(404);
+    return { data: arquivos[nomeArquivo] };
   });
 }
 
@@ -444,5 +463,127 @@ describe("fixtures de README (Etapa 4)", () => {
     ["C#",         ["csharp", "dotnet", ".net"],           "notas-cli",      20],
   ])("%s (%j) em %s → %i", (_skill, sinais, nome, esperado) => {
     expect(pontos(sinais, nome)).toBe(esperado);
+  });
+});
+
+// ETAPA 5 — forks ficam de fora e arquivos de dependências viram evidência.
+describe("forks e arquivos de dependências (Etapa 5)", () => {
+  const PKG_REACT = JSON.stringify({ dependencies: { react: "^18.2.0", "react-dom": "^18.2.0" }, devDependencies: { vite: "^5" } });
+
+  test("fork é ignorado: não pontua e nem é consultado", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({
+      "u/meu":  { languages: { Python: 1 }, readme: null },
+      "u/fork": { languages: { Python: 1 }, readme: "python" },
+    });
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, [
+      { full_name: "u/meu", fork: false },
+      { full_name: "u/fork", fork: true },
+    ]);
+    expect(r.skills).toEqual([{ skill_id: 1, confidence: 40 }]); // só o "meu"
+    expect(axios.get.mock.calls.some(([url]) => url.includes("u/fork"))).toBe(false);
+  });
+
+  test("só forks na lista → status ok, nada detectado (não é 'indisponível')", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({});
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, [{ full_name: "u/fork", fork: true }]);
+    expect(r).toEqual({ status: "ok", skills: [], reposComFalha: 0 });
+  });
+
+  test("React no package.json → +40 (mesmo sem citar React no README)", async () => {
+    instalarFakeDb([{ id: 7, github_signals: "react,reactjs,jsx,tsx" }]);
+    instalarFakeGitHub({ "u/a": { languages: { JavaScript: 1 }, readme: "loja virtual", arquivos: { "package.json": PKG_REACT } } });
+    const r = await matchSkillsFromGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(r).toEqual([{ skill_id: 7, confidence: 40 }]);
+  });
+
+  test("dependência + README → 60; dependência não soma com linguagem (+40 uma vez só)", async () => {
+    instalarFakeDb([
+      { id: 7, github_signals: "react,reactjs,jsx,tsx" },
+      { id: 8, github_signals: "javascript,js" },
+    ]);
+    instalarFakeGitHub({ "u/a": {
+      languages: { JavaScript: 1 }, readme: "feito com react",
+      arquivos: { "package.json": JSON.stringify({ dependencies: { react: "1", js: "1" } }) },
+    } });
+    const r = await matchSkillsFromGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(r).toEqual([
+      { skill_id: 7, confidence: 60 }, // +40 dependência, +20 README
+      { skill_id: 8, confidence: 40 }, // linguagem + dependência "js" = +40, não 80
+    ]);
+  });
+
+  test("package.json inválido não quebra a análise: o resto do repositório conta", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }, { id: 7, github_signals: "react" }]);
+    instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null, arquivos: { "package.json": "{ isto não é json" } } });
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(r.status).toBe("ok");
+    expect(r.skills).toEqual([{ skill_id: 1, confidence: 40 }]);
+  });
+
+  test("requirements.txt: django → +40 em Django", async () => {
+    instalarFakeDb([{ id: 3, github_signals: "django" }]);
+    instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null, arquivos: { "requirements.txt": "Django>=4.2\ngunicorn" } } });
+    expect(await matchSkillsFromGitHub(TOKEN, GITHUB_ID, repoList("u/a"))).toEqual([{ skill_id: 3, confidence: 40 }]);
+  });
+
+  test("repositório vazio (contents 404) não é falha: sem dependências", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null, vazio: true } });
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(r.status).toBe("ok");
+    expect(r.skills).toEqual([{ skill_id: 1, confidence: 40 }]);
+  });
+
+  test("falha ao listar a raiz segue a regra da Etapa 2: repositório fora da conta", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({
+      "u/a": { languages: { Python: 1 }, readme: null, contentsErro: erroHttp(500) },
+      "u/b": { languages: { Python: 1 }, readme: null },
+    });
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a", "u/b"));
+    expect(r.status).toBe("parcial");
+    expect(r.skills).toEqual([{ skill_id: 1, confidence: 40 }]);
+  });
+
+  test("falha ao baixar um arquivo de dependências (limite de uso) também é falha do repositório", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({ "u/a": {
+      languages: { Python: 1 }, readme: null, arquivos: { "package.json": PKG_REACT },
+      arquivoErro: erroHttp(403, { headers: { "x-ratelimit-remaining": "0" } }),
+    } });
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(r.status).toBe("indisponivel");
+    expect(gravacoes()).toEqual([]);
+  });
+
+  test("lerDependencias baixa só os arquivos de dependências da raiz (uma chamada por arquivo)", async () => {
+    instalarFakeGitHub({ "u/a": { arquivos: {
+      "package.json": PKG_REACT, "README.md": "x", "index.js": "x", "requirements.txt": "flask",
+    } } });
+    const r = await lerDependencias(TOKEN, "u/a");
+    expect(r.falha).toBe(false);
+    expect(r.valor.sort()).toEqual(["flask", "react", "react-dom", "vite"]);
+    const urls = axios.get.mock.calls.map(([url]) => url);
+    expect(urls).toEqual(expect.arrayContaining([
+      "https://api.github.com/repos/u/a/contents",
+      "https://api.github.com/repos/u/a/contents/package.json",
+      "https://api.github.com/repos/u/a/contents/requirements.txt",
+    ]));
+    expect(urls).toHaveLength(3); // listagem + 2 arquivos; README.md e index.js não são baixados
+  });
+
+  test("verificarHabilidadesNoRepo também usa as dependências (+40)", async () => {
+    instalarFakeGitHub({ "u/a": { languages: { JavaScript: 1 }, readme: null, arquivos: { "package.json": PKG_REACT } } });
+    const r = await verificarHabilidadesNoRepo(TOKEN, "u/a", [{ habilidade: "React", sinais: ["react", "reactjs"] }]);
+    expect(r).toEqual([{ habilidade: "React", confidence: 40, encontrada: true }]);
+  });
+
+  test("pontuarSkillNoRepo: sinal igual ao nome de um pacote vale +40", () => {
+    expect(pontuarSkillNoRepo(["express"], ["javascript"], "", ["express", "cors"])).toBe(40);
+    expect(pontuarSkillNoRepo(["express"], ["javascript"], "", ["express-session"])).toBe(0); // nome exato
   });
 });

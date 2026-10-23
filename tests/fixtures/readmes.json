@@ -1,10 +1,51 @@
 {
-  "_comentario": "Fixtures da Etapa 4 (análise de perfil): linguagens como o GitHub devolve (minúsculas) + README de cada repositório fictício.",
+  "_comentario": "Fixtures das Etapas 4 e 5 (análise de perfil): linguagens como o GitHub devolve (minúsculas), README e, quando existe, o package.json de cada repositório fictício.",
   "repos": [
-    { "nome": "loja-front",     "linguagens": ["javascript", "css", "html"], "readme": "readmes/loja-front.md" },
-    { "nome": "api-tarefas",    "linguagens": ["python", "dockerfile"],      "readme": "readmes/api-tarefas.md" },
-    { "nome": "jogo-cpp",       "linguagens": ["c++", "cmake"],              "readme": "readmes/jogo-cpp.md" },
-    { "nome": "portfolio-next", "linguagens": ["typescript", "css"],         "readme": "readmes/portfolio-next.md" },
-    { "nome": "notas-cli",      "linguagens": ["c#"],                        "readme": "readmes/notas-cli.md" }
+    {
+      "nome": "loja-front",
+      "linguagens": [
+        "javascript",
+        "css",
+        "html"
+      ],
+      "readme": "readmes/loja-front.md",
+      "dependencias": {
+        "package.json": "dependencias/loja-front.package.json"
+      }
+    },
+    {
+      "nome": "api-tarefas",
+      "linguagens": [
+        "python",
+        "dockerfile"
+      ],
+      "readme": "readmes/api-tarefas.md"
+    },
+    {
+      "nome": "jogo-cpp",
+      "linguagens": [
+        "c++",
+        "cmake"
+      ],
+      "readme": "readmes/jogo-cpp.md"
+    },
+    {
+      "nome": "portfolio-next",
+      "linguagens": [
+        "typescript",
+        "css"
+      ],
+      "readme": "readmes/portfolio-next.md",
+      "dependencias": {
+        "package.json": "dependencias/portfolio-next.package.json"
+      }
+    },
+    {
+      "nome": "notas-cli",
+      "linguagens": [
+        "c#"
+      ],
+      "readme": "readmes/notas-cli.md"
+    }
   ]
 }

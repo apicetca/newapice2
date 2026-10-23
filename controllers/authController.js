@@ -101,7 +101,7 @@ const authController = {
       });
 
       const { data: repos } = await axios.get(
-        "https://api.github.com/user/repos?sort=updated&per_page=30",
+        "https://api.github.com/user/repos?sort=updated&per_page=30&affiliation=owner",
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
