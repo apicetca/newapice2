@@ -7,7 +7,8 @@
     "start": "node server.js",
     "mp:sync-plans": "node scripts/mp-sync-plans.js",
     "migrate:roadmap": "node migrations/run-roadmap-migration.js",
-    "seed:roadmap": "node seeds/run-roadmap-seed.js"
+    "seed:roadmap": "node seeds/run-roadmap-seed.js",
+    "migrate:analise-perfil": "node migrations/run-analise-perfil-migration.js"
   },
   "keywords": [],
   "author": "",

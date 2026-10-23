@@ -17,25 +17,15 @@
 
   <div class="lp-layout">
 
-    <!-- ═══════════════════════════════════════
-         COLUNA ESQUERDA — Formulário
-    ════════════════════════════════════════ -->
+    <!-- Barra superior: logo + linha de brilho -->
+    <header class="lp-header">
+      <a href="/" class="lp-logo" aria-label="Ápice — Página inicial">
+        <img src="/images/principal.webp" alt="Ápice" height="26" loading="eager" />
+      </a>
+    </header>
+
     <main class="lp-left" aria-label="Formulário de acesso">
       <div class="lp-left-inner">
-
-        <!-- Voltar -->
-        <a href="/" class="lp-back-link">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-          </svg>
-          Voltar ao início
-        </a>
-
-        <!-- Logo -->
-        <a href="/" class="lp-logo" aria-label="Ápice — Página inicial">
-          <img src="/images/principal.webp" alt="Ápice" height="26" loading="eager" />
-        </a>
 
         <!-- Boas-vindas -->
         <header class="lp-welcome">
@@ -166,65 +156,7 @@
 
       </div>
 
-      <!-- Rodapé esquerdo -->
-      <footer class="lp-left-footer">
-        &copy; <%= new Date().getFullYear() %> Ápice. Todos os direitos reservados.
-      </footer>
     </main>
-
-    <!-- ═══════════════════════════════════════
-         COLUNA DIREITA — Ilustração decorativa
-    ════════════════════════════════════════ -->
-    <aside class="lp-right" aria-hidden="true">
-
-      <!-- Realce único e estático -->
-      <div class="lp-right-glow"></div>
-
-      <!-- Painel editorial: como a plataforma funciona -->
-      <div class="lp-preview">
-
-        <p class="lp-eyebrow">
-          <span class="lp-eyebrow-dot"></span>
-          Como funciona
-        </p>
-
-        <h2 class="lp-right-title">De zero à vaga,<br/>em quatro passos.</h2>
-
-        <ol class="lp-steps-mini">
-          <li>
-            <span class="lp-steps-mini-num">01</span>
-            <div>
-              <p class="lp-steps-mini-title">Crie seu perfil</p>
-              <p class="lp-steps-mini-desc">Com e-mail ou GitHub, em segundos.</p>
-            </div>
-          </li>
-          <li>
-            <span class="lp-steps-mini-num">02</span>
-            <div>
-              <p class="lp-steps-mini-title">Conecte seu GitHub</p>
-              <p class="lp-steps-mini-desc">Seus repositórios viram skills catalogadas.</p>
-            </div>
-          </li>
-          <li>
-            <span class="lp-steps-mini-num">03</span>
-            <div>
-              <p class="lp-steps-mini-title">Veja seu match</p>
-              <p class="lp-steps-mini-desc">Compatibilidade real com cada vaga, sem adivinhação.</p>
-            </div>
-          </li>
-          <li>
-            <span class="lp-steps-mini-num">04</span>
-            <div>
-              <p class="lp-steps-mini-title">Evolua com um roadmap</p>
-              <p class="lp-steps-mini-desc">Skills que faltam, recursos e projetos práticos.</p>
-            </div>
-          </li>
-        </ol>
-
-      </div>
-
-      <p class="lp-right-label">Ápice · Plataforma de Carreiras em Tech</p>
-    </aside>
 
   </div>
 
@@ -243,27 +175,78 @@
       },
       empresa: {
         title:    "Acesso Empresa",
-        subtitle: "Entre com as credenciais da sua empresa",
-        btnText:  "Acessar painel",
+        subtitle: "Entre com sua conta empresarial",
+        btnText:  "Entrar na plataforma",
         footer:   `Ainda não tem conta? <a href="/cadastro#empresa">Cadastrar empresa</a>`,
       },
     };
 
-    function switchTab(type) {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Troca o conteúdo de um elemento com uma saída/entrada lateral (dir: 1 = dev→empresa, -1 = inverso)
+    function swapContent(el, update, dir) {
+      if (reduceMotion || !el.animate) { update(); return; }
+      const out = el.animate(
+        [{ opacity: 1, transform: "translateX(0)" }, { opacity: 0, transform: `translateX(${-dir * 16}px)` }],
+        { duration: 160, easing: "ease-in", fill: "forwards" }
+      );
+      out.finished.then(() => {
+        update();
+        out.cancel();
+        el.animate(
+          [{ opacity: 0, transform: `translateX(${dir * 16}px)` }, { opacity: 1, transform: "translateX(0)" }],
+          { duration: 240, easing: "ease-out" }
+        );
+      }).catch(() => update());
+    }
+
+    // Mostra/esconde o bloco do GitHub recolhendo a altura, sem "pulo" no layout
+    function toggleGithub(show) {
+      const el = getEl("github-block");
+      if (reduceMotion || !el.animate) { el.hidden = !show; return; }
+      el.style.overflow = "hidden";
+      if (show) {
+        el.hidden = false;
+        const h = el.scrollHeight;
+        el.animate(
+          [{ opacity: 0, height: "0px" }, { opacity: 1, height: h + "px" }],
+          { duration: 280, easing: "ease-out" }
+        ).finished.then(() => { el.style.overflow = ""; }).catch(() => { el.style.overflow = ""; });
+      } else {
+        const h = el.offsetHeight;
+        const a = el.animate(
+          [{ opacity: 1, height: h + "px" }, { opacity: 0, height: "0px" }],
+          { duration: 240, easing: "ease-in", fill: "forwards" }
+        );
+        a.finished.then(() => {
+          if (currentType === "empresa") el.hidden = true;
+          a.cancel();
+          el.style.overflow = "";
+        }).catch(() => { el.style.overflow = ""; });
+      }
+    }
+
+    function switchTab(type, animate = true) {
+      if (type === currentType && animate) return;
+      const dir = type === "empresa" ? 1 : -1;
       currentType = type;
       const cfg = tabConfig[type];
+      const run = (el, update) => animate ? swapContent(el, update, dir) : update();
 
       document.querySelectorAll(".tab-btn").forEach(b => {
         const isActive = b.dataset.type === type;
         b.classList.toggle("active", isActive);
         b.setAttribute("aria-selected", isActive);
       });
+      document.body.classList.toggle("is-empresa", type === "empresa");
 
-      getEl("card-title").textContent    = cfg.title;
-      getEl("card-subtitle").textContent = cfg.subtitle;
-      getEl("btn").textContent           = cfg.btnText;
-      getEl("card-footer").innerHTML     = cfg.footer;
-      getEl("github-block").hidden       = type === "empresa";
+      run(getEl("card-title"),    () => { getEl("card-title").textContent    = cfg.title; });
+      run(getEl("card-subtitle"), () => { getEl("card-subtitle").textContent = cfg.subtitle; });
+      run(getEl("btn"),           () => { getEl("btn").textContent           = cfg.btnText; });
+      run(getEl("card-footer"),   () => { getEl("card-footer").innerHTML     = cfg.footer; });
+
+      if (animate) toggleGithub(type !== "empresa");
+      else getEl("github-block").hidden = type === "empresa";
 
       hideAlert();
     }
@@ -355,7 +338,7 @@
 
     // ── Inicialização: lê URL params ───────────────────────────
     const params = new URLSearchParams(window.location.search);
-    if (params.get("tipo") === "empresa") switchTab("empresa");
+    if (params.get("tipo") === "empresa") switchTab("empresa", false);
 
     // Login pelo GitHub também volta para a página pedida (?next=).
     if (params.get("next")) {

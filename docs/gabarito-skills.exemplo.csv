@@ -1,0 +1,11 @@
+# Gabarito da avaliação da análise de perfil (docs/analise-perfil-plano.md, Etapa 9).
+# Copie para docs/gabarito-skills.csv e preencha com 10 perfis públicos do GitHub,
+# de colegas que autorizem. Uma linha por (pessoa, skill):
+#   github_login = login do GitHub
+#   skill        = nome EXATO da skill no catálogo (ex.: React, Node.js, Python)
+#   tem          = sim | não  — o que a pessoa realmente usa, não o que o algoritmo acha
+# Inclua também skills que a pessoa NÃO usa: são elas que mostram os falsos positivos.
+# Rode: node scripts/avaliar-deteccao.js
+github_login,skill,tem
+exemplo-login,React,sim
+exemplo-login,Python,não

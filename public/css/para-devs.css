@@ -71,6 +71,10 @@ body { background: #000; font-family: 'DM Mono', ui-monospace, monospace; }
 .pd-btn--primary { background: var(--accent); border: 1px solid var(--accent); color: #fff; }
 .pd-btn--primary:hover { background: var(--accent-hv); transform: translateY(-1px); }
 
+/* Nota do plano intermediário (Básico, em /para-empresas) */
+.pd-plans__nota { max-width: 880px; margin: -32px auto 56px; padding: 0 24px; text-align: center; font-size: .75rem; color: var(--muted); }
+.pd-plans__nota strong { color: var(--text); font-weight: 500; }
+
 /* ── Por que evoluir ── */
 .pd-why { padding-bottom: 64px; }
 .pd-why h2, .pd-faq h2 {

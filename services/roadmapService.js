@@ -17,6 +17,7 @@ const path = require("path");
 const db   = require("../database/db");
 const { askGeminiJSON } = require("./geminiClient");
 const { verificarRepoPublico, verificarHabilidadesNoRepo } = require("./githubAnalyzer");
+const { MENSAGEM_GITHUB_INDISPONIVEL } = require("./githubErrors");
 
 const HABILIDADES_REFERENCIA_PATH = path.join(__dirname, "..", "data", "habilidades-referencia.json");
 const ROADMAPS_MODELO_DIR         = path.join(__dirname, "..", "data", "roadmaps-modelo");
@@ -26,10 +27,9 @@ const FASES_MAX  = 5;
 const ETAPAS_MIN = 3;
 const ETAPAS_MAX = 6;
 
-// Mesma ordinalização usada em services/matchCalculator.js (NIVEL_ORDER) —
-// duplicada aqui porque matchCalculator não exporta a constante; manter os
-// dois em sincronia se a lista de níveis mudar algum dia.
-const NIVEL_ORDER = { iniciante: 0, intermediario: 1, avancado: 2 };
+// Mesma ordinalização usada em services/matchCalculator.js — fonte única em
+// services/niveis.js.
+const { NIVEL_ORDER } = require("./niveis");
 
 // ──────────────────────────────────────────────────────────
 // Leitura dos dados estáticos (data/*.json)
@@ -114,10 +114,10 @@ function confidenceToNivel(confidence) {
  * "O que já sabe" vem de `user_skills` (detectado via GitHub ou marcado
  * manualmente — a mesma tabela que o roadmap atual já usa). `perfil_tecnico_ia`
  * não entra aqui: é texto livre (boas_praticas/pontos_melhoria), não dá pra
- * usar num cálculo de gap por habilidade/nível. Sem github_id (perfil não
- * conectado) e sem autodiagnóstico implementado ainda, o gap vira "precisa
- * aprender tudo" — equivalente ao caso que a spec descreve como
- * autodiagnóstico ainda não feito.
+ * usar num cálculo de gap por habilidade/nível. As skills são lidas pelo mesmo
+ * identificador do perfil (github_id, ou o id interno para contas sem
+ * GitHub). Sem nenhuma skill — nem detectada, nem declarada no
+ * autodiagnóstico — o gap vira "precisa aprender tudo".
  */
 async function montarGap(usuarioId, objetivo) {
   if (!objetivo || !["vaga", "area"].includes(objetivo.tipo)) {
@@ -128,16 +128,18 @@ async function montarGap(usuarioId, objetivo) {
     "SELECT github_id, nivel FROM user_dev_profiles WHERE user_id = ?",
     [usuarioId]
   );
-  const githubId = devProfileRows[0]?.github_id ?? null;
+  // Mesmo identificador que o perfil usa para gravar as skills
+  // (getUserId: github_id ?? id interno) — assim uma conta sem GitHub, com
+  // skills declaradas no autodiagnóstico, tem o gap calculado de verdade
+  // (limitação 4 do doc).
+  const skillsId = devProfileRows[0]?.github_id ?? usuarioId;
 
-  let userSkillMap = {};
-  if (githubId) {
-    const [rows] = await db.query(
-      "SELECT skill_id, confidence FROM user_skills WHERE github_id = ?",
-      [githubId]
-    );
-    for (const r of rows) userSkillMap[r.skill_id] = r.confidence;
-  }
+  const userSkillMap = {};
+  const [rows] = await db.query(
+    "SELECT skill_id, confidence FROM user_skills WHERE github_id = ?",
+    [skillsId]
+  );
+  for (const r of rows) userSkillMap[r.skill_id] = r.confidence;
 
   if (objetivo.tipo === "vaga") {
     if (!objetivo.vagaId) throw new Error("objetivo.vagaId é obrigatório quando tipo='vaga'.");
@@ -619,7 +621,10 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
     };
   }
 
-  const { existe, privado } = await verificarRepoPublico(accessToken, repoFullName);
+  const { existe, privado, falha } = await verificarRepoPublico(accessToken, repoFullName);
+  // Falha de leitura do GitHub (limite de uso, token inválido, rede): não é
+  // "repositório não encontrado" e não mexe em nada da fase.
+  if (falha) return { status: "indisponivel", mensagem: MENSAGEM_GITHUB_INDISPONIVEL };
   if (!existe) {
     await db.query("UPDATE roadmap_fases SET projeto_repo_url = ? WHERE id = ?", [repoUrl, faseId]);
     return {
@@ -642,17 +647,41 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
         [habilidadesAlvo]
       )
     : [[]];
-  const habilidadesComSinais = skillRows.map(s => ({
-    habilidade: s.name,
-    sinais: s.github_signals.split(",").map(x => x.trim()),
-  }));
+  // "Verificável" = habilidade com skill de mesmo nome e github_signals
+  // cadastrados; só essas dá pra checar no repositório. As demais são
+  // devolvidas na resposta para o usuário saber o que não foi checado.
+  const habilidadesComSinais = skillRows
+    .map(s => ({
+      habilidade: s.name,
+      sinais: s.github_signals.split(",").map(x => x.trim()).filter(Boolean),
+    }))
+    .filter(h => h.sinais.length > 0);
+  const nomesVerificaveis = new Set(habilidadesComSinais.map(h => h.habilidade.toLowerCase()));
+  const naoVerificaveis = habilidadesAlvo.filter(h => !nomesVerificaveis.has(String(h).toLowerCase()));
+
+  // Nenhuma habilidade verificável: NÃO aprova sem checagem (limitação 10 do
+  // doc). A fase fecha com o selo "não verificada", o mesmo do plano Free.
+  if (habilidadesComSinais.length === 0) {
+    await db.query(
+      "UPDATE roadmap_fases SET projeto_repo_url = ?, projeto_status = 'nao_verificado' WHERE id = ?",
+      [repoUrl, faseId]
+    );
+    return {
+      status: "nao_verificavel",
+      mensagem: "Não conseguimos verificar este projeto automaticamente. A fase foi concluída com o selo 'não verificada'.",
+      naoVerificaveis,
+    };
+  }
 
   let resultadoAnalise;
   try {
-    resultadoAnalise = habilidadesComSinais.length
-      ? await verificarHabilidadesNoRepo(accessToken, repoFullName, habilidadesComSinais)
-      : [];
+    resultadoAnalise = await verificarHabilidadesNoRepo(accessToken, repoFullName, habilidadesComSinais);
   } catch (err) {
+    // Nunca devolver "faltando" quando a causa foi falha da API: o status do
+    // projeto continua como estava.
+    if (err.codigo === "GITHUB_INDISPONIVEL") {
+      return { status: "indisponivel", mensagem: MENSAGEM_GITHUB_INDISPONIVEL };
+    }
     console.error("[verificarProjeto] falha ao analisar o repositório:", err.message);
     return {
       status: "erro",
@@ -662,9 +691,8 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
 
   const faltando = resultadoAnalise.filter(r => !r.encontrada).map(r => r.habilidade);
 
-  // Sem nenhuma habilidade verificável tecnicamente (ex. fase só com
-  // habilidades "soft", sem github_signals cadastrado) — nada ficou de
-  // fora do que dava pra checar, então aprova.
+  // Todas as habilidades verificáveis foram encontradas → aprova. As não
+  // verificáveis não entram na decisão, mas são listadas no resultado.
   if (faltando.length === 0) {
     await db.query(
       `UPDATE roadmap_fases
@@ -672,12 +700,11 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
        WHERE id = ?`,
       [repoUrl, faseId]
     );
-    if (habilidadesComSinais.length) {
-      await registrarProjetoVerificadoNoPerfil(fase.usuario_id, fase.nome, habilidadesComSinais.map(h => h.habilidade));
-    }
+    await registrarProjetoVerificadoNoPerfil(fase.usuario_id, fase.nome, habilidadesComSinais.map(h => h.habilidade));
     return {
       status: "aprovado",
       mensagem: "Projeto aprovado! As habilidades da fase foram confirmadas no seu repositório.",
+      naoVerificaveis,
     };
   }
 
@@ -691,6 +718,7 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
     status: "faltando",
     mensagem: "Quase lá! Algumas habilidades ainda não apareceram no repositório — continue trabalhando nelas e envie de novo quando quiser.",
     faltando,
+    naoVerificaveis,
   };
 }
 
