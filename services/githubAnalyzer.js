@@ -70,6 +70,41 @@ async function fetchRepoReadme(accessToken, repoFullName) {
 }
 
 // --------------------------------------------
+// Pontuação de UMA skill em UM repositório — única fórmula, usada pela
+// análise do perfil e pela verificação de projetos:
+//   +40 se QUALQUER sinal da skill está nas linguagens do repositório
+//   +20 se QUALQUER sinal aparece no README como palavra inteira
+// Sinônimos (react, reactjs, jsx) não somam entre si.
+// --------------------------------------------
+const PONTOS_LINGUAGEM = 40;
+const PONTOS_README    = 20;
+const CONFIANCA_MAXIMA = 100;
+
+function escaparRegex(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Palavra inteira: antes e depois do sinal não pode haver letra nem número.
+// Não usa \b porque \b falha com sinais que terminam em + ou # (c++, c#) e
+// não reconhece letras acentuadas.
+function aparecePalavraInteira(texto, sinal) {
+  if (!sinal) return false;
+  return new RegExp(`(?<![\\p{L}\\p{N}])${escaparRegex(sinal)}(?![\\p{L}\\p{N}])`, "u").test(texto);
+}
+
+function normalizarSinais(sinais) {
+  return sinais.map(s => String(s).trim().toLowerCase()).filter(Boolean);
+}
+
+function pontuarSkillNoRepo(sinais, languages, readme) {
+  const lista = normalizarSinais(sinais);
+  let pontos = 0;
+  if (lista.some(s => languages.includes(s))) pontos += PONTOS_LINGUAGEM;
+  if (lista.some(s => aparecePalavraInteira(readme, s))) pontos += PONTOS_README;
+  return pontos;
+}
+
+// --------------------------------------------
 // Função principal: analisa GitHub e salva
 // as skills detectadas no banco de dados.
 //
@@ -117,26 +152,18 @@ async function analisarGitHub(accessToken, githubId, repos) {
     // Ex: "express,node,nodejs" → ["express", "node", "nodejs"]
     const signals = skill.github_signals.split(",").map(s => s.trim());
 
+    // Soma, repositório a repositório, +40 (linguagem) e +20 (README por
+    // palavra inteira) — ver pontuarSkillNoRepo.
     let confidence = 0;
-
     for (const repo of repoData) {
-      for (const signal of signals) {
-        // Sinal encontrado como linguagem do repositório (+40 pontos)
-        if (repo.languages.includes(signal)) {
-          confidence += 40;
-        }
-        // Sinal encontrado no README do repositório (+20 pontos)
-        if (repo.readme.includes(signal)) {
-          confidence += 20;
-        }
-      }
+      confidence += pontuarSkillNoRepo(signals, repo.languages, repo.readme);
     }
 
     // Só considera detectada se a confiança for maior que zero
     if (confidence > 0) {
       detectedSkills.push({
         skill_id:   skill.id,
-        confidence: Math.min(confidence, 100), // máximo 100
+        confidence: Math.min(confidence, CONFIANCA_MAXIMA),
       });
     }
   }
@@ -215,16 +242,13 @@ async function verificarHabilidadesNoRepo(accessToken, repoFullName, habilidades
   const readme    = leitura.valor;
 
   return habilidadesComSinais.map(({ habilidade, sinais }) => {
-    let confidence = 0;
-    for (const sinal of sinais) {
-      if (languages.includes(sinal)) confidence += 40;
-      if (readme.includes(sinal)) confidence += 20;
-    }
-    return { habilidade, confidence: Math.min(confidence, 100), encontrada: confidence > 0 };
+    const confidence = Math.min(pontuarSkillNoRepo(sinais, languages, readme), CONFIANCA_MAXIMA);
+    return { habilidade, confidence, encontrada: confidence > 0 };
   });
 }
 
 module.exports = {
   matchSkillsFromGitHub, analisarGitHub, fetchRepoLanguages, fetchRepoReadme,
   verificarRepoPublico, verificarHabilidadesNoRepo,
+  pontuarSkillNoRepo, aparecePalavraInteira,
 };

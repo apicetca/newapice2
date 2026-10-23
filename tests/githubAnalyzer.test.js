@@ -9,8 +9,10 @@ const axios = require("axios");
 const db = require("../database/db");
 const {
   matchSkillsFromGitHub, analisarGitHub, fetchRepoLanguages, fetchRepoReadme,
-  verificarRepoPublico, verificarHabilidadesNoRepo,
+  verificarRepoPublico, verificarHabilidadesNoRepo, pontuarSkillNoRepo, aparecePalavraInteira,
 } = require("../services/githubAnalyzer");
+const fs = require("fs");
+const path = require("path");
 
 const TOKEN = "token-de-teste";
 const GITHUB_ID = 42;
@@ -66,8 +68,11 @@ const repoList = (...nomes) => nomes.map((full_name) => ({ full_name }));
 beforeEach(() => jest.clearAllMocks());
 afterEach(() => jest.restoreAllMocks());
 
-describe("matchSkillsFromGitHub — exemplo da seção 1 do doc (React = 80)", () => {
-  test("3 repositórios: 40 + 40 + 0 → 80, e grava source github", async () => {
+// ETAPA 4: o exemplo mudou DE PROPÓSITO de 80 para 40. Regra nova: por skill
+// e por repositório, +20 se QUALQUER sinal aparece no README (palavra inteira);
+// "react" + "jsx" no mesmo README, ou "react" dentro de "reactjs", não somam mais.
+describe("matchSkillsFromGitHub — exemplo da seção 1 do doc (React = 40)", () => {
+  test("3 repositórios: 20 + 20 + 0 → 40, e grava source github", async () => {
     instalarFakeDb([{ id: 7, github_signals: "react, reactjs, jsx, tsx" }]);
     instalarFakeGitHub({
       "u/loja-front":  { languages: { JavaScript: 1, CSS: 1 }, readme: "Feito com React e JSX" },
@@ -77,8 +82,8 @@ describe("matchSkillsFromGitHub — exemplo da seção 1 do doc (React = 80)", (
 
     const detectadas = await matchSkillsFromGitHub(TOKEN, GITHUB_ID, repoList("u/loja-front", "u/portfolio", "u/api-tarefas"));
 
-    expect(detectadas).toEqual([{ skill_id: 7, confidence: 80 }]);
-    expect(gravacoes()).toEqual([{ githubId: GITHUB_ID, skillId: 7, confidence: 80 }]);
+    expect(detectadas).toEqual([{ skill_id: 7, confidence: 40 }]);
+    expect(gravacoes()).toEqual([{ githubId: GITHUB_ID, skillId: 7, confidence: 40 }]);
     const insert = db.query.mock.calls.find(([sql]) => /insert into user_skills/i.test(sql))[0];
     expect(insert).toMatch(/'github'/);
   });
@@ -113,11 +118,14 @@ describe("matchSkillsFromGitHub — regras de pontuação", () => {
     expect(r).toEqual([{ skill_id: 1, confidence: 60 }]);
   });
 
-  test("README casa por trecho: 'py' dentro de 'happy' pontua (limitação 1 do doc)", async () => {
+  // ETAPA 4: mudou DE PROPÓSITO. Antes o README era lido por trecho e "py"
+  // dentro de "happy" pontuava (limitação 1 do doc); agora é palavra inteira.
+  test("README por palavra inteira: 'py' dentro de 'happy' NÃO pontua", async () => {
     instalarFakeDb([{ id: 1, github_signals: "py" }]);
     instalarFakeGitHub({ "u/a": { languages: {}, readme: "happy path" } });
     const r = await matchSkillsFromGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
-    expect(r).toEqual([{ skill_id: 1, confidence: 20 }]);
+    expect(r).toEqual([]);
+    expect(gravacoes()).toEqual([]);
   });
 
   test("teto de 100 (vários repositórios somando mais que isso)", async () => {
@@ -329,5 +337,112 @@ describe("verificarHabilidadesNoRepo", () => {
     instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null } });
     const r = await verificarHabilidadesNoRepo(TOKEN, "u/a", HABS);
     expect(r[0]).toMatchObject({ confidence: 40, encontrada: true });
+  });
+});
+
+// ETAPA 4 — palavra inteira no README e sinônimos contados uma vez.
+describe("aparecePalavraInteira", () => {
+  test.each([
+    ["happy path", "py", false],
+    ["feito em py e flask", "py", true],
+    ["jogo escrito em c++ com sdl2", "c++", true],
+    ["jogo em c++.", "c++", true],
+    ["ferramenta em c# (.net 8)", "c#", true],
+    ["ferramenta em c# (.net 8)", ".net", true],
+    ["backend em node.js", "node", true],
+    ["usei reactjs", "react", false],
+    ["usei reactjs", "reactjs", true],
+    ["banco mysql", "sql", false],
+    ["consultas sql", "sql", true],
+    ["tudo em programação", "ação", false], // letras acentuadas contam como letra
+    ["", "py", false],
+  ])("%j contém %j como palavra inteira → %s", (texto, sinal, esperado) => {
+    expect(aparecePalavraInteira(texto, sinal)).toBe(esperado);
+  });
+
+  test("caracteres especiais do sinal são escapados (não viram regex)", () => {
+    expect(aparecePalavraInteira("arquivo axnet", ".net")).toBe(false); // "." não é curinga
+    expect(aparecePalavraInteira("cpp", "c++")).toBe(false);
+  });
+});
+
+describe("pontuarSkillNoRepo — regra nova", () => {
+  test("'c++' casa com o README que fala de C++ (+20)", () => {
+    expect(pontuarSkillNoRepo(["c++"], [], "jogo em c++ com sdl2")).toBe(20);
+  });
+
+  test("'c++' nas linguagens do GitHub (+40)", () => {
+    expect(pontuarSkillNoRepo(["c++"], ["c++", "cmake"], "")).toBe(40);
+  });
+
+  test("'reactjs' no README conta uma vez só (não soma react + reactjs)", () => {
+    expect(pontuarSkillNoRepo(["react", "reactjs", "jsx", "tsx"], [], "componentes em reactjs")).toBe(20);
+  });
+
+  test("vários sinônimos no mesmo README somam só +20", () => {
+    expect(pontuarSkillNoRepo(["react", "reactjs", "jsx", "tsx"], [], "react, reactjs, jsx e tsx")).toBe(20);
+  });
+
+  test("dois sinais nas linguagens somam só +40", () => {
+    expect(pontuarSkillNoRepo(["javascript", "js", "typescript"], ["javascript", "typescript"], "")).toBe(40);
+  });
+
+  test("linguagem + README no mesmo repositório: 40 + 20 = 60", () => {
+    expect(pontuarSkillNoRepo(["python", "py"], ["python"], "api em python")).toBe(60);
+  });
+
+  test("sinais com espaço e maiúsculas são normalizados", () => {
+    expect(pontuarSkillNoRepo([" Python ", ""], ["python"], "")).toBe(40);
+  });
+
+  test("a soma entre repositórios continua, com teto 100", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python,py" }]);
+    instalarFakeGitHub({
+      "u/a": { languages: { Python: 1 }, readme: "python" },
+      "u/b": { languages: { Python: 1 }, readme: "python" },
+    });
+    const r = await matchSkillsFromGitHub(TOKEN, GITHUB_ID, repoList("u/a", "u/b"));
+    expect(r).toEqual([{ skill_id: 1, confidence: 100 }]); // 60 + 60 → teto 100
+  });
+
+  test("verificarHabilidadesNoRepo usa a mesma regra (py ≠ happy, sinônimos uma vez)", async () => {
+    instalarFakeGitHub({ "u/a": { languages: {}, readme: "happy path com react e jsx" } });
+    const r = await verificarHabilidadesNoRepo(TOKEN, "u/a", [
+      { habilidade: "Python", sinais: ["python", "py"] },
+      { habilidade: "React", sinais: ["react", "reactjs", "jsx"] },
+    ]);
+    expect(r).toEqual([
+      { habilidade: "Python", confidence: 0, encontrada: false },
+      { habilidade: "React", confidence: 20, encontrada: true },
+    ]);
+  });
+});
+
+// Fixtures da tabela antes × depois da Etapa 4 (tests/fixtures/readmes.json),
+// com os sinais do seed. Fixa os valores novos para os casos que motivaram a regra.
+describe("fixtures de README (Etapa 4)", () => {
+  const base = path.join(__dirname, "fixtures");
+  const fx = JSON.parse(fs.readFileSync(path.join(base, "readmes.json"), "utf8"));
+  const repo = Object.fromEntries(fx.repos.map(r => [r.nome, {
+    linguagens: r.linguagens,
+    readme: fs.readFileSync(path.join(base, r.readme), "utf8").toLowerCase(),
+  }]));
+  const pontos = (sinais, nome) => pontuarSkillNoRepo(sinais, repo[nome].linguagens, repo[nome].readme);
+
+  test.each([
+    // [skill, sinais, repositório, nova pontuação]
+    ["Python",     ["python", "py"],                       "loja-front",     0],  // "happy" não é py
+    ["React",      ["react", "reactjs", "jsx", "tsx"],     "loja-front",     20], // react + jsx = uma vez
+    ["Python",     ["python", "py"],                       "api-tarefas",    60],
+    ["Docker",     ["docker", "dockerfile", "container"],  "api-tarefas",    60], // dockerfile (linguagem) + docker (README)
+    ["SQL",        ["sql", "query", "database"],           "api-tarefas",    20], // "query" conta; "sql" dentro de mysql não
+    ["SQLite",     ["sqlite", "sql"],                      "api-tarefas",    0],
+    ["TypeScript", ["typescript", "ts"],                   "jogo-cpp",       0],  // "lets" não é ts
+    ["React",      ["react", "reactjs", "jsx", "tsx"],     "portfolio-next", 20],
+    ["TypeScript", ["typescript", "ts"],                   "portfolio-next", 60],
+    ["Python",     ["python", "py"],                       "notas-cli",      0],
+    ["C#",         ["csharp", "dotnet", ".net"],           "notas-cli",      20],
+  ])("%s (%j) em %s → %i", (_skill, sinais, nome, esperado) => {
+    expect(pontos(sinais, nome)).toBe(esperado);
   });
 });

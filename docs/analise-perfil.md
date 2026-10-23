@@ -44,15 +44,17 @@ As chamadas usam o token OAuth da sessão (`req.session.user.accessToken`), que 
 
 ### A fórmula
 
-A função é `matchSkillsFromGitHub(accessToken, githubId, repos)` (`githubAnalyzer.js:45`). Os repositórios são processados em lotes de 5. Para cada skill, cada repositório e cada sinal da skill:
+A função é `analisarGitHub(accessToken, githubId, repos)` (`githubAnalyzer.js`); `matchSkillsFromGitHub` é um atalho que devolve só a lista de skills. Os repositórios são processados em lotes de 5. A pontuação de uma skill em um repositório fica em `pontuarSkillNoRepo`, a mesma função usada na verificação de projetos. Desde a Etapa 4 do plano, para cada skill e cada repositório:
 
 ```latex
-\text{confiança}(skill) = \min\Big(100,\ \sum_{repo}\ \sum_{sinal} \big(40 \cdot [\text{sinal} \in \text{linguagens}] + 20 \cdot [\text{sinal está no README}]\big)\Big)
+\text{confiança}(skill) = \min\Big(100,\ \sum_{repo} \big(40 \cdot [\exists\, sinal \in \text{linguagens}] + 20 \cdot [\exists\, sinal \text{ no README como palavra inteira}]\big)\Big)
 ```
 
-- **+40** quando o sinal está entre as linguagens do repositório.
-- **+20** quando o sinal aparece no README. A busca é por trecho de texto (`readme.includes(sinal)`), não por palavra inteira.
+- **+40** quando **algum** sinal da skill está entre as linguagens do repositório (comparação exata).
+- **+20** quando **algum** sinal aparece no README como palavra inteira: antes e depois do sinal não pode haver letra nem número. `py` não casa com "happy"; `c++` e `c#` funcionam.
+- Sinônimos (`react`, `reactjs`, `jsx`) não somam entre si: cada repositório dá no máximo 40 + 20 por skill.
 - O total tem teto de **100**.
+- Repositório cuja leitura falhou (limite de uso, token inválido, rede) fica fora da conta (Etapa 2).
 - Só grava a skill se a confiança for **maior que 0**: `INSERT … ON DUPLICATE KEY UPDATE confidence` em `user_skills`, com `source = 'github'`.
 
 ### Exemplo passo a passo
@@ -61,11 +63,11 @@ Dados hipotéticos, só para mostrar a conta. Skill **React**, sinais `react, re
 
 | Repositório | Linguagens | Trecho do README | Pontos |
 | --- | --- | --- | --- |
-| `loja-front` | javascript, css | "feito com React e JSX" | `react` no README +20, `jsx` no README +20 = **40** |
-| `portfolio` | typescript, html | "usei reactjs" | `react` +20 (trecho de "reactjs"), `reactjs` +20 = **40** |
+| `loja-front` | javascript, css | "feito com React e JSX" | `react` e `jsx` no README, contados uma vez = **20** |
+| `portfolio` | typescript, html | "usei reactjs" | `reactjs` no README (`react` dentro de "reactjs" não conta mais) = **20** |
 | `api-tarefas` | javascript | "API em Node" | nenhum sinal = **0** |
 
-Confiança de React = min(100, 40 + 40 + 0) = **80**. Nenhum sinal de React casa com as linguagens, porque o GitHub devolve só nomes de linguagem (javascript, typescript…). Por isso React só pontua pelo README.
+Confiança de React = min(100, 20 + 20 + 0) = **40**. Antes da Etapa 4, com a soma por sinal e a busca por trecho, o mesmo exemplo dava **80**. Nenhum sinal de React casa com as linguagens, porque o GitHub devolve só nomes de linguagem (javascript, typescript…). Por isso React só pontua pelo README.
 
 ### Saída
 
