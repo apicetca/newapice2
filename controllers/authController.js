@@ -101,14 +101,9 @@ const authController = {
       });
 
       const { data: repos } = await axios.get(
-        "https://api.github.com/user/repos?sort=updated&per_page=30",
+        "https://api.github.com/user/repos?sort=updated&per_page=30&affiliation=owner",
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-
-      // Fire-and-forget: falha aqui não deve bloquear o login
-      matchSkillsFromGitHub(accessToken, githubUser.id, repos).catch(err => {
-        console.error("[github-analyzer]", err.message);
-      });
 
       const emailToUse = githubUser.email || `${githubUser.login}@users.noreply.github.com`;
 
@@ -146,6 +141,13 @@ const authController = {
         [internalId]
       );
       const devProfile = devProfiles[0] ?? {};
+
+      // Fire-and-forget: falha aqui não deve bloquear o login. Roda depois de
+      // conhecer o usuário interno para usar os repositórios que ele importou
+      // em /repositorios (se houver) em vez dos 30 mais recentes.
+      matchSkillsFromGitHub(accessToken, githubUser.id, repos, { userId: internalId }).catch(err => {
+        console.error("[github-analyzer]", err.message);
+      });
 
       // Decisão de produto: o mentor de carreira nunca continua a conversa
       // de uma sessão anterior — todo login começa do zero. Fire-and-forget

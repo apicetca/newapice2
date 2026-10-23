@@ -19,9 +19,8 @@ de tecnologia. Responda SEMPRE em JSON puro (sem markdown) no formato exato:
 O percentual_ia deve ficar próximo do percentual calculado informado — pequenos ajustes são
 aceitáveis se a explicação justificar, mas não invente uma nota muito distante da calculada.`;
 
-// Mapeamentos ordinais
-const NIVEL_ORDER  = { iniciante: 0, intermediario: 1, avancado: 2 };
-const LEVEL_ORDER  = { estagio: 0, junior: 1, pleno: 2 };
+// Mapeamentos ordinais — fonte única em services/niveis.js
+const { NIVEL_ORDER, LEVEL_ORDER } = require("./niveis");
 
 // ──────────────────────────────────────────────────────────
 // Núcleo puro do cálculo de match — única fonte de verdade.
@@ -105,19 +104,15 @@ async function calculateJobMatch(skillsId, jobId, profileData = {}) {
   });
 
   // ── 4. Scores ──────────────────────────────────────
-  const skillsScore = computeSkillsScore(userSkillMap, jobSkills);
+  // Mesma fórmula da visão da empresa: o match sai de computeMatch (85% skills
+  // + 15% senioridade), sem repetir os pesos aqui (limitação 7 do doc).
+  const nivel    = profileData.nivel ?? null;
+  // Busca o level da vaga só se for usado (sem nível do dev, a senioridade não conta)
+  const jobLevel = nivel ? (profileData.jobLevel ?? await _fetchJobLevel(jobId)) : null;
 
-  let seniorityScore = 100;
-  if (profileData.nivel) {
-    // Busca o level da vaga se não estiver em profileData
-    const jobLevel = profileData.jobLevel ?? await _fetchJobLevel(jobId);
-    seniorityScore = computeSeniorityScore(profileData.nivel, jobLevel);
-  }
-
-  const matchPercent = Math.min(100, Math.round(
-    skillsScore    * 0.85 +
-    seniorityScore * 0.15
-  ));
+  const skillsScore    = computeSkillsScore(userSkillMap, jobSkills);
+  const seniorityScore = nivel ? computeSeniorityScore(nivel, jobLevel) : 100;
+  const matchPercent   = computeMatch(userSkillMap, jobSkills, nivel, jobLevel);
 
   return {
     match:     matchPercent,
@@ -142,15 +137,22 @@ async function _fetchJobLevel(jobId) {
 // a cada acesso. O percentual numérico continua vindo de
 // calculateJobMatch (computeMatch é a única fonte de verdade);
 // a IA só complementa com uma explicação em texto.
+//
+// O cache guarda o percentual CALCULADO usado para gerar a explicação e só
+// vale enquanto ele for igual ao match calculado agora: mudou skill, nível ou
+// requisito da vaga → a explicação é gerada de novo e substitui a antiga
+// (limitação 8 do doc).
 // ──────────────────────────────────────────────────────────
 async function getMatchExplanation(githubId, jobId, profileData = {}) {
+  const match = await calculateJobMatch(githubId, jobId, profileData);
+
   const [[cached]] = await db.query(
     "SELECT percentual, explicacao FROM match_ia_cache WHERE github_id = ? AND job_id = ?",
     [githubId, jobId]
   );
-  if (cached) return { percentual_ia: cached.percentual, explicacao: cached.explicacao };
-
-  const match = await calculateJobMatch(githubId, jobId, profileData);
+  if (cached && Number(cached.percentual) === match.match) {
+    return { percentual_ia: match.match, explicacao: cached.explicacao };
+  }
 
   // LGPD: só tecnologias/skills e o breakdown do match vão pro prompt —
   // nunca nome, e-mail ou outro dado pessoal do candidato.
@@ -170,17 +172,18 @@ async function getMatchExplanation(githubId, jobId, profileData = {}) {
     maxTokens: 1536,
   });
 
-  const percentualIa = Number.isInteger(result.percentual_ia) ? result.percentual_ia : match.match;
-  const explicacao    = result.explicacao ?? "";
+  const explicacao = result.explicacao ?? "";
 
+  // Guarda o percentual calculado (não o que a IA sugeriu) — é ele que diz se
+  // a explicação ainda vale. O percentual exibido continua sendo o calculado.
   await db.query(
     `INSERT INTO match_ia_cache (github_id, job_id, percentual, explicacao)
      VALUES (?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE percentual = VALUES(percentual), explicacao = VALUES(explicacao)`,
-    [githubId, jobId, percentualIa, explicacao]
+    [githubId, jobId, match.match, explicacao]
   );
 
-  return { percentual_ia: percentualIa, explicacao };
+  return { percentual_ia: match.match, explicacao };
 }
 
 module.exports = {

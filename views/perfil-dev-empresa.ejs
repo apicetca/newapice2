@@ -84,6 +84,9 @@
 
     /* ── Skills ── */
     .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .6rem; }
+    .skill-origem { display: inline-block; margin-left: 4px; font-size: .6rem; font-weight: 500; padding: 1px 6px; border-radius: 99px; border: 1px solid var(--border-lite); color: var(--muted); white-space: nowrap; vertical-align: middle; }
+    .skill-origem--github    { border-color: var(--teal-border); color: var(--teal); }
+    .skill-origem--declarada { border-color: var(--accent-border); color: var(--accent-text); }
     .skill-row { display: flex; flex-direction: column; gap: .3rem; }
     .skill-row-top { display: flex; justify-content: space-between; align-items: center; }
     .skill-name { font-size: .82rem; color: var(--text); font-weight: 500; }
@@ -228,10 +231,10 @@
     const LEVEL_LABEL = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
     const LEVEL_CLASS = { estagio: "badge-green", junior: "badge-blue", pleno: "badge-yellow" };
     const AVATAR_COLORS = [
-      "linear-gradient(135deg,#7c3aed,#10b691)",
+      "linear-gradient(135deg,#04A07D,#10b691)",
       "linear-gradient(135deg,#10b691,#60a5fa)",
       "linear-gradient(135deg,#f59e0b,#ef4444)",
-      "linear-gradient(135deg,#ec4899,#7c3aed)",
+      "linear-gradient(135deg,#ec4899,#04A07D)",
       "linear-gradient(135deg,#06b6d4,#10b691)",
       "linear-gradient(135deg,#84cc16,#10b691)",
     ];
@@ -336,7 +339,9 @@
       grid.innerHTML = skills.slice(0, 24).map(s => `
         <div class="skill-row">
           <div class="skill-row-top">
-            <span class="skill-name">${escapeHtml(s.name)}</span>
+            <span class="skill-name">${escapeHtml(s.name)}
+              <span class="skill-origem ${s.source === "manual" ? "skill-origem--declarada" : "skill-origem--github"}">${s.source === "manual" ? "declarada" : "detectada no GitHub"}</span>
+            </span>
             <span class="skill-pct">${s.confidence}%</span>
           </div>
           <div class="skill-bar" role="progressbar" aria-valuenow="${s.confidence}" aria-valuemin="0" aria-valuemax="100" aria-label="${escapeHtml(s.name)}">

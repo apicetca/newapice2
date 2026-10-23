@@ -284,6 +284,14 @@
   white-space: nowrap;
 }
 
+/* Selo de origem da skill: detectada no GitHub × declarada pelo dev */
+.skill-tag .skill-origem {
+  margin-left: 5px; font-size: .58rem; font-weight: 500;
+  padding: 0 5px; border-radius: 99px; border: 1px solid var(--border-lite);
+}
+.skill-origem--github    { border-color: var(--teal-border); color: var(--teal); }
+.skill-origem--declarada { border-color: var(--accent-border); color: var(--accent-text); }
+
 .skill-tag--more {
   background: transparent;
   border-style: dashed;

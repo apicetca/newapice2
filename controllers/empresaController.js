@@ -402,7 +402,7 @@ const empresaController = {
       const devGithubIds = devs.map(d => d.github_id);
 
       const [skillRows] = await db.query(`
-        SELECT us.github_id, us.skill_id, us.confidence, s.name AS skill_name
+        SELECT us.github_id, us.skill_id, us.confidence, us.source, s.name AS skill_name
         FROM user_skills us
         JOIN skills s ON s.id = us.skill_id
         WHERE us.github_id IN (?)
@@ -411,10 +411,12 @@ const empresaController = {
 
       const devSkillMap   = {};
       const devSkillNames = {};
+      const devSkillOrigem = {}; // nome → "github" | "manual" (selo "detectada"/"declarada")
       for (const s of skillRows) {
-        if (!devSkillMap[s.github_id]) { devSkillMap[s.github_id] = {}; devSkillNames[s.github_id] = []; }
+        if (!devSkillMap[s.github_id]) { devSkillMap[s.github_id] = {}; devSkillNames[s.github_id] = []; devSkillOrigem[s.github_id] = {}; }
         devSkillMap[s.github_id][s.skill_id] = s.confidence;
         devSkillNames[s.github_id].push(s.skill_name);
+        devSkillOrigem[s.github_id][s.skill_name] = s.source === "manual" ? "manual" : "github";
       }
 
       const [progressRows] = await db.query(`
@@ -461,6 +463,7 @@ const empresaController = {
           github:       dev.github_login,
           level:        NIVEL_MAP[dev.nivel] ?? "estagio",
           skills:       skillNames.slice(0, 5),
+          skillsOrigem: Object.fromEntries(skillNames.slice(0, 5).map(n => [n, devSkillOrigem[dev.github_id]?.[n] ?? "github"])),
           progress:     prog.bestProgress,
           match:        bestMatch,
           roadmap:      prog.inRoadmap,
@@ -491,7 +494,7 @@ const empresaController = {
       const dev = profiles[0];
 
       const [skillRows] = await db.query(`
-        SELECT s.id AS skill_id, s.name, s.category, s.type, us.confidence
+        SELECT s.id AS skill_id, s.name, s.category, s.type, us.confidence, us.source
         FROM user_skills us
         JOIN skills s ON s.id = us.skill_id
         WHERE us.github_id = ?
@@ -546,7 +549,10 @@ const empresaController = {
         github:       dev.github_login,
         avatar_url:   dev.avatar_url,
         level:        NIVEL_MAP[dev.nivel] ?? "estagio",
-        skills:       skillRows.map(s => ({ name: s.name, category: s.category, type: s.type, confidence: s.confidence })),
+        skills:       skillRows.map(s => ({
+          name: s.name, category: s.category, type: s.type, confidence: s.confidence,
+          source: s.source === "manual" ? "manual" : "github",
+        })),
         match:        bestMatch,
         isPro:        devPlan.code === "dev_pro",
         best_job:     bestJobTitle,

@@ -1,0 +1,65 @@
+/* ══════════════════════════════════════════════════════════
+   empresa-theme.css — cor de destaque da área da empresa
+   Carregado por partials/header-company.ejs, depois dos CSS de
+   página, então vale para toda página com navegação de empresa.
+   Botões, CTAs e textos de destaque (antes roxo/verde/azul)
+   passam a usar uma única cor: #04A07D.
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  --brand-company:        #04A07D;
+  --brand-company-hv:     #05B88F;
+  --brand-company-rgb:    4, 160, 125;
+
+  /* destaque (antes roxo) */
+  --accent:        var(--brand-company);
+  --accent-hv:     var(--brand-company-hv);
+  --accent-text:   var(--brand-company);
+  --accent-dim:    rgba(var(--brand-company-rgb), .13);
+  --accent-border: rgba(var(--brand-company-rgb), .30);
+  --accent-glow:   rgba(var(--brand-company-rgb), .28);
+
+  /* verde / azul / lilás usados como cor de texto e badge */
+  --teal:          var(--brand-company);
+  --teal-hv:       var(--brand-company-hv);
+  --teal-dim:      rgba(var(--brand-company-rgb), .12);
+  --teal-border:   rgba(var(--brand-company-rgb), .28);
+  --teal-glow:     rgba(var(--brand-company-rgb), .20);
+  --blue:          var(--brand-company);
+  --blue-dim:      rgba(var(--brand-company-rgb), .12);
+  --purple:        var(--brand-company);
+  --purple-dim:    rgba(var(--brand-company-rgb), .12);
+}
+
+/* ── Valores que os CSS de página gravaram direto (rgba/hex) ── */
+.badge-blue {
+  background: rgba(var(--brand-company-rgb), .12);
+  color: var(--brand-company);
+  border-color: rgba(var(--brand-company-rgb), .28);
+}
+.bottom-nav--dev .bottom-nav-item.is-active,
+.bottom-nav--company .bottom-nav-item.is-active {
+  background: rgba(var(--brand-company-rgb), .18);
+  color: var(--brand-company);
+}
+.filter-chip.active,
+.msg-filter-tab.active,
+.btn-icon.btn-toggle-on,
+.skill-chip,
+.skill-btn.selected,
+.vaga-icon-wrap,
+.vbadge-level,
+.skill-row.has,
+.skill-tag.hard { border-color: rgba(var(--brand-company-rgb), .30); }
+.badge-ok { background: rgba(var(--brand-company-rgb), .15); color: var(--brand-company); }
+.skill-tag.soft,
+.chip-blue,
+.dev-score--mid,
+.badge-blue { border-color: rgba(var(--brand-company-rgb), .25); }
+.form-input:focus, .form-select:focus, .form-textarea:focus,
+.field select:focus, .field textarea:focus, .search-input:focus {
+  border-color: var(--brand-company);
+  box-shadow: 0 0 0 3px rgba(var(--brand-company-rgb), .15);
+}
+.btn-primary:hover { box-shadow: 0 6px 22px rgba(var(--brand-company-rgb), .35); }
+.avatar-edit-btn:hover { box-shadow: 0 0 14px rgba(var(--brand-company-rgb), .45); }

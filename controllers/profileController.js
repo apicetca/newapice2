@@ -4,8 +4,12 @@ const fs    = require("fs");
 const axios = require("axios");
 const multer = require("multer");
 const db    = require("../database/db");
-const { matchSkillsFromGitHub } = require("../services/githubAnalyzer");
+const { analisarGitHub } = require("../services/githubAnalyzer");
+const { MENSAGEM_GITHUB_INDISPONIVEL, ehFalhaDeLeitura, registrarFalha } = require("../services/githubErrors");
 const { getUserPlan } = require("../services/subscriptionService");
+const {
+  CONFIANCA_POR_NIVEL, NIVEIS_DECLARADOS, combinar, detectadaDe,
+} = require("../services/skillOrigem");
 
 // ── Avatar upload (multer) ────────────────────────────────
 const UPLOAD_DIR = path.join(__dirname, "../public/uploads/avatars");
@@ -77,6 +81,39 @@ const profileController = {
         WHERE us.github_id = ?
         ORDER BY us.confidence DESC, s.name ASC
       `, [githubId]);
+
+      // "Por quê?" de cada skill detectada: de quais repositórios vieram os
+      // pontos. Sem a tabela (migração ainda não rodada), segue sem evidências.
+      let evidencias = [];
+      try {
+        [evidencias] = await db.query(
+          `SELECT skill_id, repo_full_name, tipo, pontos
+           FROM user_skill_evidencias
+           WHERE github_id = ?
+           ORDER BY pontos DESC, repo_full_name ASC`,
+          [githubId]
+        );
+      } catch (err) {
+        if (err.code !== "ER_NO_SUCH_TABLE") throw err;
+      }
+      const evidenciasPorSkill = {};
+      for (const ev of evidencias) {
+        (evidenciasPorSkill[ev.skill_id] ??= []).push({ repo: ev.repo_full_name, tipo: ev.tipo, pontos: ev.pontos });
+      }
+      for (const sk of skills) sk.evidencias = evidenciasPorSkill[sk.skill_id] ?? [];
+
+      // Nível declarado no autodiagnóstico (Etapa 7), quando houver.
+      let declaracoes = [];
+      try {
+        [declaracoes] = await db.query(
+          "SELECT skill_id, nivel FROM user_skill_declaracoes WHERE github_id = ?",
+          [githubId]
+        );
+      } catch (err) {
+        if (err.code !== "ER_NO_SUCH_TABLE") throw err;
+      }
+      const nivelPorSkill = Object.fromEntries(declaracoes.map(d => [d.skill_id, d.nivel]));
+      for (const sk of skills) sk.nivel_declarado = nivelPorSkill[sk.skill_id] ?? null;
 
       const plan = await getUserPlan(userId, "dev");
 
@@ -213,15 +250,21 @@ const profileController = {
 
     try {
       const { data: repos } = await axios.get(
-        "https://api.github.com/user/repos?sort=updated&per_page=50",
+        "https://api.github.com/user/repos?sort=updated&per_page=50&affiliation=owner",
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      const detected = await matchSkillsFromGitHub(
+      const { status, skills: detected } = await analisarGitHub(
         accessToken,
         github_id ?? req.session.user.id,
-        repos
+        repos,
+        { userId: req.session.user.id } // repositórios importados em /repositorios, se houver
       );
+
+      // Falha ao ler o GitHub não é "nenhuma skill": nada foi alterado.
+      if (status === "indisponivel") {
+        return res.status(503).json({ error: MENSAGEM_GITHUB_INDISPONIVEL });
+      }
 
       res.json({
         success:  true,
@@ -229,47 +272,129 @@ const profileController = {
         detected: detected.length,
       });
     } catch (err) {
+      // Token inválido/expirado, limite de uso ou GitHub fora do ar ao listar os
+      // repositórios: mesma mensagem amigável (e nada é alterado).
+      if (err.isAxiosError && ehFalhaDeLeitura(err)) {
+        registrarFalha("lista de repositórios", "/user/repos", err);
+        return res.status(503).json({ error: MENSAGEM_GITHUB_INDISPONIVEL });
+      }
       console.error("Erro na re-análise:", err.message);
       res.status(500).json({ error: "Erro ao re-analisar repositórios." });
     }
   },
 
+  // Autodiagnóstico (Etapa 7): o dev declara o nível da skill — iniciante
+  // (30), intermediário (60) ou avançado (85). A declaração fica em
+  // user_skill_declaracoes e serve de piso: em user_skills vale a maior entre
+  // ela e a confiança detectada no GitHub, com `source` = origem desse valor.
   addSkill: async (req, res) => {
-    const { skill_id } = req.body;
-    const githubId     = getUserId(req);
+    const { skill_id, nivel = "intermediario" } = req.body ?? {};
+    const githubId = getUserId(req);
 
     if (!skill_id) return res.status(400).json({ error: "skill_id é obrigatório." });
+    if (!NIVEIS_DECLARADOS.includes(nivel)) {
+      return res.status(400).json({ error: `nivel deve ser um de: ${NIVEIS_DECLARADOS.join(", ")}.` });
+    }
 
+    let conn;
     try {
       const [skills] = await db.query("SELECT id, name FROM skills WHERE id = ?", [skill_id]);
       if (!skills.length) return res.status(404).json({ error: "Skill não encontrada." });
 
-      await db.query(`
-        INSERT INTO user_skills (github_id, skill_id, source, confidence)
-        VALUES (?, ?, 'manual', 70)
-        ON DUPLICATE KEY UPDATE source = 'manual', confidence = GREATEST(confidence, 70)
-      `, [githubId, skill_id]);
+      const declarada = CONFIANCA_POR_NIVEL[nivel];
+      conn = await db.getConnection();
+      await conn.beginTransaction();
 
-      res.json({ success: true, skill: skills[0] });
+      try {
+        await conn.query(`
+          INSERT INTO user_skill_declaracoes (github_id, skill_id, nivel, confidence)
+          VALUES (?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE nivel = VALUES(nivel), confidence = VALUES(confidence)
+        `, [githubId, skill_id, nivel, declarada]);
+      } catch (err) {
+        if (err.code !== "ER_NO_SUCH_TABLE") throw err;
+        console.error("[addSkill] tabela user_skill_declaracoes não existe — rode `npm run migrate:analise-perfil`.");
+      }
+
+      const [[atual]] = await conn.query(
+        "SELECT source, confidence FROM user_skills WHERE github_id = ? AND skill_id = ?",
+        [githubId, skill_id]
+      );
+      const detectada = await detectadaDe(conn, githubId, skill_id, atual);
+      const final = combinar(detectada, declarada);
+
+      await conn.query(`
+        INSERT INTO user_skills (github_id, skill_id, source, confidence)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE source = VALUES(source), confidence = VALUES(confidence)
+      `, [githubId, skill_id, final.source, final.confidence]);
+
+      await conn.commit();
+      res.json({ success: true, skill: skills[0], nivel, confidence: final.confidence, source: final.source });
     } catch (err) {
+      if (conn) await conn.rollback().catch(() => {});
       console.error("Erro ao adicionar skill:", err.message);
       res.status(500).json({ error: "Erro interno." });
+    } finally {
+      if (conn) conn.release();
     }
   },
 
+  // Remove a DECLARAÇÃO do dev. Se o GitHub também detectou a skill, ela
+  // continua no perfil com a confiança detectada (source 'github').
   removeSkill: async (req, res) => {
     const githubId = getUserId(req);
     const skillId  = req.params.skillId;
 
+    let conn;
     try {
-      await db.query(
-        "DELETE FROM user_skills WHERE github_id = ? AND skill_id = ? AND source = 'manual'",
+      conn = await db.getConnection();
+      await conn.beginTransaction();
+
+      let tinhaDeclaracao = false;
+      try {
+        const [r] = await conn.query(
+          "DELETE FROM user_skill_declaracoes WHERE github_id = ? AND skill_id = ?",
+          [githubId, skillId]
+        );
+        tinhaDeclaracao = r.affectedRows > 0;
+      } catch (err) {
+        if (err.code !== "ER_NO_SUCH_TABLE") throw err;
+      }
+
+      const [[atual]] = await conn.query(
+        "SELECT source, confidence FROM user_skills WHERE github_id = ? AND skill_id = ?",
         [githubId, skillId]
       );
-      res.json({ success: true });
+
+      // Só dá para remover o que o dev declarou (ou uma skill manual antiga).
+      if (!tinhaDeclaracao && atual?.source !== "manual") {
+        await conn.rollback();
+        return res.status(400).json({ error: "Só é possível remover habilidades declaradas por você." });
+      }
+
+      let restante = null;
+      if (atual) {
+        const detectada = await detectadaDe(conn, githubId, skillId, atual);
+        if (detectada > 0) {
+          await conn.query(
+            "UPDATE user_skills SET source = 'github', confidence = ? WHERE github_id = ? AND skill_id = ?",
+            [detectada, githubId, skillId]
+          );
+          restante = { source: "github", confidence: detectada };
+        } else {
+          await conn.query("DELETE FROM user_skills WHERE github_id = ? AND skill_id = ?", [githubId, skillId]);
+        }
+      }
+
+      await conn.commit();
+      res.json({ success: true, restante });
     } catch (err) {
+      if (conn) await conn.rollback().catch(() => {});
       console.error("Erro ao remover skill:", err.message);
       res.status(500).json({ error: "Erro interno." });
+    } finally {
+      if (conn) conn.release();
     }
   },
 

@@ -30,7 +30,7 @@
       font-size: clamp(1.4rem, 2.4vw, 1.75rem);
     }
 
-    form { gap: 13px; }
+    .login-page form { gap: 14px; }
 
     /* ── Right panel: benefícios ── */
     .lp-signup-hl {
@@ -108,16 +108,15 @@
 
   <div class="lp-layout">
 
-    <!-- ═══════════════════════════════════════
-         COLUNA ESQUERDA — Formulário
-    ════════════════════════════════════════ -->
+    <!-- Barra superior: logo + linha de brilho -->
+    <header class="lp-header">
+      <a href="/" class="lp-logo" aria-label="Ápice — Página inicial">
+        <img src="/images/principal.webp" alt="Ápice" height="26" loading="eager" />
+      </a>
+    </header>
+
     <main class="lp-left" aria-label="Formulário de cadastro">
       <div class="lp-left-inner">
-
-        <!-- Logo -->
-        <a href="/" class="lp-logo" aria-label="Ápice — Página inicial">
-          <img src="/images/principal.webp" alt="Ápice" height="26" loading="eager" />
-        </a>
 
         <!-- Boas-vindas -->
         <div class="lp-welcome">
@@ -455,96 +454,7 @@
         </p>
 
       </div>
-
-      <footer class="lp-left-footer">
-        &copy; <%= new Date().getFullYear() %> Ápice. Todos os direitos reservados.
-      </footer>
     </main>
-
-    <!-- ═══════════════════════════════════════
-         COLUNA DIREITA — Ilustração decorativa
-    ════════════════════════════════════════ -->
-    <aside class="lp-right" aria-hidden="true">
-
-      <!-- Realce único e estático -->
-      <div class="lp-right-glow"></div>
-
-      <div class="lp-preview">
-
-        <!-- Headline -->
-        <div class="lp-signup-hl">
-          <p class="lp-signup-pre">
-            <span class="lp-signup-pre-dot"></span>
-            Junte-se à comunidade
-          </p>
-          <h2 class="lp-signup-title">
-            Sua carreira tech<br/><em>começa aqui</em>
-          </h2>
-        </div>
-
-        <!-- Benefício 1 -->
-        <div class="lp-feature">
-          <div class="lp-feature-ico lp-feature-ico--purple">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-            </svg>
-          </div>
-          <div class="lp-feature-body">
-            <p class="lp-feature-title">GitHub analisado automaticamente</p>
-            <p class="lp-feature-desc">Seus repositórios e skills são extraídos e catalogados pelo sistema</p>
-          </div>
-        </div>
-
-        <!-- Benefício 2 -->
-        <div class="lp-feature">
-          <div class="lp-feature-ico lp-feature-ico--green">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <circle cx="12" cy="12" r="6"/>
-              <circle cx="12" cy="12" r="2"/>
-            </svg>
-          </div>
-          <div class="lp-feature-body">
-            <p class="lp-feature-title">Match inteligente de vagas</p>
-            <p class="lp-feature-desc">Encontramos vagas 100% compatíveis com seu perfil real e nível</p>
-          </div>
-        </div>
-
-        <!-- Benefício 3 -->
-        <div class="lp-feature">
-          <div class="lp-feature-ico lp-feature-ico--blue">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-          </div>
-          <div class="lp-feature-body">
-            <p class="lp-feature-title">Roadmap personalizado</p>
-            <p class="lp-feature-desc">Trilha de aprendizado gerada com base nas lacunas do seu perfil</p>
-          </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="lp-signup-stats">
-          <div>
-            <span class="lp-signup-stat-n">3.2k+</span>
-            <span class="lp-signup-stat-l">Devs ativos</span>
-          </div>
-          <div>
-            <span class="lp-signup-stat-n">450+</span>
-            <span class="lp-signup-stat-l">Vagas</span>
-          </div>
-          <div>
-            <span class="lp-signup-stat-n">89%</span>
-            <span class="lp-signup-stat-l">Match médio</span>
-          </div>
-        </div>
-
-      </div>
-
-      <p class="lp-right-label">Ápice · Plataforma de Carreiras em Tech</p>
-    </aside>
 
   </div>
 
@@ -552,16 +462,97 @@
     const getEl = id => document.getElementById(id);
 
     // ── Tab switching ──────────────────────────────────────────
-    function switchTab(type) {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let currentType = "dev";
+
+    // Troca o texto de um elemento com saída/entrada lateral (dir: 1 = dev→empresa, -1 = inverso)
+    function swapContent(el, update, dir) {
+      if (reduceMotion || !el.animate) { update(); return; }
+      const out = el.animate(
+        [{ opacity: 1, transform: "translateX(0)" }, { opacity: 0, transform: `translateX(${-dir * 16}px)` }],
+        { duration: 160, easing: "ease-in", fill: "forwards" }
+      );
+      out.finished.then(() => {
+        update();
+        out.cancel();
+        el.animate(
+          [{ opacity: 0, transform: `translateX(${dir * 16}px)` }, { opacity: 1, transform: "translateX(0)" }],
+          { duration: 240, easing: "ease-out" }
+        );
+      }).catch(() => update());
+    }
+
+    // Troca os grupos de campos: os antigos saem juntos, os novos entram em cascata
+    // (o grupo usa display: contents, então a animação é aplicada nos filhos)
+    function swapFields(fromGroup, toGroup, dir) {
+      if (reduceMotion || !toGroup.animate) { fromGroup.hidden = true; toGroup.hidden = false; return; }
+      const outs = Array.from(fromGroup.children).map(c => c.animate(
+        [{ opacity: 1, transform: "translateX(0)" }, { opacity: 0, transform: `translateX(${-dir * 16}px)` }],
+        { duration: 160, easing: "ease-in", fill: "forwards" }
+      ));
+      Promise.all(outs.map(a => a.finished)).then(() => {
+        fromGroup.hidden = true;
+        outs.forEach(a => a.cancel());
+        toGroup.hidden = false;
+        Array.from(toGroup.children).forEach((c, i) => c.animate(
+          [{ opacity: 0, transform: `translateX(${dir * 16}px)` }, { opacity: 1, transform: "translateX(0)" }],
+          { duration: 260, delay: i * 35, easing: "ease-out", fill: "backwards" }
+        ));
+      }).catch(() => { fromGroup.hidden = true; toGroup.hidden = false; });
+    }
+
+    // Mostra/esconde o bloco do GitHub recolhendo a altura, sem "pulo" no layout
+    function toggleGithub(show) {
+      const el = getEl("github-block");
+      if (reduceMotion || !el.animate) { el.hidden = !show; return; }
+      el.style.overflow = "hidden";
+      if (show) {
+        el.hidden = false;
+        const h = el.scrollHeight;
+        el.animate(
+          [{ opacity: 0, height: "0px" }, { opacity: 1, height: h + "px" }],
+          { duration: 280, easing: "ease-out" }
+        ).finished.then(() => { el.style.overflow = ""; }).catch(() => { el.style.overflow = ""; });
+      } else {
+        const h = el.offsetHeight;
+        const a = el.animate(
+          [{ opacity: 1, height: h + "px" }, { opacity: 0, height: "0px" }],
+          { duration: 240, easing: "ease-in", fill: "forwards" }
+        );
+        a.finished.then(() => {
+          if (currentType === "empresa") el.hidden = true;
+          a.cancel();
+          el.style.overflow = "";
+        }).catch(() => { el.style.overflow = ""; });
+      }
+    }
+
+    function switchTab(type, animate = true) {
+      if (type === currentType && animate) return;
+      currentType = type;
       const isEmp = type === "empresa";
+      const dir = isEmp ? 1 : -1;
       getEl("tab-dev").classList.toggle("active", !isEmp);
       getEl("tab-empresa").classList.toggle("active", isEmp);
       getEl("tab-dev").setAttribute("aria-selected", String(!isEmp));
       getEl("tab-empresa").setAttribute("aria-selected", String(isEmp));
-      getEl("fields-dev").hidden     =  isEmp;
-      getEl("fields-empresa").hidden = !isEmp;
-      getEl("github-block").hidden   =  isEmp;
       getEl("user-type").value = type;
+      document.body.classList.toggle("is-empresa", isEmp);
+
+      const title    = isEmp ? "Cadastrar empresa" : "Criar conta grátis";
+      const subtitle = isEmp ? "Cadastre sua conta empresarial" : "Escolha como deseja usar a plataforma";
+      if (animate) {
+        swapContent(getEl("card-title"),    () => { getEl("card-title").textContent    = title; }, dir);
+        swapContent(getEl("card-subtitle"), () => { getEl("card-subtitle").textContent = subtitle; }, dir);
+        swapFields(getEl(isEmp ? "fields-dev" : "fields-empresa"), getEl(isEmp ? "fields-empresa" : "fields-dev"), dir);
+        toggleGithub(!isEmp);
+      } else {
+        getEl("card-title").textContent    = title;
+        getEl("card-subtitle").textContent = subtitle;
+        getEl("fields-dev").hidden     =  isEmp;
+        getEl("fields-empresa").hidden = !isEmp;
+        getEl("github-block").hidden   =  isEmp;
+      }
       clearErrors();
     }
 
@@ -753,7 +744,7 @@
     });
 
     // Auto-seleciona aba empresa se vier de /cadastro#empresa
-    if (window.location.hash === "#empresa") switchTab("empresa");
+    if (window.location.hash === "#empresa" || new URLSearchParams(window.location.search).get("tipo") === "empresa") switchTab("empresa", false);
   </script>
 
   <script src="/js/form-validation.js"></script>

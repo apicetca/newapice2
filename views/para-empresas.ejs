@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
   <title>Ápice — Para empresas</title>
-  <meta name="description" content="Compare os planos FREE e PRO da Ápice para empresas: triagem por IA, avaliação por código real e gestão simplificada de vagas." />
+  <meta name="description" content="Compare os planos da Ápice para empresas: desenvolvedores compatíveis com cada vaga, avaliação por código real e resumo de candidatos por IA no Premium." />
   <meta name="robots" content="index, follow" />
 
   <meta property="og:type"        content="website" />
   <meta property="og:site_name"   content="Ápice" />
   <meta property="og:url"         content="https://newapice22.onrender.com/para-empresas" />
-  <meta property="og:title"       content="Ápice para empresas — planos FREE e PRO" />
-  <meta property="og:description" content="Otimize seus processos seletivos com triagem por inteligência artificial e avaliação por código real." />
+  <meta property="og:title"       content="Ápice para empresas — planos FREE e Premium" />
+  <meta property="og:description" content="Encontre desenvolvedores compatíveis com cada vaga, avaliados pelo código real do GitHub." />
   <meta property="og:locale"      content="pt_BR" />
   <meta property="og:image"       content="https://newapice22.onrender.com/images/principal.webp" />
   <meta name="twitter:card"       content="summary_large_image" />
-  <meta name="twitter:title"      content="Ápice para empresas — planos FREE e PRO" />
-  <meta name="twitter:description" content="Triagem por IA, avaliação por código real e gestão simplificada de vagas." />
+  <meta name="twitter:title"      content="Ápice para empresas — planos FREE e Premium" />
+  <meta name="twitter:description" content="Desenvolvedores compatíveis com cada vaga, avaliados pelo código real do GitHub." />
   <meta name="twitter:image"      content="https://newapice22.onrender.com/images/principal.webp" />
   <link rel="canonical" href="https://newapice22.onrender.com/para-empresas" />
 
@@ -42,56 +42,54 @@
       Qual é o <em class="mark-purple">plano ideal</em> para a sua empresa <em class="mark-green">contratar devs?</em>
     </h1>
     <p>
-      Compare as nossas opções e descubra como otimizar seus processos seletivos com triagem por inteligência artificial, avaliação por código real e gestão simplificada de vagas.
+      Compare as nossas opções e descubra como otimizar seus processos seletivos com desenvolvedores compatíveis com cada vaga, avaliação por código real e resumo de candidatos por inteligência artificial.
     </p>
   </section>
 
   <!-- ══════════ PLANOS ══════════ -->
+  <!-- Preços e limites vêm de config/plans.js (rota /para-empresas em server.js). -->
   <section class="pd-plans" aria-label="Planos para empresas">
 
     <article class="pd-plan" aria-labelledby="plan-free-name">
       <header class="pd-plan__head">
         <h2 id="plan-free-name">Empresa FREE</h2>
       </header>
-      <p class="pd-plan__desc">Ferramentas essenciais, sem IA.</p>
-      <p class="pd-plan__price"><strong>R$<%= prices.free %></strong><span>/mês</span></p>
+      <p class="pd-plan__desc">Para começar a contratar, sem custo.</p>
+      <p class="pd-plan__price"><strong>R$0</strong><span>/mês</span></p>
       <ul class="pd-plan__list">
-        <li class="is-muted"><span class="ic" aria-hidden="true">✓</span> 3 vagas ativas simultaneamente</li>
-        <li class="is-muted"><span class="ic" aria-hidden="true">✓</span> 30 dias de exposição por vaga</li>
-        <li class="is-muted"><span class="ic" aria-hidden="true">✓</span> Visualização dos candidatos inscritos</li>
-        <li class="is-off"><span class="ic" aria-hidden="true">✕</span> Sem Pontuação de compatibilidade por vaga</li>
-        <li class="is-off"><span class="ic" aria-hidden="true">✕</span> Sem triagem automática por IA</li>
+        <li class="is-muted"><span class="ic" aria-hidden="true">✓</span> <%= planos.free.vagas %> vaga ativa por vez</li>
+        <li class="is-muted"><span class="ic" aria-hidden="true">✓</span> Desenvolvedores compatíveis com a vaga</li>
+        <li class="is-muted"><span class="ic" aria-hidden="true">✓</span> Percentual de compatibilidade calculado pelo código real</li>
+        <li class="is-off"><span class="ic" aria-hidden="true">✕</span> Sem resumo de candidatos gerado por IA</li>
       </ul>
       <a href="/cadastro?tipo=empresa" class="pd-btn pd-btn--ghost">Começar grátis</a>
     </article>
 
     <article class="pd-plan pd-plan--pro" aria-labelledby="plan-pro-name">
       <header class="pd-plan__head">
-        <h2 id="plan-pro-name">Empresa PRO</h2>
-        <div class="pd-toggle" role="group" aria-label="Periodicidade da cobrança">
-          <button type="button" class="pd-toggle__btn is-active" data-period="mensal" aria-pressed="true">Mensal</button>
-          <button type="button" class="pd-toggle__btn" data-period="anual" aria-pressed="false">Anual</button>
-        </div>
+        <h2 id="plan-pro-name">Empresa Premium</h2>
+        <span class="pd-badge">Cobrança mensal</span>
       </header>
-      <p class="pd-plan__desc">Acesso a todas as ferramentas e IA.</p>
-      <p class="pd-plan__price" aria-live="polite">
-        <strong>R$<span id="pro-price" data-mensal="<%= prices.pro %>" data-anual="<%= prices.proAnnual %>"><%= prices.pro %></span></strong><span>/mês</span>
-      </p>
+      <p class="pd-plan__desc">Vagas ilimitadas e resumo de candidatos por IA.</p>
+      <p class="pd-plan__price"><strong>R$<%= planos.premium.preco %></strong><span>/mês</span></p>
       <ul class="pd-plan__list">
-        <li><span class="ic" aria-hidden="true">→</span> Até 15 vagas ativas simultaneamente</li>
-        <li><span class="ic" aria-hidden="true">→</span> 60 dias de exposição por vaga</li>
-        <li><span class="ic" aria-hidden="true">→</span> Visualização dos candidatos inscritos</li>
-        <li><span class="ic" aria-hidden="true">→</span> Pontuação de compatibilidade por vaga</li>
-        <li><span class="ic" aria-hidden="true">→</span> Triagem automática por IA</li>
+        <li><span class="ic" aria-hidden="true">→</span> Vagas ativas ilimitadas</li>
+        <li><span class="ic" aria-hidden="true">→</span> Desenvolvedores compatíveis com cada vaga</li>
+        <li><span class="ic" aria-hidden="true">→</span> Percentual de compatibilidade calculado pelo código real</li>
+        <li><span class="ic" aria-hidden="true">→</span> Resumo de candidatos gerado por IA</li>
       </ul>
       <a href="/cadastro?tipo=empresa" class="pd-btn pd-btn--primary">Fazer upgrade</a>
     </article>
 
   </section>
 
+  <p class="pd-plans__nota">
+    Precisa de um meio-termo? O plano <strong>Básico</strong> custa R$<%= planos.basico.preco %>/mês e permite até <%= planos.basico.vagas %> vagas ativas ao mesmo tempo.
+  </p>
+
   <!-- ══════════ POR QUE EVOLUIR ══════════ -->
   <section class="pd-why" aria-labelledby="why-title">
-    <h2 id="why-title">Por que evoluir para o Empresa PRO?</h2>
+    <h2 id="why-title">Por que evoluir para o Empresa Premium?</h2>
     <div class="pd-why__grid">
 
       <article class="pd-feature">
@@ -99,8 +97,8 @@
           <span class="pd-feature__tag">FIS 0.1</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
         </div>
-        <h3>→ Triagem Inteligente por Compatibilidade</h3>
-        <p>Chega de analisar centenas de currículos manualmente. A IA calcula a compatibilidade técnica real de cada candidato com os requisitos do seu projeto.</p>
+        <h3>→ Resumo de Candidatos por IA</h3>
+        <p>Cada candidatura chega com um resumo gerado por IA, com os pontos fortes e os projetos mais relevantes para a vaga, para você decidir mais rápido.</p>
       </article>
 
       <article class="pd-feature">
@@ -108,8 +106,8 @@
           <span class="pd-feature__tag">FIS 0.2</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h13M3 12h9M3 18h5"/><path d="m17 14 3 3 3-3M20 8v9"/></svg>
         </div>
-        <h3>→ Ordenação e Filtros Avançados</h3>
-        <p>Priorize os melhores talentos em segundos. Ordene a lista de inscritos do mais compatível para o menos compatível e economize tempo de recrutamento.</p>
+        <h3>→ Vagas Ativas Ilimitadas</h3>
+        <p>Abra quantas vagas precisar ao mesmo tempo, sem precisar encerrar uma para publicar outra.</p>
       </article>
 
       <article class="pd-feature">
@@ -117,8 +115,8 @@
           <span class="pd-feature__tag">FIS 0.3</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
         </div>
-        <h3>→ Maior Duração e Volume de Vagas</h3>
-        <p>Mantenha até 15 vagas abertas ao mesmo tempo por 60 dias, garantindo maior alcance e tempo para atrair os perfis ideais para o seu time.</p>
+        <h3>→ Compatibilidade em Cada Vaga</h3>
+        <p>Em todas as vagas abertas, veja os desenvolvedores mais compatíveis, com o percentual calculado a partir do código real do GitHub.</p>
       </article>
 
     </div>
@@ -131,18 +129,18 @@
     <ul class="pd-faq__list">
 
       <li><details class="pd-faq__item">
-        <summary>O que acontece se eu atingir o limite de 3 vagas no plano FREE?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>Você continua gerenciando as 3 vagas ativas normalmente, mas não consegue publicar uma nova até encerrar uma delas ou migrar para o plano PRO, que permite até 15 vagas ativas.</p>
+        <summary>O que acontece se eu atingir o limite de vagas do plano FREE?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
+        <p>No FREE você tem <%= planos.free.vagas %> vaga ativa por vez. Para publicar outra, encerre a atual ou assine um plano pago: o Básico (até <%= planos.basico.vagas %> vagas ativas) ou o Premium (vagas ilimitadas).</p>
       </details></li>
 
       <li><details class="pd-faq__item">
         <summary>Como é calculada a compatibilidade do candidato com a vaga?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>A plataforma compara as skills identificadas no GitHub do candidato com as skills obrigatórias e desejáveis da vaga, e resume essa comparação em um percentual de compatibilidade.</p>
+        <p>A plataforma compara as skills identificadas no GitHub do candidato com as skills obrigatórias e desejáveis da vaga, e resume essa comparação em um percentual de compatibilidade. O cálculo é o mesmo em todos os planos.</p>
       </details></li>
 
       <li><details class="pd-faq__item">
         <summary>Como funciona a renovação e o cancelamento do plano pago?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>O plano é renovado a cada período contratado (mensal ou anual). Você pode cancelar a qualquer momento e continua com os recursos PRO até o fim do período já pago.</p>
+        <p>A assinatura é mensal e renovada automaticamente pelo Mercado Pago. Se você cancelar, continua com os recursos do plano até o fim do período já pago.</p>
       </details></li>
 
       <li><details class="pd-faq__item">
@@ -151,35 +149,19 @@
       </details></li>
 
       <li><details class="pd-faq__item">
-        <summary>Como funciona a triagem automática por IA?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>Cada candidato inscrito é analisado automaticamente com base no código real do GitHub e classificado por afinidade técnica com a vaga, para que você comece pelos perfis mais compatíveis.</p>
+        <summary>Como funciona o resumo de candidatos por IA?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
+        <p>No Premium, cada candidatura ganha um resumo curto gerado por IA a partir das skills e dos projetos do candidato, destacando os pontos fortes e os projetos mais relevantes para a vaga.</p>
       </details></li>
 
       <li><details class="pd-faq__item">
         <summary>Quais são as formas de pagamento aceitas?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>As formas de pagamento serão divulgadas antes da abertura da contratação do plano PRO. O plano FREE não exige nenhum pagamento.</p>
+        <p>Cartão de crédito, pelo Mercado Pago, com cobrança mensal. O plano FREE não exige nenhum pagamento.</p>
       </details></li>
 
     </ul>
   </section>
 
 </main>
-
-<script>
-  (function () {
-    var priceEl = document.getElementById('pro-price');
-    document.querySelectorAll('.pd-toggle__btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        document.querySelectorAll('.pd-toggle__btn').forEach(function (b) {
-          var on = b === btn;
-          b.classList.toggle('is-active', on);
-          b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        });
-        priceEl.textContent = priceEl.getAttribute('data-' + btn.dataset.period);
-      });
-    });
-  })();
-</script>
 
 <script src="/js/reveal.js" defer></script>
 </body>

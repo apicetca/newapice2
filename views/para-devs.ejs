@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
   <title>Ápice — Para devs</title>
-  <meta name="description" content="Conheça os planos FREE e PRO da Ápice para desenvolvedores: roadmap, verificação de projetos por IA e mentor de carreira com simulação de entrevista." />
+  <meta name="description" content="Conheça os planos FREE e PRO da Ápice para desenvolvedores: roadmap, verificação automática de projetos e mentor de carreira com IA e simulação de entrevista." />
   <meta name="robots" content="index, follow" />
 
   <meta property="og:type"        content="website" />
   <meta property="og:site_name"   content="Ápice" />
   <meta property="og:url"         content="https://newapice22.onrender.com/para-devs" />
   <meta property="og:title"       content="Ápice para devs — planos FREE e PRO" />
-  <meta property="og:description" content="Habilidades validadas por IA com base no seu código real e gestão completa da sua evolução." />
+  <meta property="og:description" content="Habilidades validadas com base no seu código real e gestão completa da sua evolução." />
   <meta property="og:locale"      content="pt_BR" />
   <meta property="og:image"       content="https://newapice22.onrender.com/images/principal.webp" />
   <meta name="twitter:card"       content="summary_large_image" />
   <meta name="twitter:title"      content="Ápice para devs — planos FREE e PRO" />
-  <meta name="twitter:description" content="Habilidades validadas por IA com base no seu código real." />
+  <meta name="twitter:description" content="Habilidades validadas com base no seu código real." />
   <meta name="twitter:image"      content="https://newapice22.onrender.com/images/principal.webp" />
   <link rel="canonical" href="https://newapice22.onrender.com/para-devs" />
 
@@ -59,7 +59,7 @@
       <ul class="pd-plan__list">
         <li class="is-off"><span aria-hidden="true">→</span> Apenas 1 roadmap ativo por vez</li>
         <li class="is-off"><span aria-hidden="true">→</span> Regeneração de roadmap limitada</li>
-        <li class="is-off"><span aria-hidden="true">→</span> Sem verificação de projetos por IA</li>
+        <li class="is-off"><span aria-hidden="true">→</span> Sem verificação automática de projetos</li>
         <li class="is-off"><span aria-hidden="true">→</span> Sem Mentor de Carreira com IA</li>
       </ul>
       <a href="/cadastro" class="pd-btn pd-btn--ghost">Começar grátis</a>
@@ -68,19 +68,14 @@
     <article class="pd-plan pd-plan--pro" aria-labelledby="plan-pro-name">
       <header class="pd-plan__head">
         <h2 id="plan-pro-name">Plano PRO</h2>
-        <div class="pd-toggle" role="group" aria-label="Periodicidade da cobrança">
-          <button type="button" class="pd-toggle__btn is-active" data-period="mensal" aria-pressed="true">Mensal</button>
-          <button type="button" class="pd-toggle__btn" data-period="anual" aria-pressed="false">Anual</button>
-        </div>
+        <span class="pd-badge">Cobrança mensal</span>
       </header>
       <p class="pd-plan__desc">Acesso a todas as ferramentas e IA.</p>
-      <p class="pd-plan__price" aria-live="polite">
-        <strong>R$<span id="pro-price" data-mensal="<%= prices.pro %>" data-anual="<%= prices.proAnnual %>"><%= prices.pro %></span></strong><span>/mês</span>
-      </p>
+      <p class="pd-plan__price"><strong>R$<%= prices.pro %></strong><span>/mês</span></p>
       <ul class="pd-plan__list">
         <li><span aria-hidden="true">→</span> Até 5 roadmaps ativos simultaneamente</li>
         <li><span aria-hidden="true">→</span> Regeneração de roadmap semanal</li>
-        <li><span aria-hidden="true">→</span> Verificação de projetos por IA</li>
+        <li><span aria-hidden="true">→</span> Verificação automática de projetos</li>
         <li><span aria-hidden="true">→</span> Mentor de Carreira com IA</li>
       </ul>
       <a href="/cadastro" class="pd-btn pd-btn--primary">Fazer upgrade</a>
@@ -98,8 +93,8 @@
           <span class="pd-feature__tag">FIS 0.1</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
         </div>
-        <h3>→ Verificação de Projetos por IA</h3>
-        <p>Não fique na dúvida se seu código está pronto. A IA analisa suas entregas de cada fase para validar se o projeto atende aos requisitos reais do mercado.</p>
+        <h3>→ Verificação Automática de Projetos</h3>
+        <p>Não fique na dúvida se seu código está pronto. A plataforma confere o repositório de cada fase e mostra quais habilidades já aparecem no projeto e quais ainda faltam.</p>
       </article>
 
       <article class="pd-feature">
@@ -136,8 +131,8 @@
       </details></li>
 
       <li><details class="pd-faq__item">
-        <summary>Como funciona a verificação de projetos por IA?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>Ao concluir uma fase, você envia o repositório do projeto. A IA analisa o código e confere se ele atende aos requisitos daquela fase, devolvendo um retorno com o que está pronto e o que ainda falta.</p>
+        <summary>Como funciona a verificação automática de projetos?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
+        <p>Ao concluir uma fase, você envia o link do repositório do projeto. A plataforma lê as linguagens, os arquivos de dependências (como o package.json) e o README, e confere se as habilidades daquela fase aparecem ali, devolvendo o que está pronto e o que ainda falta.</p>
       </details></li>
 
       <li><details class="pd-faq__item">
@@ -147,29 +142,13 @@
 
       <li><details class="pd-faq__item">
         <summary>Quais são as formas de pagamento aceitas?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>As formas de pagamento serão divulgadas antes da abertura da contratação do plano PRO. O plano FREE não exige nenhum pagamento.</p>
+        <p>Cartão de crédito, pelo Mercado Pago, com cobrança mensal. O plano FREE não exige nenhum pagamento.</p>
       </details></li>
 
     </ul>
   </section>
 
 </main>
-
-<script>
-  (function () {
-    var priceEl = document.getElementById('pro-price');
-    document.querySelectorAll('.pd-toggle__btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        document.querySelectorAll('.pd-toggle__btn').forEach(function (b) {
-          var on = b === btn;
-          b.classList.toggle('is-active', on);
-          b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        });
-        priceEl.textContent = priceEl.getAttribute('data-' + btn.dataset.period);
-      });
-    });
-  })();
-</script>
 
 <script src="/js/reveal.js" defer></script>
 </body>

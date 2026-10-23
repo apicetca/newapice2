@@ -5,7 +5,6 @@ const { param, body } = require("express-validator");
 const { isAuth } = require("../middlewares/auth");
 const { handleValidation } = require("../validators/handle-validation");
 const { hasFeature } = require("../services/subscriptionService");
-const { getCachedProfile, analyzeUserProfile } = require("../services/aiProfileAnalyzer");
 const { getMatchExplanation } = require("../services/matchCalculator");
 const { getHistory, sendMessage } = require("../services/mentorChat");
 const { getInsightsFreshOrCached } = require("../services/marketInsights");
@@ -86,36 +85,6 @@ router.get("/health", isAuth, async (req, res) => {
   }
 });
 
-// GET /api/ai/perfil-tecnico — análise de repositórios via IA
-// (proficiência estimada, boas práticas, pontos de melhoria).
-// Usa cache em perfil_tecnico_ia; só chama a IA se ainda não existir,
-// a menos que ?reanalisar=1 seja passado (botão "Reanalisar" na tela).
-router.get("/perfil-tecnico", isAuth, async (req, res) => {
-  const userId = req.session.user.id;
-  const forceReanalyze = req.query.reanalisar === "1";
-
-  try {
-    if (!forceReanalyze) {
-      const cached = await getCachedProfile(userId);
-      if (cached) return res.json(cached);
-    }
-
-    const accessToken = req.session.user?.accessToken;
-    if (!accessToken) {
-      return res.status(400).json({ error: "Conta GitHub não vinculada. Faça login com o GitHub para gerar a análise." });
-    }
-
-    const profile = await analyzeUserProfile(userId, accessToken);
-    res.json(profile);
-  } catch (err) {
-    console.error("[GET /api/ai/perfil-tecnico]", err.message);
-    if (err.message.includes("repositórios importados")) {
-      return res.status(400).json({ error: "Importe ao menos um repositório antes de gerar a análise." });
-    }
-    res.status(502).json({ error: "Erro ao gerar análise com IA. Tente novamente em instantes." });
-  }
-});
-
 // GET /api/ai/jobs/:id/match-explicacao — compatibilidade semântica
 // (percentual + explicação textual) entre o usuário logado e a vaga.
 // Cacheado por par candidato-vaga em match_ia_cache.
@@ -124,7 +93,9 @@ router.get("/jobs/:id/match-explicacao", isAuth, ...intParam("id"), async (req, 
   const jobId    = req.params.id;
 
   try {
-    const explanation = await getMatchExplanation(githubId, jobId);
+    // Mesmo profileData da página da vaga (nível do dev), para o percentual
+    // explicado ser o mesmo que o dev vê — e o cache comparar com ele.
+    const explanation = await getMatchExplanation(githubId, jobId, { nivel: req.session.user.nivel });
     res.json(explanation);
   } catch (err) {
     console.error("[GET /api/ai/jobs/:id/match-explicacao]", err.message);

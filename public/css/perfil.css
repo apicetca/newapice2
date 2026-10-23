@@ -519,6 +519,36 @@
 }
 .skill-remove:hover { color: var(--red); }
 
+/* "por quê?" de cada skill (Etapa 6 da análise de perfil) */
+.skill-why-btn {
+  background: none; border: none; cursor: pointer;
+  padding: 0; font: inherit; font-size: .65rem;
+  color: var(--muted); text-decoration: underline; text-underline-offset: 2px;
+}
+.skill-why-btn:hover,
+.skill-why-btn[aria-expanded="true"] { color: var(--text); }
+.skill-why-btn:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 2px; border-radius: 2px; }
+
+.skill-why {
+  margin: -.5rem 0 1.25rem;
+  padding: .75rem 1rem;
+  border: 1px solid var(--border-lite);
+  border-radius: 10px;
+  background: var(--bg-3);
+}
+.skill-why-title { font-size: .8rem; font-weight: 600; margin: 0 0 .4rem; }
+/* Selos de origem (Etapa 7) */
+.skill-origem {
+  font-size: .6rem; font-weight: 500; letter-spacing: .02em;
+  padding: 1px 6px; border-radius: 99px; border: 1px solid var(--border-lite);
+  color: var(--muted); white-space: nowrap;
+}
+.skill-origem--github    { border-color: var(--teal-border); color: var(--teal); }
+.skill-origem--declarada { border-color: var(--accent-border); color: var(--accent-text); }
+.add-skill-row .field--nivel { flex: 0 0 160px; min-width: 140px; }
+
+.skill-why-list { margin: 0; padding-left: 1.1rem; font-size: .76rem; color: var(--muted); line-height: 1.7; }
+
 .add-skill-row {
   display: flex;
   gap: .6rem;

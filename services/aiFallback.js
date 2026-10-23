@@ -4,9 +4,8 @@
 // não dependem de memória de conversa nem function
 // calling nativos do Gemini — usado só dentro de
 // services/geminiClient.js::askGeminiJSON, então os
-// 6 serviços consumidores (aiProfileAnalyzer,
-// candidateSummarizer, marketInsights,
-// matchCalculator, portfolioDescriber,
+// 5 serviços consumidores (candidateSummarizer,
+// marketInsights, matchCalculator, portfolioDescriber,
 // roadmapGenerator) ganham fallback automático sem
 // precisar de nenhuma alteração.
 //
