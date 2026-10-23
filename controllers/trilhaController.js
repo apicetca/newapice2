@@ -24,6 +24,20 @@ function objetivoLabel(roadmap) {
 }
 
 /**
+ * O usuário já tem skills detectadas pela análise dos repositórios
+ * (githubAnalyzer → user_skills)? Alimenta o aviso do formulário de novo roadmap.
+ */
+async function temSkillsDetectadas(usuarioId) {
+  const [[perfil]] = await db.query(
+    `SELECT 1 AS ok FROM user_dev_profiles p
+     JOIN user_skills us ON us.github_id = p.github_id
+     WHERE p.user_id = ? LIMIT 1`,
+    [usuarioId]
+  );
+  return Boolean(perfil);
+}
+
+/**
  * Carrega o roadmap do :id da rota, já filtrado pelo usuário logado — uma
  * linha não encontrada (não existe OU é de outro usuário) vira 404 sem
  * distinção, pra não revelar a um usuário que o id pertence a outra conta.
@@ -90,17 +104,14 @@ async function listar(req, res) {
 /** GET /trilha/novo — formulário de criação. */
 async function formularioNovo(req, res) {
   try {
-    const [[perfil]] = await db.query(
-      "SELECT id FROM perfil_tecnico_ia WHERE user_id = ?",
-      [req.session.user.id]
-    );
+    const temPerfilTecnico = await temSkillsDetectadas(req.session.user.id);
     const [vagas] = await db.query(
       "SELECT id, title, company FROM jobs WHERE active = 1 ORDER BY title LIMIT 200"
     );
 
     res.render("roadmap/novo", {
       currentPage: "trilha",
-      temPerfilTecnico: Boolean(perfil),
+      temPerfilTecnico,
       vagas,
       areas: AREA_LABELS,
       prefill: {
@@ -138,15 +149,13 @@ async function criar(req, res) {
     res.redirect(`/trilha/${resultado.roadmapId}`);
   } catch (err) {
     console.error("[POST /trilha]", err.message);
-    const [[perfil]] = await db.query(
-      "SELECT id FROM perfil_tecnico_ia WHERE user_id = ?", [req.session.user.id]
-    );
+    const temPerfilTecnico = await temSkillsDetectadas(req.session.user.id);
     const [vagas] = await db.query(
       "SELECT id, title, company FROM jobs WHERE active = 1 ORDER BY title LIMIT 200"
     );
     res.status(400).render("roadmap/novo", {
       currentPage: "trilha",
-      temPerfilTecnico: Boolean(perfil),
+      temPerfilTecnico,
       vagas,
       areas: AREA_LABELS,
       prefill: { tipo, area: area ?? "front-end", vagaId: vagaId ? Number(vagaId) : null },

@@ -112,8 +112,8 @@ async function lerDependencias(accessToken, repoFullName) {
 }
 
 // --------------------------------------------
-// Versões "simples" (mantidas para os outros chamadores — aiProfileAnalyzer,
-// portfolioDescriber): devolvem [] / "" também em caso de falha, que fica
+// Versões "simples" (mantidas para os outros chamadores — portfolioDescriber):
+// devolvem [] / "" também em caso de falha, que fica
 // registrada no log.
 // --------------------------------------------
 async function fetchRepoLanguages(accessToken, repoFullName) {

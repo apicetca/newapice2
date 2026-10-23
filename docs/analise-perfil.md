@@ -8,12 +8,10 @@ A análise de perfil do Ápice é determinística: nenhum dos quatro cálculos a
 
 Todas as regras deste documento vêm do `docs/analise-perfil-inventario.md`, um levantamento somente leitura feito pelo Claude Code em 21/10/2026. Cada regra cita o arquivo e, quando o inventário informa, a linha. Antes de mudar uma regra no código, confira o trecho citado.
 
-**Estado do repositório:** o inventário descreve a árvore de trabalho, que tem mudanças ainda não commitadas:
+**Estado do repositório:** o inventário foi feito sobre uma árvore de trabalho com duas mudanças que depois foram commitadas no branch `feat/analise-perfil`:
 
-- A análise de repositórios por IA (`services/aiProfileAnalyzer.js` e a rota `GET /api/ai/perfil-tecnico`) foi removida. **Ainda não está decidido se a remoção é definitiva.** Este documento descreve o sistema sem ela.
+- A análise de repositórios por IA (`services/aiProfileAnalyzer.js` e a rota `GET /api/ai/perfil-tecnico`) foi removida **de forma definitiva**. Este documento descreve o sistema sem ela.
 - `controllers/trilhaController.js` passou a decidir o aviso "sem perfil técnico" pela tabela `user_skills`, e não mais por `perfil_tecnico_ia`.
-
-Se a remoção for desfeita, as seções de análise do GitHub e de limitações precisam ser revistas.
 
 ## Visão geral
 

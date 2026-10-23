@@ -556,14 +556,6 @@
   .repos-page-title { font-size: 1.2rem; }
   .repos-page-header .btn-primary-dev { width: 100%; justify-content: center; min-height: 44px; }
 
-  /* ── Análise de perfil técnico (estilos inline na view) ── */
-  #ia-perfil-section { padding: 16px !important; }
-  #ia-perfil-section .btn-primary-dev,
-  #ia-perfil-section .btn-ghost { min-height: 44px; justify-content: center; }
-  #ia-perfil-start .btn-primary-dev { width: 100%; }
-  #btn-ia-perfil-reanalisar { width: 100%; }
-  .ia-perfil-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
-  #ia-perfil-section ul { overflow-wrap: anywhere; }
 
   /* ── Cards: ícone + texto em cima, ações em linha embaixo ── */
   .repo-card { flex-wrap: wrap; padding: 16px; gap: 12px; }

@@ -10,10 +10,6 @@
 jest.mock('../../services/subscriptionService', () => ({
   hasFeature: jest.fn().mockResolvedValue(true), // simula um plano futuro que "vazaria" a feature
 }));
-jest.mock('../../services/aiProfileAnalyzer', () => ({
-  getCachedProfile: jest.fn(),
-  analyzeUserProfile: jest.fn(),
-}));
 jest.mock('../../services/matchCalculator', () => ({
   getMatchExplanation: jest.fn(),
 }));

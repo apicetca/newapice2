@@ -35,10 +35,6 @@ jest.mock("../services/matchCalculator", () => ({
   getMatchExplanation: jest.fn(),
 }));
 jest.mock("../services/roadmapGenerator", () => ({ generateRoadmap: jest.fn() }));
-jest.mock("../services/aiProfileAnalyzer", () => ({
-  getCachedProfile: jest.fn(),
-  analyzeUserProfile: jest.fn(),
-}));
 jest.mock("../services/marketInsights", () => ({ getInsightsFreshOrCached: jest.fn() }));
 
 const db = require("../database/db");

@@ -8,7 +8,7 @@
 // LGPD: nenhuma função aqui retorna nome completo,
 // e-mail ou qualquer dado pessoal — só sinais
 // técnicos (skills, nível, progresso), igual ao
-// padrão já usado em mentorChat.js/aiProfileAnalyzer.js.
+// padrão já usado em mentorChat.js.
 // ============================================
 const db = require("../database/db");
 
