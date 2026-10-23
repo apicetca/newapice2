@@ -446,5 +446,6 @@ async function verificarHabilidadesNoRepo(accessToken, repoFullName, habilidades
 module.exports = {
   matchSkillsFromGitHub, analisarGitHub, fetchRepoLanguages, fetchRepoReadme,
   verificarRepoPublico, verificarHabilidadesNoRepo,
-  pontuarSkillNoRepo, evidenciasSkillNoRepo, aparecePalavraInteira, lerDependencias,
+  pontuarSkillNoRepo, evidenciasSkillNoRepo, aparecePalavraInteira,
+  lerLinguagens, lerReadme, lerDependencias,
 };
