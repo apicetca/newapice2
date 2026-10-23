@@ -151,12 +151,26 @@ function normalizarSinais(sinais) {
   return sinais.map(s => String(s).trim().toLowerCase()).filter(Boolean);
 }
 
-function pontuarSkillNoRepo(sinais, languages, readme, dependencias = []) {
+// Evidências de UMA skill em UM repositório, já com os pontos. A evidência de
+// +40 é "linguagem" quando o sinal está nas linguagens; senão, "dependencia".
+// Ex.: [{ tipo: "dependencia", pontos: 40 }, { tipo: "readme", pontos: 20 }]
+function evidenciasSkillNoRepo(sinais, languages, readme, dependencias = []) {
   const lista = normalizarSinais(sinais);
-  let pontos = 0;
-  if (lista.some(s => languages.includes(s) || dependencias.includes(s))) pontos += PONTOS_LINGUAGEM;
-  if (lista.some(s => aparecePalavraInteira(readme, s))) pontos += PONTOS_README;
-  return pontos;
+  const evidencias = [];
+  if (lista.some(s => languages.includes(s))) {
+    evidencias.push({ tipo: "linguagem", pontos: PONTOS_LINGUAGEM });
+  } else if (lista.some(s => dependencias.includes(s))) {
+    evidencias.push({ tipo: "dependencia", pontos: PONTOS_LINGUAGEM });
+  }
+  if (lista.some(s => aparecePalavraInteira(readme, s))) {
+    evidencias.push({ tipo: "readme", pontos: PONTOS_README });
+  }
+  return evidencias;
+}
+
+function pontuarSkillNoRepo(sinais, languages, readme, dependencias = []) {
+  return evidenciasSkillNoRepo(sinais, languages, readme, dependencias)
+    .reduce((total, e) => total + e.pontos, 0);
 }
 
 // --------------------------------------------
@@ -166,16 +180,26 @@ function pontuarSkillNoRepo(sinais, languages, readme, dependencias = []) {
 // Repositório cuja leitura falhou (limite de uso, token inválido, rede) fica
 // de fora da conta — não vira "confiança 0" — e, nesse caso, a confiança já
 // gravada nunca é reduzida. Se TODOS falharem, não grava nada.
+// Repositórios usados: se opcoes.userId é informado e o dev importou
+// repositórios em /repositorios (user_repositories), só esses contam; senão,
+// os mais recentes recebidos em `repos`. Forks nunca contam.
+//
+// Cada análise também grava, numa transação, de onde veio cada ponto
+// (user_skill_evidencias) — é o "por quê?" das skills no perfil.
 // Retorna { status: "ok" | "parcial" | "indisponivel", skills, reposComFalha }.
 // --------------------------------------------
-async function analisarGitHub(accessToken, githubId, repos) {
+async function analisarGitHub(accessToken, githubId, repos, opcoes = {}) {
   // Busca todas as skills que têm sinais do GitHub cadastrados
   const [allSkills] = await db.query(
     "SELECT * FROM skills WHERE github_signals IS NOT NULL"
   );
 
+  const candidatos = opcoes.userId
+    ? await selecionarRepositorios(accessToken, opcoes.userId, repos)
+    : repos;
+
   // Forks ficam de fora: o código não foi escrito pelo dev.
-  const proprios = repos.filter(repo => !repo.fork);
+  const proprios = candidatos.filter(repo => !repo.fork);
 
   // Para cada repositório, busca linguagens, README e dependências (em lotes de 5)
   const BATCH = 5;
@@ -191,6 +215,7 @@ async function analisarGitHub(accessToken, githubId, repos) {
           lerDependencias(accessToken, repo.full_name),
         ]);
         return {
+          full_name:    repo.full_name,
           falha:        linguagens.falha || readme.falha || dependencias.falha,
           languages:    linguagens.valor,
           readme:       readme.valor,
@@ -210,6 +235,7 @@ async function analisarGitHub(accessToken, githubId, repos) {
   }
 
   const detectedSkills = [];
+  const evidencias = []; // [github_id, skill_id, repo_full_name, tipo, pontos]
 
   for (const skill of allSkills) {
     // Converte a string de sinais em array
@@ -217,10 +243,13 @@ async function analisarGitHub(accessToken, githubId, repos) {
     const signals = skill.github_signals.split(",").map(s => s.trim());
 
     // Soma, repositório a repositório, +40 (linguagem ou dependência) e +20
-    // (README por palavra inteira) — ver pontuarSkillNoRepo.
+    // (README por palavra inteira) — ver evidenciasSkillNoRepo.
     let confidence = 0;
     for (const repo of repoData) {
-      confidence += pontuarSkillNoRepo(signals, repo.languages, repo.readme, repo.dependencias);
+      for (const ev of evidenciasSkillNoRepo(signals, repo.languages, repo.readme, repo.dependencias)) {
+        confidence += ev.pontos;
+        evidencias.push([githubId, skill.id, repo.full_name, ev.tipo, ev.pontos]);
+      }
     }
 
     // Só considera detectada se a confiança for maior que zero
@@ -232,26 +261,111 @@ async function analisarGitHub(accessToken, githubId, repos) {
     }
   }
 
-  // Salva (ou atualiza) as skills detectadas no banco de dados. Com leitura
-  // parcial, só sobe (GREATEST): o que ficou de fora pode ter pontuado antes.
-  const atualiza = reposComFalha > 0
-    ? "confidence = GREATEST(confidence, VALUES(confidence))"
-    : "confidence = VALUES(confidence)";
-  for (const skill of detectedSkills) {
-    await db.query(`
-      INSERT INTO user_skills (github_id, skill_id, source, confidence)
-      VALUES (?, ?, 'github', ?)
-      ON DUPLICATE KEY UPDATE ${atualiza}
-    `, [githubId, skill.skill_id, skill.confidence]);
-  }
+  await gravarResultado(githubId, detectedSkills, evidencias, {
+    parcial:   reposComFalha > 0,
+    reposLidos: repoData.map(r => r.full_name),
+  });
 
   return { status: reposComFalha > 0 ? "parcial" : "ok", skills: detectedSkills, reposComFalha };
 }
 
+// --------------------------------------------
+// Grava skills e evidências numa TRANSAÇÃO.
+// - Leitura completa: as evidências antigas do dev são substituídas pelas novas.
+// - Leitura parcial: só as evidências dos repositórios lidos agora são
+//   substituídas, e a confiança só sobe (GREATEST) — o que ficou de fora pode
+//   ter pontuado antes.
+// Se a tabela de evidências ainda não existe (migração não rodada), as skills
+// são gravadas normalmente e o problema vai para o log.
+// --------------------------------------------
+async function gravarResultado(githubId, detectedSkills, evidencias, { parcial, reposLidos }) {
+  const conn = await db.getConnection();
+  let semTabelaEvidencias = false;
+  const naTabelaDeEvidencias = async (sql, params) => {
+    if (semTabelaEvidencias) return;
+    try {
+      await conn.query(sql, params);
+    } catch (err) {
+      if (err.code !== "ER_NO_SUCH_TABLE") throw err;
+      semTabelaEvidencias = true;
+      console.error("[github-analyzer] tabela user_skill_evidencias não existe — rode `npm run migrate:analise-perfil`. Skills gravadas sem evidências.");
+    }
+  };
+
+  try {
+    await conn.beginTransaction();
+
+    if (!parcial) {
+      await naTabelaDeEvidencias("DELETE FROM user_skill_evidencias WHERE github_id = ?", [githubId]);
+    } else if (reposLidos.length) {
+      await naTabelaDeEvidencias(
+        "DELETE FROM user_skill_evidencias WHERE github_id = ? AND repo_full_name IN (?)",
+        [githubId, reposLidos]
+      );
+    }
+
+    const atualiza = parcial
+      ? "confidence = GREATEST(confidence, VALUES(confidence))"
+      : "confidence = VALUES(confidence)";
+    for (const skill of detectedSkills) {
+      await conn.query(`
+        INSERT INTO user_skills (github_id, skill_id, source, confidence)
+        VALUES (?, ?, 'github', ?)
+        ON DUPLICATE KEY UPDATE ${atualiza}
+      `, [githubId, skill.skill_id, skill.confidence]);
+    }
+
+    if (evidencias.length) {
+      await naTabelaDeEvidencias(
+        "INSERT INTO user_skill_evidencias (github_id, skill_id, repo_full_name, tipo, pontos) VALUES ?",
+        [evidencias]
+      );
+    }
+
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+
+// --------------------------------------------
+// Repositórios que entram na análise: os importados pelo dev em
+// /repositorios, se houver; senão, a lista recebida (os mais recentes).
+// A lista importada não guarda se o repositório é fork, então essa
+// informação vem da lista recebida ou, para os que não estão nela, de
+// GET /repos/{r} (uma chamada por repositório). Se essa leitura falhar, o
+// repositório segue na lista e a regra de falha da análise decide.
+// --------------------------------------------
+async function selecionarRepositorios(accessToken, userId, reposRecentes) {
+  const [importados] = await db.query(
+    "SELECT repo_full_name FROM user_repositories WHERE user_id = ? ORDER BY added_at DESC",
+    [userId]
+  );
+  if (!importados.length) return reposRecentes;
+
+  const recentesPorNome = new Map(reposRecentes.map(r => [String(r.full_name).toLowerCase(), r]));
+  return Promise.all(importados.map(async ({ repo_full_name }) => {
+    const conhecido = recentesPorNome.get(String(repo_full_name).toLowerCase());
+    if (conhecido) return conhecido;
+    try {
+      const res = await axios.get(
+        `https://api.github.com/repos/${repo_full_name}`,
+        { headers: { Authorization: `Bearer ${accessToken}` }, timeout: GITHUB_TIMEOUT_MS }
+      );
+      return { full_name: repo_full_name, fork: Boolean(res.data?.fork) };
+    } catch {
+      return { full_name: repo_full_name, fork: false };
+    }
+  }));
+}
+
 // Compatibilidade: devolve só a lista de skills detectadas (vazia se o GitHub
 // estava indisponível). Quem precisa distinguir "indisponível" usa analisarGitHub.
-async function matchSkillsFromGitHub(accessToken, githubId, repos) {
-  return (await analisarGitHub(accessToken, githubId, repos)).skills;
+async function matchSkillsFromGitHub(accessToken, githubId, repos, opcoes = {}) {
+  return (await analisarGitHub(accessToken, githubId, repos, opcoes)).skills;
 }
 
 // --------------------------------------------
@@ -316,5 +430,5 @@ async function verificarHabilidadesNoRepo(accessToken, repoFullName, habilidades
 module.exports = {
   matchSkillsFromGitHub, analisarGitHub, fetchRepoLanguages, fetchRepoReadme,
   verificarRepoPublico, verificarHabilidadesNoRepo,
-  pontuarSkillNoRepo, aparecePalavraInteira, lerDependencias,
+  pontuarSkillNoRepo, evidenciasSkillNoRepo, aparecePalavraInteira, lerDependencias,
 };

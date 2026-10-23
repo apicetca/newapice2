@@ -3,14 +3,14 @@
 // registra como matchSkillsFromGitHub pontua HOJE (docs/analise-perfil.md,
 // seção 1), com a API do GitHub e o banco mockados.
 jest.mock("axios", () => ({ get: jest.fn() }));
-jest.mock("../database/db", () => ({ query: jest.fn() }));
+jest.mock("../database/db", () => ({ query: jest.fn(), getConnection: jest.fn() }));
 
 const axios = require("axios");
 const db = require("../database/db");
 const {
   matchSkillsFromGitHub, analisarGitHub, fetchRepoLanguages, fetchRepoReadme,
   verificarRepoPublico, verificarHabilidadesNoRepo, pontuarSkillNoRepo, aparecePalavraInteira,
-  lerDependencias,
+  lerDependencias, evidenciasSkillNoRepo,
 } = require("../services/githubAnalyzer");
 const fs = require("fs");
 const path = require("path");
@@ -40,6 +40,12 @@ function erroDeRede() {
 // } }
 function instalarFakeGitHub(repos) {
   axios.get.mockImplementation(async (url) => {
+    const meta = url.match(/repos\/([^/]+\/[^/]+)$/);
+    if (meta) {
+      const repo = repos[meta[1]];
+      if (!repo) throw erroHttp(404);
+      return { data: { full_name: meta[1], fork: Boolean(repo.fork) } };
+    }
     const m = url.match(/repos\/([^/]+\/[^/]+)\/(languages|readme|contents)(?:\/(.+))?$/);
     if (!m) throw new Error(`fakeGitHub: URL não mapeada: ${url}`);
     const [, nome, recurso, arquivo] = m;
@@ -69,13 +75,42 @@ function instalarFakeGitHub(repos) {
   });
 }
 
-function instalarFakeDb(skills) {
+// importados: repositórios do dev em user_repositories (padrão: nenhum).
+// A conexão da transação (getConnection) usa o mesmo db.query, então
+// gravacoes()/evidenciasGravadas() enxergam tudo; begin/commit/rollback ficam em `transacao`.
+let transacao;
+function instalarFakeDb(skills, { importados = [], semTabelaEvidencias = false } = {}) {
   db.query.mockImplementation(async (sql) => {
     if (/from skills/i.test(sql)) return [skills];
+    if (/from user_repositories/i.test(sql)) return [importados.map(n => ({ repo_full_name: n }))];
+    if (/user_skill_evidencias/i.test(sql)) {
+      if (semTabelaEvidencias) {
+        const err = new Error("Table 'user_skill_evidencias' doesn't exist");
+        err.code = "ER_NO_SUCH_TABLE";
+        throw err;
+      }
+      return [{}];
+    }
     if (/insert into user_skills/i.test(sql)) return [{}];
     throw new Error(`fakeDb: rota não mapeada: ${sql}`);
   });
+  transacao = {
+    query: (...args) => db.query(...args),
+    beginTransaction: jest.fn(async () => {}),
+    commit: jest.fn(async () => {}),
+    rollback: jest.fn(async () => {}),
+    release: jest.fn(),
+  };
+  db.getConnection.mockResolvedValue(transacao);
 }
+
+const evidenciasGravadas = () =>
+  db.query.mock.calls
+    .filter(([sql]) => /insert into user_skill_evidencias/i.test(sql))
+    .flatMap(([, params]) => params[0])
+    .map(([githubId, skillId, repo, tipo, pontos]) => ({ githubId, skillId, repo, tipo, pontos }));
+const apagouEvidencias = () =>
+  db.query.mock.calls.filter(([sql]) => /delete from user_skill_evidencias/i.test(sql));
 
 const gravacoes = () =>
   db.query.mock.calls
@@ -585,5 +620,150 @@ describe("forks e arquivos de dependências (Etapa 5)", () => {
   test("pontuarSkillNoRepo: sinal igual ao nome de um pacote vale +40", () => {
     expect(pontuarSkillNoRepo(["express"], ["javascript"], "", ["express", "cors"])).toBe(40);
     expect(pontuarSkillNoRepo(["express"], ["javascript"], "", ["express-session"])).toBe(0); // nome exato
+  });
+});
+
+// ETAPA 6 — evidências por skill e repositórios escolhidos em /repositorios.
+describe("evidências por skill (Etapa 6)", () => {
+  const PKG = JSON.stringify({ dependencies: { react: "^18" } });
+
+  test("grava uma evidência por tipo e repositório, com os pontos", async () => {
+    instalarFakeDb([{ id: 7, github_signals: "react,reactjs" }, { id: 8, github_signals: "javascript" }]);
+    instalarFakeGitHub({
+      "u/loja": { languages: { JavaScript: 1 }, readme: "feito com react", arquivos: { "package.json": PKG } },
+      "u/site": { languages: {}, readme: "usei reactjs" },
+    });
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/loja", "u/site"));
+
+    expect(r.skills).toEqual([{ skill_id: 7, confidence: 80 }, { skill_id: 8, confidence: 40 }]);
+    expect(evidenciasGravadas()).toEqual([
+      { githubId: GITHUB_ID, skillId: 7, repo: "u/loja", tipo: "dependencia", pontos: 40 },
+      { githubId: GITHUB_ID, skillId: 7, repo: "u/loja", tipo: "readme",      pontos: 20 },
+      { githubId: GITHUB_ID, skillId: 7, repo: "u/site", tipo: "readme",      pontos: 20 },
+      { githubId: GITHUB_ID, skillId: 8, repo: "u/loja", tipo: "linguagem",   pontos: 40 },
+    ]);
+  });
+
+  test("linguagem e dependência no mesmo repositório: uma evidência só, do tipo linguagem", () => {
+    expect(evidenciasSkillNoRepo(["javascript", "js"], ["javascript"], "", ["js"])).toEqual([
+      { tipo: "linguagem", pontos: 40 },
+    ]);
+  });
+
+  test("as evidências antigas são substituídas a cada análise, numa transação", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null } });
+    await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+
+    const ordem = db.query.mock.calls.map(([sql]) => sql.replace(/\s+/g, " ").trim().split(" ").slice(0, 3).join(" ").toLowerCase());
+    expect(ordem).toEqual([
+      "select * from",                   // skills
+      "delete from user_skill_evidencias",
+      "insert into user_skills",
+      "insert into user_skill_evidencias",
+    ]);
+    expect(apagouEvidencias()[0][1]).toEqual([GITHUB_ID]); // todas as do dev
+    expect(transacao.beginTransaction).toHaveBeenCalledTimes(1);
+    expect(transacao.commit).toHaveBeenCalledTimes(1);
+    expect(transacao.rollback).not.toHaveBeenCalled();
+    expect(transacao.release).toHaveBeenCalledTimes(1);
+  });
+
+  test("análise sem nenhuma skill ainda apaga as evidências antigas", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "rust" }]);
+    instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null } });
+    await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(apagouEvidencias()).toHaveLength(1);
+    expect(evidenciasGravadas()).toEqual([]);
+  });
+
+  test("leitura parcial: só apaga as evidências dos repositórios lidos agora", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({
+      "u/a": { languages: { Python: 1 }, readme: null },
+      "u/b": { languagesErro: erroHttp(500), readme: null },
+    });
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a", "u/b"));
+    const [sql, params] = apagouEvidencias()[0];
+    expect(sql).toMatch(/repo_full_name IN \(\?\)/);
+    expect(params).toEqual([GITHUB_ID, ["u/a"]]);
+  });
+
+  test("GitHub indisponível: nenhuma transação é aberta (nada muda)", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({ "u/a": { languagesErro: erroHttp(401), readme: null } });
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(db.getConnection).not.toHaveBeenCalled();
+  });
+
+  test("erro ao gravar faz rollback e libera a conexão", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null } });
+    const original = db.query.getMockImplementation();
+    db.query.mockImplementation(async (sql, params) => {
+      if (/insert into user_skills/i.test(sql)) throw new Error("deadlock");
+      return original(sql, params);
+    });
+    await expect(analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"))).rejects.toThrow("deadlock");
+    expect(transacao.rollback).toHaveBeenCalledTimes(1);
+    expect(transacao.commit).not.toHaveBeenCalled();
+    expect(transacao.release).toHaveBeenCalledTimes(1);
+  });
+
+  test("sem a tabela de evidências (migração não rodada) as skills são gravadas mesmo assim", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }], { semTabelaEvidencias: true });
+    instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null } });
+    const log = jest.spyOn(console, "error").mockImplementation(() => {});
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(r.status).toBe("ok");
+    expect(gravacoes()).toEqual([{ githubId: GITHUB_ID, skillId: 1, confidence: 40 }]);
+    expect(transacao.commit).toHaveBeenCalledTimes(1);
+    expect(log.mock.calls.join(" ")).toMatch(/migrate:analise-perfil/);
+  });
+});
+
+describe("repositórios escolhidos em /repositorios (Etapa 6)", () => {
+  test("dev com repositórios importados → só eles contam", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }, { id: 2, github_signals: "go" }], { importados: ["u/importado"] });
+    instalarFakeGitHub({
+      "u/importado": { languages: { Python: 1 }, readme: null },
+      "u/recente":   { languages: { Go: 1 }, readme: null },
+    });
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, [{ full_name: "u/recente" }, { full_name: "u/importado" }], { userId: 5 });
+
+    expect(r.skills).toEqual([{ skill_id: 1, confidence: 40 }]);
+    expect(axios.get.mock.calls.some(([url]) => url.includes("u/recente"))).toBe(false);
+    const consulta = db.query.mock.calls.find(([sql]) => /from user_repositories/i.test(sql));
+    expect(consulta[1]).toEqual([5]);
+  });
+
+  test("dev sem repositórios importados → os mais recentes (como antes)", async () => {
+    instalarFakeDb([{ id: 2, github_signals: "go" }], { importados: [] });
+    instalarFakeGitHub({ "u/recente": { languages: { Go: 1 }, readme: null } });
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, [{ full_name: "u/recente" }], { userId: 5 });
+    expect(r.skills).toEqual([{ skill_id: 2, confidence: 40 }]);
+  });
+
+  test("importado que é fork continua fora (fork vem da lista recente ou de GET /repos/{r})", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }], { importados: ["u/meu", "u/fork-recente", "u/fork-antigo"] });
+    instalarFakeGitHub({
+      "u/meu":         { languages: { Python: 1 }, readme: null },
+      "u/fork-recente":{ languages: { Python: 1 }, readme: null },
+      "u/fork-antigo": { languages: { Python: 1 }, readme: null, fork: true },
+    });
+    const r = await analisarGitHub(TOKEN, GITHUB_ID, [{ full_name: "u/fork-recente", fork: true }], { userId: 5 });
+
+    expect(r.skills).toEqual([{ skill_id: 1, confidence: 40 }]); // só u/meu
+    const lidos = axios.get.mock.calls.map(([url]) => url).filter(url => url.endsWith("/languages"));
+    expect(lidos).toEqual(["https://api.github.com/repos/u/meu/languages"]);
+  });
+
+  test("sem userId (chamadas antigas) não consulta user_repositories", async () => {
+    instalarFakeDb([{ id: 1, github_signals: "python" }]);
+    instalarFakeGitHub({ "u/a": { languages: { Python: 1 }, readme: null } });
+    await matchSkillsFromGitHub(TOKEN, GITHUB_ID, repoList("u/a"));
+    expect(db.query.mock.calls.some(([sql]) => /user_repositories/i.test(sql))).toBe(false);
   });
 });

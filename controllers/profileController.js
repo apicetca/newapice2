@@ -79,6 +79,26 @@ const profileController = {
         ORDER BY us.confidence DESC, s.name ASC
       `, [githubId]);
 
+      // "Por quê?" de cada skill detectada: de quais repositórios vieram os
+      // pontos. Sem a tabela (migração ainda não rodada), segue sem evidências.
+      let evidencias = [];
+      try {
+        [evidencias] = await db.query(
+          `SELECT skill_id, repo_full_name, tipo, pontos
+           FROM user_skill_evidencias
+           WHERE github_id = ?
+           ORDER BY pontos DESC, repo_full_name ASC`,
+          [githubId]
+        );
+      } catch (err) {
+        if (err.code !== "ER_NO_SUCH_TABLE") throw err;
+      }
+      const evidenciasPorSkill = {};
+      for (const ev of evidencias) {
+        (evidenciasPorSkill[ev.skill_id] ??= []).push({ repo: ev.repo_full_name, tipo: ev.tipo, pontos: ev.pontos });
+      }
+      for (const sk of skills) sk.evidencias = evidenciasPorSkill[sk.skill_id] ?? [];
+
       const plan = await getUserPlan(userId, "dev");
 
       res.json({
@@ -221,7 +241,8 @@ const profileController = {
       const { status, skills: detected } = await analisarGitHub(
         accessToken,
         github_id ?? req.session.user.id,
-        repos
+        repos,
+        { userId: req.session.user.id } // repositórios importados em /repositorios, se houver
       );
 
       // Falha ao ler o GitHub não é "nenhuma skill": nada foi alterado.

@@ -144,6 +144,12 @@
               <span class="skills-empty">Carregando habilidades...</span>
             </div>
 
+            <!-- "Por quê?" de uma skill: de onde vieram os pontos -->
+            <div class="skill-why" id="skill-why" role="region" aria-labelledby="skill-why-title" hidden>
+              <p class="skill-why-title" id="skill-why-title"></p>
+              <ul class="skill-why-list" id="skill-why-list"></ul>
+            </div>
+
             <!-- Add skill manually -->
             <div class="add-skill-row">
               <fieldset class="field">
@@ -385,20 +391,79 @@
         return;
       }
 
-      skills.forEach(sk => {
-        const tag = document.createElement("span");
-        tag.className   = `skill-tag ${sk.type}`;
-        tag.dataset.sid = sk.skill_id;
+      skills.forEach(sk => grid.appendChild(criarSkillTag(sk)));
+    }
 
-        const removeBtnHtml = sk.source === "manual"
-          ? `<button type="button" class="skill-remove" onclick="removeSkill(${sk.skill_id}, this)" aria-label="Remover ${sk.name}">
-               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-             </button>`
-          : "";
+    // Uma tag de skill. Todo texto entra por textContent (nunca innerHTML com
+    // dados), e os botões usam addEventListener.
+    const SVG_REMOVER = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
-        tag.innerHTML = `${sk.name}<span class="skill-conf">${sk.confidence}%</span>${removeBtnHtml}`;
-        grid.appendChild(tag);
-      });
+    function criarSkillTag(sk) {
+      const tag = document.createElement("span");
+      tag.className   = `skill-tag ${sk.type === "soft" ? "soft" : "hard"}`;
+      tag.dataset.sid = sk.skill_id;
+
+      tag.appendChild(document.createTextNode(sk.name));
+
+      const conf = document.createElement("span");
+      conf.className   = "skill-conf";
+      conf.textContent = `${sk.confidence}%`;
+      tag.appendChild(conf);
+
+      const why = document.createElement("button");
+      why.type      = "button";
+      why.className = "skill-why-btn";
+      why.textContent = "por quê?";
+      why.setAttribute("aria-expanded", "false");
+      why.setAttribute("aria-controls", "skill-why");
+      why.setAttribute("aria-label", `Por que ${sk.name} tem ${sk.confidence}%?`);
+      why.addEventListener("click", () => mostrarPorque(sk, why));
+      tag.appendChild(why);
+
+      if (sk.source === "manual") {
+        const rm = document.createElement("button");
+        rm.type      = "button";
+        rm.className = "skill-remove";
+        rm.setAttribute("aria-label", `Remover ${sk.name}`);
+        rm.innerHTML = SVG_REMOVER; // só o ícone fixo, sem dados
+        rm.addEventListener("click", () => removeSkill(sk.skill_id, rm));
+        tag.appendChild(rm);
+      }
+      return tag;
+    }
+
+    const TIPO_EVIDENCIA = { linguagem: "linguagem", dependencia: "dependência", readme: "README" };
+
+    // Abre (ou fecha, se for a mesma skill) o painel com as evidências.
+    function mostrarPorque(sk, botao) {
+      const painel = $("skill-why");
+      const aberto = !painel.hidden && painel.dataset.sid === String(sk.skill_id);
+      document.querySelectorAll(".skill-why-btn[aria-expanded='true']").forEach(b => b.setAttribute("aria-expanded", "false"));
+      if (aberto) { painel.hidden = true; delete painel.dataset.sid; return; }
+
+      const lista = $("skill-why-list");
+      lista.replaceChildren();
+      $("skill-why-title").textContent = `${sk.name} — ${sk.confidence}%`;
+
+      const evidencias = sk.evidencias ?? [];
+      const adicionar = (texto) => {
+        const li = document.createElement("li");
+        li.textContent = texto;
+        lista.appendChild(li);
+      };
+      if (sk.source === "manual") adicionar("Adicionada por você.");
+      for (const ev of evidencias) {
+        adicionar(`${ev.repo}: ${TIPO_EVIDENCIA[ev.tipo] ?? ev.tipo} (+${ev.pontos})`);
+      }
+      if (sk.source !== "manual" && evidencias.length === 0) {
+        adicionar("Detectada numa análise anterior. Clique em \"Analisar agora\" para ver de quais repositórios ela veio.");
+      }
+      const soma = evidencias.reduce((t, ev) => t + ev.pontos, 0);
+      if (soma > 100) adicionar(`Total ${soma} pontos, limitado a 100%.`);
+
+      painel.dataset.sid = String(sk.skill_id);
+      painel.hidden = false;
+      botao.setAttribute("aria-expanded", "true");
     }
 
     function fillCatalog(catalog, mySkills) {
@@ -558,17 +623,11 @@
         const emptyEl = grid.querySelector(".skills-empty");
         if (emptyEl) emptyEl.remove();
 
-        const tag = document.createElement("span");
-        tag.className   = "skill-tag hard";
-        tag.dataset.sid = skillId;
+        const tag = criarSkillTag({
+          skill_id: Number(skillId), name: data.skill.name, type: "hard",
+          confidence: 70, source: "manual", evidencias: [],
+        });
         tag.style.animation = "fadeUp .25s ease";
-        tag.innerHTML = `
-          ${data.skill.name}
-          <span class="skill-conf">70%</span>
-          <button type="button" class="skill-remove" onclick="removeSkill(${skillId}, this)" aria-label="Remover ${data.skill.name}">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        `;
         grid.appendChild(tag);
 
         // Remove from select dropdown
@@ -594,6 +653,8 @@
         if (!res.ok) { showToast("Erro ao remover habilidade.", "error"); btn.disabled = false; return; }
 
         const tag = btn.closest(".skill-tag");
+        const painel = $("skill-why");
+        if (painel.dataset.sid === String(skillId)) painel.hidden = true;
         tag.style.cssText = "opacity:0;transform:scale(.88);transition:opacity .2s,transform .2s";
         setTimeout(() => tag.remove(), 210);
 
