@@ -17,6 +17,7 @@ const path = require("path");
 const db   = require("../database/db");
 const { askGeminiJSON } = require("./geminiClient");
 const { verificarRepoPublico, verificarHabilidadesNoRepo } = require("./githubAnalyzer");
+const { MENSAGEM_GITHUB_INDISPONIVEL } = require("./githubErrors");
 
 const HABILIDADES_REFERENCIA_PATH = path.join(__dirname, "..", "data", "habilidades-referencia.json");
 const ROADMAPS_MODELO_DIR         = path.join(__dirname, "..", "data", "roadmaps-modelo");
@@ -619,7 +620,10 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
     };
   }
 
-  const { existe, privado } = await verificarRepoPublico(accessToken, repoFullName);
+  const { existe, privado, falha } = await verificarRepoPublico(accessToken, repoFullName);
+  // Falha de leitura do GitHub (limite de uso, token inválido, rede): não é
+  // "repositório não encontrado" e não mexe em nada da fase.
+  if (falha) return { status: "indisponivel", mensagem: MENSAGEM_GITHUB_INDISPONIVEL };
   if (!existe) {
     await db.query("UPDATE roadmap_fases SET projeto_repo_url = ? WHERE id = ?", [repoUrl, faseId]);
     return {
@@ -653,6 +657,11 @@ async function verificarProjeto(faseId, repoUrl, accessToken) {
       ? await verificarHabilidadesNoRepo(accessToken, repoFullName, habilidadesComSinais)
       : [];
   } catch (err) {
+    // Nunca devolver "faltando" quando a causa foi falha da API: o status do
+    // projeto continua como estava.
+    if (err.codigo === "GITHUB_INDISPONIVEL") {
+      return { status: "indisponivel", mensagem: MENSAGEM_GITHUB_INDISPONIVEL };
+    }
     console.error("[verificarProjeto] falha ao analisar o repositório:", err.message);
     return {
       status: "erro",

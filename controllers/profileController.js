@@ -4,7 +4,8 @@ const fs    = require("fs");
 const axios = require("axios");
 const multer = require("multer");
 const db    = require("../database/db");
-const { matchSkillsFromGitHub } = require("../services/githubAnalyzer");
+const { analisarGitHub } = require("../services/githubAnalyzer");
+const { MENSAGEM_GITHUB_INDISPONIVEL, ehFalhaDeLeitura, registrarFalha } = require("../services/githubErrors");
 const { getUserPlan } = require("../services/subscriptionService");
 
 // ── Avatar upload (multer) ────────────────────────────────
@@ -217,11 +218,16 @@ const profileController = {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      const detected = await matchSkillsFromGitHub(
+      const { status, skills: detected } = await analisarGitHub(
         accessToken,
         github_id ?? req.session.user.id,
         repos
       );
+
+      // Falha ao ler o GitHub não é "nenhuma skill": nada foi alterado.
+      if (status === "indisponivel") {
+        return res.status(503).json({ error: MENSAGEM_GITHUB_INDISPONIVEL });
+      }
 
       res.json({
         success:  true,
@@ -229,6 +235,12 @@ const profileController = {
         detected: detected.length,
       });
     } catch (err) {
+      // Token inválido/expirado, limite de uso ou GitHub fora do ar ao listar os
+      // repositórios: mesma mensagem amigável (e nada é alterado).
+      if (err.isAxiosError && ehFalhaDeLeitura(err)) {
+        registrarFalha("lista de repositórios", "/user/repos", err);
+        return res.status(503).json({ error: MENSAGEM_GITHUB_INDISPONIVEL });
+      }
       console.error("Erro na re-análise:", err.message);
       res.status(500).json({ error: "Erro ao re-analisar repositórios." });
     }

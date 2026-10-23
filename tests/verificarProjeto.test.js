@@ -132,3 +132,48 @@ describe("fecharProjetoSemVerificar (plano Free)", () => {
     expect(chamada).toBeTruthy();
   });
 });
+
+// ETAPA 2: falha de leitura do GitHub nunca vira "faltando" nem "repositório
+// não encontrado", e não mexe no projeto_status da fase.
+describe("verificarProjeto — GitHub indisponível (falha da API)", () => {
+  const SKILL_ROWS = [{ name: "JavaScript", github_signals: "javascript,js" }];
+  const { GitHubIndisponivelError, MENSAGEM_GITHUB_INDISPONIVEL } = require("../services/githubErrors");
+
+  const escritas = (handler) =>
+    handler.mock.calls.filter(([sql]) => sql.toLowerCase().trim().startsWith("update roadmap_fases"));
+
+  test("falha ao consultar o repositório → indisponivel, sem nenhuma escrita na fase", async () => {
+    const handler = instalarFakeDb({ skillRows: SKILL_ROWS });
+    verificarRepoPublico.mockResolvedValue({ existe: false, privado: null, falha: true });
+
+    const resultado = await verificarProjeto(FASE.id, REPO_URL, "token-fake");
+
+    expect(resultado).toEqual({ status: "indisponivel", mensagem: MENSAGEM_GITHUB_INDISPONIVEL });
+    expect(escritas(handler)).toEqual([]); // nem projeto_repo_url, nem projeto_status
+    expect(verificarHabilidadesNoRepo).not.toHaveBeenCalled();
+  });
+
+  test("falha ao ler linguagens/README → indisponivel (nunca 'faltando') e status inalterado", async () => {
+    const handler = instalarFakeDb({ skillRows: SKILL_ROWS });
+    verificarRepoPublico.mockResolvedValue({ existe: true, privado: false, falha: false });
+    verificarHabilidadesNoRepo.mockRejectedValue(new GitHubIndisponivelError("dev/meu-projeto"));
+
+    const resultado = await verificarProjeto(FASE.id, REPO_URL, "token-fake");
+
+    expect(resultado.status).toBe("indisponivel");
+    expect(resultado.status).not.toBe("faltando");
+    expect(resultado.mensagem).toBe("Não conseguimos ler seu GitHub agora. Tente de novo em alguns minutos.");
+    expect(resultado.faltando).toBeUndefined();
+    expect(escritas(handler)).toEqual([]);
+  });
+
+  test("repositório que realmente não existe continua sendo 'erro' (não confundir com falha)", async () => {
+    instalarFakeDb({ skillRows: SKILL_ROWS });
+    verificarRepoPublico.mockResolvedValue({ existe: false, privado: null, falha: false });
+
+    const resultado = await verificarProjeto(FASE.id, REPO_URL, "token-fake");
+
+    expect(resultado.status).toBe("erro");
+    expect(resultado.mensagem.toLowerCase()).toMatch(/não encontramos/);
+  });
+});
