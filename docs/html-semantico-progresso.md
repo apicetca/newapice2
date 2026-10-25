@@ -50,7 +50,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | # | Página | `<div>` | Telas (papel e rota) | Status |
 |---:|---|---:|---|---|
 | 1 | [vagas.ejs](../views/vagas.ejs) | 63 | visitante `/vagas`<br>dev `/vagas`<br>empresa `/vagas` | concluída — ver registro |
-| 2 | [progresso.ejs](../views/progresso.ejs) | 46 | dev `/meu-progresso` | pendente |
+| 2 | [progresso.ejs](../views/progresso.ejs) | 46 | dev `/meu-progresso` | concluída — ver registro |
 | 3 | [repositorios.ejs](../views/repositorios.ejs) | 36 | dev `/repositorios` | pendente |
 | 4 | [perfil-dev.ejs](../views/perfil-dev.ejs) | 34 | dev `/perfil` | pendente |
 | 5 | [minha-assinatura.ejs](../views/minha-assinatura.ejs) | 31 | dev `/minha-assinatura`<br>empresa `/minha-assinatura` | pendente |
@@ -104,6 +104,10 @@ Estas páginas seguem o ciclo normalmente. A lista serve só para a conferência
 - `empresa-mensagens`: a empresa de teste não tem conversas, então abrir conversa, digitar e enviar ficaram "ausente"/"invisível".
 - `redefinir-senha`: sem token na URL os campos ficam desabilitados, então preencher e enviar não tiveram efeito.
 - `empresa-matchs`: a empresa de teste não tem match, então "aceitar" ficou ausente.
+
+**Conversões que o base não cobre** (o conteúdo convertido é gerado pelo JS só quando há dados, e as contas de teste não têm esses dados):
+
+- `progresso`: o card de roadmap (`.card-top` → `<header>`, `.card-stats` → `<ul>`) só aparece com roadmap em andamento; a conta dev não tem nenhum.
 
 **Páginas com animações próprias** (o base visual leva toda animação ao estado final e não registra transições, então o movimento em si não foi comparado). As **27 pendentes** têm animação própria: cada uma carrega um CSS de página com pelo menos `fadeUp`.
 
@@ -165,6 +169,29 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - layout sem significado próprio: `.login-banner-inner`, `.banner-text`, `.filter-inner`, `.search-wrap`, `.filter-sep` (2), `.results-row`, `.job-card-accent` (2), `.job-card-body` (2), `.job-icon-wrap`, `.job-meta` (2), `.job-company` (2).
   - `.skill-block` (2) e `.skill-block-label` (2): o rótulo não é heading, então `<section>` não se aplica.
   - estados vazio/erro do JS: `.empty-state` (2) e `.empty-icon` (2).
+
+### 2. progresso — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar progresso`: 3 de 3 capturas iguais (dev × 1440/768/375).
+- **Pergunta 2 (funções):** SIM. `verificar-funcoes comparar progresso`: OK; `npm test`: 668 passaram.
+- **Arquivos:** `views/progresso.ejs`, `public/css/progresso.css` (usado só por esta página).
+- **Cobertura:** a conta dev não tem roadmap em andamento, então o card gerado pelo JS (`.card-top`, `.card-stats`) não aparece no base; está na conferência manual.
+- **Trocadas (11):**
+  - `.summary-bar` → `<ul>` e os 4 `.summary-card` → `<li>` (já tinham `role="list"`/`"listitem"`, mantidos).
+  - `.gp-header` → `<header>` (título e percentual da barra global).
+  - `.section-header` → `<header>` (`<h1>` "Meus roadmaps" e o link).
+  - `.status-tabs` (`role="group"`) → `<fieldset>`.
+  - no card do JS: `.card-top` → `<header>`; `.card-stats` → `<ul>`, com os `.card-stat` como `<li>` (antes `<span>`).
+  - CSS: `.summary-bar` ganhou `margin-top:0;padding:0;list-style:none` (mantém o `margin-bottom` da classe); `.status-tabs` ganhou `margin-top:0;margin-inline:0;padding:0;border:0;min-inline-size:auto`; `.card-stats` ganhou `margin:0;padding:0;list-style:none`.
+- **Mantidas (35) e motivo:**
+  - `#roadmap-list` e `#roadmap-empty`: o teste QA-033 exige as duas como `<div>`.
+  - `.gp-track` e `.card-track` (`role="progressbar"`): o teste QA-038 exige `<div>`; `.gp-fill`/`.card-fill` são o preenchimento visual delas.
+  - `.global-progress` (`role="region"`): não tem título visível (só `aria-label`), então `<section>` não se aplica; o `role` já dá o landmark.
+  - `.loading-screen`, `#content`, `.spinner` (2): estados de carregamento/conteúdo e ícone decorativo.
+  - `.summary-icon`/`.summary-val`/`.summary-lbl` (12): ícone, valor e rótulo de cada indicador; `<dl>` está fora da lista.
+  - `.gp-legend` (`aria-hidden`): legenda decorativa.
+  - no card do JS: `.roadmap-card-inner`, `.card-stripe`, `.card-content`, `.card-info`, `.card-title` (não é heading), `.card-company`, `.card-badges`, `.card-progress`, `.card-prog-header`: layout interno do card.
+  - estados do JS: `.empty-icon` e os 2 invólucros com `style` da mensagem de erro de carregamento.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
