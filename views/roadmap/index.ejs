@@ -43,7 +43,7 @@
         <div class="rm-card-list" role="list" aria-label="Seus roadmaps">
           <% roadmaps.forEach(function(r) { %>
             <article class="rm-card <%= r.status === 'arquivado' ? 'rm-card--arquivado' : '' %>" role="listitem">
-              <div class="rm-card-top">
+              <header class="rm-card-top">
                 <div class="rm-card-info">
                   <p class="rm-card-title"><%= r.label %></p>
                   <p class="rm-card-meta"><%= r.horas_semana %>h/semana &middot; versão <%= r.versao %></p>
@@ -60,7 +60,7 @@
                     <span class="badge badge-yellow" title="Gerado pelo roadmap-modelo (a IA não respondeu desta vez)">Modelo</span>
                   <% } %>
                 </div>
-              </div>
+              </header>
 
               <div class="rm-progress" role="progressbar" aria-valuenow="<%= r.pct %>" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso de <%= r.label %>">
                 <div class="rm-progress-track">

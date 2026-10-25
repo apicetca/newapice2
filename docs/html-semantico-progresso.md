@@ -67,7 +67,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 16 | [esqueci-senha.ejs](../views/esqueci-senha.ejs) | 9 | visitante `/esqueci-senha` | concluída — ver registro |
 | 17 | [index.ejs](../views/index.ejs) | 9 | visitante `/` | concluída sem troca — ver registro |
 | 18 | [mentor.ejs](../views/mentor.ejs) | 9 | dev `/mentor` | concluída — ver registro |
-| 19 | [roadmap/index.ejs](../views/roadmap/index.ejs) | 9 | dev `/trilha` | pendente |
+| 19 | [roadmap/index.ejs](../views/roadmap/index.ejs) | 9 | dev `/trilha` | concluída — ver registro |
 | 20 | [roadmap/novo.ejs](../views/roadmap/novo.ejs) | 9 | dev `/trilha/novo` | pendente |
 | 21 | [assinatura-resultado.ejs](../views/assinatura-resultado.ejs) | 8 | dev `/assinatura/retorno`<br>empresa `/assinatura/retorno` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
 | 22 | [dashboard.ejs](../views/dashboard.ejs) | 8 | dev `/dashboard` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
@@ -440,6 +440,20 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `#mentorAnexoPreview`: chip do arquivo anexado.
   - `#mentorEmpty` e a `<div>` centralizada do botão de entrevista (JS): estado vazio.
   - `createElement("div")` em `escapeHtml()`: elemento temporário que nunca entra no DOM.
+
+### 19. roadmap/index — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar roadmap/index`: 3 de 3 capturas iguais (dev × 3 larguras; os cards de roadmap aparecem no base).
+- **Pergunta 2 (funções):** SIM. OK; `npm test`: 668 passaram.
+- **Arquivos:** só `views/roadmap/index.ejs`; nenhum CSS mudou.
+- **Trocadas (1, repetida em cada card):** `.rm-card-top` → `<header>` (nome do roadmap, meta e selos de status).
+- **Mantidas (8) e motivo:**
+  - `.rm-page`: layout.
+  - `.rm-empty`: estado vazio sem título.
+  - `.rm-card-list` (`role="list"`): virar `<ul>` exigiria trocar os filhos `<article role="listitem">`, que não são `<div>`.
+  - `.rm-card-info` (título e meta são `<p>`, sem heading, então `<hgroup>` não se aplica) e `.rm-card-badges`.
+  - `.rm-progress` (`role="progressbar"`) com `.rm-progress-track`/`.rm-progress-fill`.
+- **Observação (não alterado):** os cards usam `<article role="listitem">`, que o axe acusa como role não permitido (mesmo problema do QA-033). A correção trocaria `<article>` por `<li>`, o que está fora da regra de só trocar `<div>`.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
