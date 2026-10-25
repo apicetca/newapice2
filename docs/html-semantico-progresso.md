@@ -82,6 +82,65 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 Ficam fora do ciclo porque não têm nenhuma `<div>`: `404`, `500`, `admin-dashboard`, `admin-empresas`, `admin-matchs`, `admin-usuarios`, `admin-vagas`, `empresa-dashboard`, `empresa-desenvolvedores`, `roadmap`, `partials/header`, `partials/header-dev`, `partials/header-company`, `partials/header-admin`.
 `admin-dashboard` estava na lista das 9 revisadas, mas também não tem `<div>`.
 
+### Partials (conferidos em 2026-10-25)
+
+`views/partials/` tem 4 arquivos, e são os únicos `.ejs` incluídos por `include()` em todo o projeto (não há partial de footer nem outro fragmento). Nenhum tem `<div>`, nem no markup nem em JS, então nenhum entra na lista de pendentes.
+
+| Partial | `<div>` | Incluído por |
+|---|---:|---|
+| `partials/header.ejs` (visitante) | 0 | index, insights-mercado, para-devs, para-empresas, sobre, vaga-publica, vagas |
+| `partials/header-dev.ejs` | 0 | 18 páginas: assinar, assinatura-resultado, dashboard, insights-mercado, mensagens, mentor, minha-assinatura, perfil-dev, planos, progresso, repositorios, roadmap, roadmap/detalhe, roadmap/index, roadmap/novo, sobre, vaga-publica, vagas |
+| `partials/header-company.ejs` | 0 | 17 páginas: assinar, assinatura-resultado, empresa-candidaturas, empresa-dashboard, empresa-desenvolvedores, empresa-matchs, empresa-mensagens, empresa-vaga-form, empresa-vagas, insights-mercado, minha-assinatura, perfil-dev-empresa, perfil-empresa, planos, sobre, vaga-publica, vagas |
+| `partials/header-admin.ejs` | 0 | as 7 páginas de admin |
+
+Se algum partial for alterado durante o ciclo, as perguntas 1 e 2 rodam em todas as páginas que o incluem (tabela acima), inclusive as protegidas.
+
+## Conferência manual no fim
+
+Estas páginas seguem o ciclo normalmente. A lista serve só para a conferência manual depois de todas as conversões.
+
+**O roteiro não teve efeito no base (faltou dado ou token)**, então a pergunta 2 não exercitou essas interações:
+
+- `empresa-mensagens`: a empresa de teste não tem conversas, então abrir conversa, digitar e enviar ficaram "ausente"/"invisível".
+- `redefinir-senha`: sem token na URL os campos ficam desabilitados, então preencher e enviar não tiveram efeito.
+- `empresa-matchs`: a empresa de teste não tem match, então "aceitar" ficou ausente.
+
+**Páginas com animações próprias** (o base visual leva toda animação ao estado final e não registra transições, então o movimento em si não foi comparado). As **27 pendentes** têm animação própria: cada uma carrega um CSS de página com pelo menos `fadeUp`.
+
+| Página | Animações próprias (`@keyframes`) | Declarações próprias (animação / transição) | Origem |
+|---|---|---:|---|
+| vagas | fadeUp, pulse | 7 / 14 | `dev.css`, `vagas.css` |
+| progresso | fadeUp, spin, pulse | 7 / 14 | `dev.css`, `progresso.css` |
+| repositorios | fadeUp, skel-shimmer, backdrop-in, modal-in, sheet-in, spin | 7 / 17 | `dev.css`, `repositorios.css`, `<style>`/`style=""` |
+| perfil-dev | fadeUp, shimmer, pulseDot, savedPop, spin | 8 / 15 | `dev.css`, `perfil.css` |
+| minha-assinatura | spin, fadeUp, shimmer, pulseDot, savedPop, sub-spin | 14 / 33 | `empresa-dashboard.css`, `dev.css`, `perfil.css`, `assinatura.css` |
+| perfil-empresa | fadeUp, shimmer, pulseDot, savedPop, spin | 8 / 15 | `dev.css`, `perfil.css` |
+| vaga-publica | spin, fadeUp | 4 / 5 | `vaga-publica.css` |
+| perfil-dev-empresa | fadeUp | 2 / 11 | `dev.css`, `<style>`/`style=""` |
+| roadmap/detalhe | fadeUp, rmSpin | 3 / 11 | `dev.css`, `trilha.css` |
+| empresa-mensagens | spin, fadeUp, bubbleIn | 6 / 25 | `empresa-dashboard.css`, `mensagens.css` |
+| mensagens | spin, fadeUp, bubbleIn | 6 / 25 | `empresa-dashboard.css`, `mensagens.css` |
+| assinar | spin, fadeUp, shimmer, pulseDot, savedPop, sub-spin | 14 / 33 | `empresa-dashboard.css`, `dev.css`, `perfil.css`, `assinatura.css` |
+| planos | spin, fadeUp, shimmer, pulseDot, savedPop, sub-spin | 14 / 34 | `empresa-dashboard.css`, `dev.css`, `perfil.css`, `assinatura.css`, `<style>`/`style=""` |
+| redefinir-senha | fadeUp, pulse-dot | 5 / 12 | `auth.css` |
+| cadastro | fadeUp, pulse-dot | 5 / 12 | `auth.css` |
+| esqueci-senha | fadeUp, pulse-dot | 5 / 12 | `auth.css` |
+| index | fadeIn, fadeUp, logos-scroll | 3 / 14 | `landing.css` |
+| mentor | fadeUp, bubbleIn | 2 / 10 | `mensagens.css` |
+| roadmap/index | fadeUp, rmSpin | 3 / 11 | `dev.css`, `trilha.css` |
+| roadmap/novo | fadeUp, rmSpin | 3 / 11 | `dev.css`, `trilha.css` |
+| assinatura-resultado | spin, fadeUp, shimmer, pulseDot, savedPop, sub-spin | 14 / 33 | `empresa-dashboard.css`, `dev.css`, `perfil.css`, `assinatura.css` |
+| dashboard | fadeUp, spin | 6 / 10 | `dev.css`, `dashboard.css` |
+| login | fadeUp, pulse-dot | 5 / 12 | `auth.css` |
+| sobre | fadeUp, revealIn | 4 / 10 | `dev.css`, `sobre.css`, `reveal.css` |
+| para-empresas | fadeUp, revealIn | 4 / 10 | `dev.css`, `para-devs.css`, `reveal.css` |
+| para-devs | fadeUp, revealIn | 4 / 10 | `dev.css`, `para-devs.css`, `reveal.css` |
+| empresa-matchs | fadeUp, spin | 7 / 15 | `dev.css`, `empresa-matchs.css` |
+
+> **Observação — animações e transições globais**, presentes em todas as páginas e não listadas acima: `fieldErrorIn` (mensagem de erro de campo, em `design-system.css`) e 25 transições do header/menu em `header.css`. `empresa-theme.css`, carregado pelo header de empresa, não tem nenhuma.
+
+Contagem feita no CSS que a própria página carrega (sem `design-system.css`, `header.css` e o CSS dos partials), nos `<style>` e nos `style=""`, ignorando comentários e valores `none`. Em `minha-assinatura`, `assinar`, `planos` e `assinatura-resultado` o CSS muda conforme o tipo de conta (`dev.css` ou `empresa-dashboard.css`); a contagem soma os dois.
+
 ## Registro do ciclo
 
 Uma entrada por página, na ordem em que for processada: resultado das perguntas 1 e 2, commit, `<div>` trocadas, `<div>` mantidas com o motivo e, se falhar, o que falhou.
