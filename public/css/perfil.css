@@ -567,7 +567,7 @@
 }
 
 /* ── Vagas mini list (company) ───────────────────────── */
-.vagas-list { display: flex; flex-direction: column; gap: .55rem; }
+.vagas-list { display: flex; flex-direction: column; gap: .55rem; margin: 0; padding: 0; list-style: none; /* pode ser um <ul> */ }
 
 .vaga-row {
   display: flex;

@@ -41,13 +41,13 @@
                 <div class="company-logo" id="company-logo">?</div>
               </div>
 
-              <div class="profile-meta">
+              <header class="profile-meta">
                 <h1 class="profile-name" id="hero-name">—</h1>
                 <p  class="profile-sub"  id="hero-razao">—</p>
-                <div class="profile-chips" id="hero-chips" aria-label="Informações da empresa"></div>
-              </div>
+                <ul class="profile-chips" id="hero-chips" aria-label="Informações da empresa"></ul>
+              </header>
 
-              <div class="profile-stats" id="hero-stats" aria-label="Estatísticas"></div>
+              <ul class="profile-stats" id="hero-stats" aria-label="Estatísticas"></ul>
 
             </div>
           </section>
@@ -152,9 +152,9 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
               Vagas publicadas
             </h2>
-            <div class="vagas-list" id="vagas-list" aria-live="polite">
+            <ul class="vagas-list" id="vagas-list" aria-live="polite">
               <!-- filled by JS -->
-            </div>
+            </ul>
             <div style="margin-top:1rem">
               <a href="/empresa/dashboard" class="btn-secondary" style="text-decoration:none;display:inline-flex">
                 Ver todas as vagas
@@ -294,30 +294,30 @@
       chips.innerHTML = "";
 
       if (data.setor) {
-        chips.innerHTML += `<span class="chip chip-teal">${escapeHtml(data.setor)}</span>`;
+        chips.innerHTML += `<li class="chip chip-teal">${escapeHtml(data.setor)}</li>`;
       }
       if (data.tamanho) {
-        chips.innerHTML += `<span class="chip chip-muted">${escapeHtml(data.tamanho)} funcionários</span>`;
+        chips.innerHTML += `<li class="chip chip-muted">${escapeHtml(data.tamanho)} funcionários</li>`;
       }
       if (data.cnpj) {
-        chips.innerHTML += `<span class="chip chip-muted">CNPJ ${fmtCnpj(data.cnpj)}</span>`;
+        chips.innerHTML += `<li class="chip chip-muted">CNPJ ${fmtCnpj(data.cnpj)}</li>`;
       }
 
       const since = data.created_at
         ? new Date(data.created_at).toLocaleDateString("pt-BR", { year: "numeric", month: "long" })
         : "—";
-      chips.innerHTML += `<span class="chip chip-muted">Desde ${since}</span>`;
+      chips.innerHTML += `<li class="chip chip-muted">Desde ${since}</li>`;
 
       // Stats
       $("hero-stats").innerHTML = `
-        <div class="stat-item">
+        <li class="stat-item">
           <span class="stat-value">${data.totalVagas ?? 0}</span>
           <span class="stat-label">vagas</span>
-        </div>
-        <div class="stat-item">
+        </li>
+        <li class="stat-item">
           <span class="stat-value">${data.vagasAtivas ?? 0}</span>
           <span class="stat-label">ativas</span>
-        </div>
+        </li>
       `;
     }
 
@@ -351,7 +351,7 @@
     function renderVagas(vagas) {
       const list = $("vagas-list");
       if (!vagas || vagas.length === 0) {
-        list.innerHTML = `<p class="vagas-empty">Nenhuma vaga publicada ainda. <a href="/empresa/dashboard" style="color:var(--teal)">Criar primeira vaga</a></p>`;
+        list.innerHTML = `<li class="vagas-empty">Nenhuma vaga publicada ainda. <a href="/empresa/dashboard" style="color:var(--teal)">Criar primeira vaga</a></li>`;
         return;
       }
 
@@ -359,14 +359,14 @@
         const active  = Boolean(v.active);
         const created = new Date(v.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
         return `
-          <div class="vaga-row">
+          <li class="vaga-row">
             <span class="vaga-status-dot ${active ? "active" : "inactive"}" title="${active ? "Ativa" : "Inativa"}"></span>
             <div class="vaga-info">
               <p class="vaga-title">${escapeHtml(v.title)}</p>
               <p class="vaga-meta">${levelLabel[v.level] ?? v.level} · publicada em ${created}</p>
             </div>
             <span class="chip ${active ? "chip-teal" : "chip-muted"}">${active ? "Ativa" : "Inativa"}</span>
-          </div>
+          </li>
         `;
       }).join("");
     }

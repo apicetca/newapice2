@@ -54,7 +54,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 3 | [repositorios.ejs](../views/repositorios.ejs) | 36 | dev `/repositorios` | concluída — ver registro |
 | 4 | [perfil-dev.ejs](../views/perfil-dev.ejs) | 34 | dev `/perfil` | concluída — ver registro |
 | 5 | [minha-assinatura.ejs](../views/minha-assinatura.ejs) | 31 | dev `/minha-assinatura`<br>empresa `/minha-assinatura` | concluída — ver registro |
-| 6 | [perfil-empresa.ejs](../views/perfil-empresa.ejs) | 30 | empresa `/empresa/perfil` | pendente |
+| 6 | [perfil-empresa.ejs](../views/perfil-empresa.ejs) | 30 | empresa `/empresa/perfil` | concluída — ver registro |
 | 7 | [vaga-publica.ejs](../views/vaga-publica.ejs) | 28 | visitante `/vagas/{vaga}`<br>dev `/vagas/{vaga}`<br>empresa `/vagas/{vaga}` | pendente |
 | 8 | [perfil-dev-empresa.ejs](../views/perfil-dev-empresa.ejs) | 23 | empresa `/empresa/dev/{dev}` | pendente |
 | 9 | [roadmap/detalhe.ejs](../views/roadmap/detalhe.ejs) | 16 | dev `/trilha/{roadmap}` | pendente |
@@ -255,6 +255,22 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `#history` e as `<div>` dentro das `<td>` do histórico: o CSS `.sub-history td > div` (inventário) depende delas.
   - `#cancel-modal` (overlay) e `.sub-modal` (`role="dialog"`): `<dialog>` está fora da lista e mudaria o comportamento.
   - `#mp-config`: só carrega `data-*` para o JS.
+
+### 6. perfil-empresa — concluída
+
+- **Pergunta 1 (visual):** SIM. Como `perfil.css` mudou, rodou nas 6 páginas que o usam (perfil-empresa, perfil-dev, minha-assinatura, assinar, planos, assinatura-resultado): 30 de 30 capturas iguais.
+- **Pergunta 2 (funções):** SIM nas mesmas 6 (10 telas OK); `npm test`: 668 passaram.
+- **Arquivos:** `views/perfil-empresa.ejs`, `public/css/perfil.css` (só a classe `.vagas-list` ganhou `margin:0;padding:0;list-style:none`).
+- **Trocadas (7 `<div>`, mais 4 `<span>` e 1 `<p>` → `<li>`):**
+  - `.profile-meta` → `<header>`; `#hero-chips` → `<ul>` com os 4 badges do JS como `<li>`; `#hero-stats` → `<ul>` com os 2 `.stat-item` do JS como `<li>` (mesmo padrão de `perfil-dev`).
+  - `#vagas-list` → `<ul>`; cada `.vaga-row` do JS → `<li>`; a mensagem "Nenhuma vaga publicada ainda" → `<li class="vagas-empty">` (antes `<p>`; o `<ul>` só aceita `<li>`).
+- **Mantidas (23) e motivo:**
+  - `.perfil-layout`, `#state-loading` + 3 skeletons, `#state-content`: layout e estados.
+  - `.profile-hero-inner`, `.company-logo-ring`, `.company-logo`: layout/logo decorativo.
+  - `.form-alert` (`role="alert"`), `.field-row` (2), `.form-actions`, a `<div>` com `style` do link de nova vaga, `#plan-info`, `.danger-zone`: layout ou grupos sem título.
+  - `.vaga-info` (dentro de cada item): título e meta da vaga.
+  - `#info-rows` e os 4 `.info-row`: pares rótulo/valor; `<dl>` está fora da lista.
+  - `#toast` (`role="status"`): `<output>` está fora da lista.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
