@@ -25,9 +25,9 @@
 
     <!-- ══ Coluna 1: lista de conversas ══ -->
     <aside class="msg-sidebar" aria-label="Suas conversas">
-      <div class="msg-sidebar-head">
+      <header class="msg-sidebar-head">
         <p class="msg-sidebar-hint">Para contatar um novo candidato, acesse o perfil dele em <a href="/empresa/desenvolvedores">Candidatos</a>.</p>
-      </div>
+      </header>
 
       <div class="msg-search-row">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -241,10 +241,10 @@
         const prev = messages[i - 1];
         const stacked = prev && prev.mine === m.mine && (new Date(m.created_at) - new Date(prev.created_at)) < 5 * 60 * 1000;
         return `
-        <div class="msg-bubble-row ${m.mine ? "mine" : ""} ${stacked ? "stacked" : ""}">
+        <article class="msg-bubble-row ${m.mine ? "mine" : ""} ${stacked ? "stacked" : ""}">
           <span class="msg-bubble">${escapeHtml(m.body)}</span>
           <span class="msg-bubble-time">${new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
-        </div>`;
+        </article>`;
       }).join("");
     }
     body.scrollTop = body.scrollHeight;
@@ -318,8 +318,8 @@
           ${data.github ? `<a href="https://github.com/${data.github}" target="_blank" rel="noopener">@${data.github}</a>` : ""}
           <span>Match: <strong style="color:var(--accent)">${data.match}%</strong></span>
         </div>
-        ${skillsHtml ? `<div class="msg-info-block"><h4>Skills</h4><div>${skillsHtml}</div></div>` : ""}
-        ${data.roadmaps?.length ? `<div class="msg-info-block"><h4>Progresso em roadmaps</h4>${data.roadmaps.map(r => `<p style="font-size:.8rem;margin-bottom:4px">${escapeHtml(r.job_title)}: <strong>${r.progress}%</strong></p>`).join("")}</div>` : ""}
+        ${skillsHtml ? `<section class="msg-info-block"><h4>Skills</h4><div>${skillsHtml}</div></section>` : ""}
+        ${data.roadmaps?.length ? `<section class="msg-info-block"><h4>Progresso em roadmaps</h4>${data.roadmaps.map(r => `<p style="font-size:.8rem;margin-bottom:4px">${escapeHtml(r.job_title)}: <strong>${r.progress}%</strong></p>`).join("")}</section>` : ""}
         <div class="msg-info-block">
           <a href="/empresa/dev/${activeConversation.dev_id ?? ""}" target="_blank" rel="noopener" style="color:var(--blue);font-size:.82rem">Ver perfil completo →</a>
         </div>`;

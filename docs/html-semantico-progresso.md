@@ -58,7 +58,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 7 | [vaga-publica.ejs](../views/vaga-publica.ejs) | 28 | visitante `/vagas/{vaga}`<br>dev `/vagas/{vaga}`<br>empresa `/vagas/{vaga}` | concluída — ver registro |
 | 8 | [perfil-dev-empresa.ejs](../views/perfil-dev-empresa.ejs) | 23 | empresa `/empresa/dev/{dev}` | concluída — ver registro |
 | 9 | [roadmap/detalhe.ejs](../views/roadmap/detalhe.ejs) | 16 | dev `/trilha/{roadmap}` | concluída — ver registro |
-| 10 | [empresa-mensagens.ejs](../views/empresa-mensagens.ejs) | 14 | empresa `/empresa/mensagens` | pendente |
+| 10 | [empresa-mensagens.ejs](../views/empresa-mensagens.ejs) | 14 | empresa `/empresa/mensagens` | concluída — ver registro |
 | 11 | [mensagens.ejs](../views/mensagens.ejs) | 14 | dev `/mensagens` | pendente |
 | 12 | [assinar.ejs](../views/assinar.ejs) | 13 | dev `/planos/{planoDev}/assinar`<br>empresa `/planos/{planoEmpresa}/assinar` | pendente |
 | 13 | [planos.ejs](../views/planos.ejs) | 12 | dev `/planos`<br>empresa `/planos` | pendente |
@@ -111,6 +111,7 @@ Estas páginas seguem o ciclo normalmente. A lista serve só para a conferência
 - `repositorios`: os modais (`.modal-head` → `<header>`, `.modal-foot` → `<footer>`) ficam fechados nas capturas — o roteiro de funções abre os dois; o estado vazio (`.repos-empty` → `<section>`) só aparece sem repositórios.
 - `minha-assinatura`: o cartão "Assinatura atual" (`.sub-current-head` → `<header>`) e os painéis "Trocar cartão"/"Trocar de plano" (`.sub-panel` → `<section>`) só aparecem com assinatura paga ativa; a conta dev tem plano liberado pela equipe e a empresa não tem assinatura.
 - `perfil-dev-empresa`: a lista de roadmaps do candidato (`#roadmap-list` → `<ul>`) só aparece se ele tiver roadmap; o candidato usado no base (id 5) não tem nenhum.
+- `empresa-mensagens`: as mensagens (`.msg-bubble-row` → `<article>`) e o painel do candidato (`.msg-info-block` → `<section>`) só aparecem com conversa aberta; a empresa de teste não tem conversas.
 
 **Páginas com animações próprias** (o base visual leva toda animação ao estado final e não registra transições, então o movimento em si não foi comparado). As **27 pendentes** têm animação própria: cada uma carrega um CSS de página com pelo menos `fadeUp`.
 
@@ -325,6 +326,23 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.rm-actions`: grupo dos formulários "regenerar"/"arquivar".
   - `.rm-etapa-conteudo` e `.rm-etapa-meta`: conteúdo e metadados de cada etapa (que já é um `<li>`).
   - `.rm-projeto`: o rótulo "Projeto prático" é um `<p>`, não heading, então `<section>` não se aplica.
+
+### 10. empresa-mensagens — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar empresa-mensagens`: 3 de 3 capturas iguais (empresa × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK; `npm test`: 668 passaram.
+- **Arquivos:** só `views/empresa-mensagens.ejs`; nenhum CSS mudou (`mensagens.css` não estiliza `header`/`article`/`section` soltos).
+- **Cobertura:** a empresa de teste não tem conversas, então as mensagens (`<article>`) e o painel do candidato (`<section>`) não aparecem no base; está na conferência manual. A mesma troca de `.msg-bubble-row` é feita em `mensagens`, onde a conta dev tem conversas.
+- **Trocadas (4):**
+  - `.msg-sidebar-head` → `<header>` (introdução da lista de conversas).
+  - `.msg-bubble-row` do JS → `<article>` (cada mensagem é um conteúdo independente: texto e horário).
+  - os 2 `.msg-info-block` do painel que têm `<h4>` ("Skills", "Progresso em roadmaps") → `<section>`.
+- **Mantidas (10) e motivo:**
+  - `.msg-layout`: layout das colunas.
+  - `.msg-search-row`: invólucro do campo de busca (`<search>` está fora da lista).
+  - `#convList`: os itens são `<button>`; `<ul>` exigiria envolvê-los em `<li>`.
+  - `#threadEmpty`, `#threadActive`, `#threadBody`, `#infoPanelBody`: estados e contêineres preenchidos pelo JS.
+  - no painel do JS: `.msg-info-meta`, a `<div>` dos chips de skill, e o último `.msg-info-block` (só um link, sem título).
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
