@@ -56,7 +56,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 5 | [minha-assinatura.ejs](../views/minha-assinatura.ejs) | 31 | dev `/minha-assinatura`<br>empresa `/minha-assinatura` | concluída — ver registro |
 | 6 | [perfil-empresa.ejs](../views/perfil-empresa.ejs) | 30 | empresa `/empresa/perfil` | concluída — ver registro |
 | 7 | [vaga-publica.ejs](../views/vaga-publica.ejs) | 28 | visitante `/vagas/{vaga}`<br>dev `/vagas/{vaga}`<br>empresa `/vagas/{vaga}` | concluída — ver registro |
-| 8 | [perfil-dev-empresa.ejs](../views/perfil-dev-empresa.ejs) | 23 | empresa `/empresa/dev/{dev}` | pendente |
+| 8 | [perfil-dev-empresa.ejs](../views/perfil-dev-empresa.ejs) | 23 | empresa `/empresa/dev/{dev}` | concluída — ver registro |
 | 9 | [roadmap/detalhe.ejs](../views/roadmap/detalhe.ejs) | 16 | dev `/trilha/{roadmap}` | pendente |
 | 10 | [empresa-mensagens.ejs](../views/empresa-mensagens.ejs) | 14 | empresa `/empresa/mensagens` | pendente |
 | 11 | [mensagens.ejs](../views/mensagens.ejs) | 14 | dev `/mensagens` | pendente |
@@ -290,6 +290,24 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.vaga-icon-wrap` (decorativo), `.match-bar-track`/`.match-bar-fill` (barra visual), `.match-login-prompt`.
   - `.vaga-action-card` (2): cartão lateral de ações, sem título.
   - as `<div>` de rótulo/valor dentro de cada `.vaga-meta-item` (já um `<li>`): `<dl>` está fora da lista.
+
+### 8. perfil-dev-empresa — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar perfil-dev-empresa`: 3 de 3 capturas iguais (empresa × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK; `npm test`: 668 passaram.
+- **Arquivos:** só `views/perfil-dev-empresa.ejs` (o CSS da página fica no `<style>` dela).
+- **Trocadas (7 `<div>`, mais os `<span>` dos chips e o `<p>` de "nenhuma skill" → `<li>`):**
+  - `.dev-hero-main` → `<header>` (nome `<h1>`, cargo, GitHub e chips do candidato).
+  - `#hero-chips` e `#hero-skill-chips` (`.dev-hero-chips`) → `<ul>`, com os badges e as skills que o JS gera como `<li>`.
+  - `#skills-grid` → `<ul>` com cada `.skill-row` como `<li>`; a mensagem "Nenhuma skill detectada ainda." → `<li class="no-data">`.
+  - `#roadmap-list` → `<ul>` com cada `.roadmap-row` como `<li>`.
+  - CSS (no `<style>` da página): `.dev-hero-chips`, `.skills-grid` e `.roadmap-list` ganharam `padding:0;list-style:none` e margem zerada (mantendo o `margin-bottom` dos chips).
+- **Mantidas (16) e motivo:**
+  - `#state-loading`, `#state-error`, `#state-content`: estados.
+  - `.dev-hero-avatar` (decorativo), `.dev-hero-actions`, `.match-ring-wrap`, `.match-ring-label`: anel de compatibilidade e botão de contato.
+  - `.dev-tabs` (`role="tablist"`) e os `.dev-tab-panel` (`role="tabpanel"`, 2 no template): a `<div>` é o elemento certo para esses papéis ARIA.
+  - `.tab-empty`: estado vazio das abas, sem título.
+  - dentro dos itens do JS: `.skill-row-top`, `.skill-bar`/`.skill-fill` e `.roadmap-bar-wrap`/`.roadmap-bar-fill` (barras com `role="progressbar"` e o preenchimento visual).
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 

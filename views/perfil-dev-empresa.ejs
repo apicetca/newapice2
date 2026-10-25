@@ -35,7 +35,7 @@
     .dev-hero-role { font-size: .85rem; color: var(--muted); margin-bottom: .6rem; }
     .dev-hero-github { display: inline-flex; align-items: center; gap: .35rem; color: var(--muted); font-size: .82rem; text-decoration: none; margin-bottom: .75rem; }
     .dev-hero-github:hover { color: var(--text); }
-    .dev-hero-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .85rem; }
+    .dev-hero-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .85rem; margin-top: 0; padding: 0; list-style: none; /* é um <ul> */ }
     .skill-chip {
       display: inline-flex; align-items: center; padding: 4px 11px; border-radius: 99px;
       background: var(--bg-3); border: 1px solid var(--border-lite); color: var(--text);
@@ -83,7 +83,7 @@
     .section-title { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 1.25rem; display: flex; align-items: center; gap: .5rem; }
 
     /* ── Skills ── */
-    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .6rem; }
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .6rem; margin: 0; padding: 0; list-style: none; /* é um <ul> */ }
     .skill-origem { display: inline-block; margin-left: 4px; font-size: .6rem; font-weight: 500; padding: 1px 6px; border-radius: 99px; border: 1px solid var(--border-lite); color: var(--muted); white-space: nowrap; vertical-align: middle; }
     .skill-origem--github    { border-color: var(--teal-border); color: var(--teal); }
     .skill-origem--declarada { border-color: var(--accent-border); color: var(--accent-text); }
@@ -96,7 +96,7 @@
     .no-data { color: var(--muted); font-size: .85rem; }
 
     /* ── Roadmap progress ── */
-    .roadmap-list { display: flex; flex-direction: column; gap: .75rem; }
+    .roadmap-list { display: flex; flex-direction: column; gap: .75rem; margin: 0; padding: 0; list-style: none; /* é um <ul> */ }
     .roadmap-row { display: flex; align-items: center; gap: .75rem; }
     .roadmap-job { flex: 1; font-size: .83rem; color: var(--text); }
     .roadmap-bar-wrap { flex: 2; height: 6px; background: var(--border-lite); border-radius: 3px; overflow: hidden; }
@@ -156,16 +156,16 @@
         <section class="dev-hero" aria-label="Resumo do candidato">
           <img class="dev-hero-avatar" id="hero-avatar-img" hidden alt="" />
           <div class="dev-hero-avatar" id="hero-avatar" aria-hidden="true"></div>
-          <div class="dev-hero-main">
+          <header class="dev-hero-main">
             <h1 class="dev-hero-name" id="hero-name">—</h1>
             <p class="dev-hero-role" id="hero-role">—</p>
             <a class="dev-hero-github" id="hero-github" href="#" target="_blank" rel="noopener noreferrer">
               <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
               —
             </a>
-            <div class="dev-hero-chips" id="hero-chips"></div>
-            <div class="dev-hero-chips" id="hero-skill-chips" aria-label="Principais skills"></div>
-          </div>
+            <ul class="dev-hero-chips" id="hero-chips"></ul>
+            <ul class="dev-hero-chips" id="hero-skill-chips" aria-label="Principais skills"></ul>
+          </header>
           <div class="dev-hero-actions">
             <div class="match-ring-wrap" aria-label="Compatibilidade com suas vagas">
               <svg width="84" height="84" viewBox="0 0 84 84">
@@ -200,7 +200,7 @@
               <svg width="14" height="14" viewBox="0 0 18 18" fill="none" aria-hidden="true"><polygon points="9 2 2 7 9 12 16 7 9 2" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><polyline points="2 12 9 17 16 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
               Skills detectadas
             </h2>
-            <div class="skills-grid" id="skills-grid"></div>
+            <ul class="skills-grid" id="skills-grid"></ul>
           </section>
 
           <section class="section-card" id="section-roadmap" aria-labelledby="title-roadmap" hidden>
@@ -208,7 +208,7 @@
               <svg width="14" height="14" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h12M9 3l6 6-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Progresso em roadmaps
             </h2>
-            <div class="roadmap-list" id="roadmap-list"></div>
+            <ul class="roadmap-list" id="roadmap-list"></ul>
           </section>
         </div>
 
@@ -304,15 +304,15 @@
       }
 
       const chips = document.getElementById("hero-chips");
-      chips.innerHTML = `<span class="badge ${LEVEL_CLASS[dev.level] ?? ''}">${LEVEL_LABEL[dev.level] ?? dev.level}</span>`;
-      if (dev.isPro) chips.innerHTML += `<span class="badge badge-yellow" title="Perfil em destaque (plano PRO)">★ PRO</span>`;
-      if (dev.best_job) chips.innerHTML += `<span class="badge badge-purple">Melhor fit: ${escapeHtml(dev.best_job)}</span>`;
+      chips.innerHTML = `<li class="badge ${LEVEL_CLASS[dev.level] ?? ''}">${LEVEL_LABEL[dev.level] ?? dev.level}</li>`;
+      if (dev.isPro) chips.innerHTML += `<li class="badge badge-yellow" title="Perfil em destaque (plano PRO)">★ PRO</li>`;
+      if (dev.best_job) chips.innerHTML += `<li class="badge badge-purple">Melhor fit: ${escapeHtml(dev.best_job)}</li>`;
 
       const skillChips = document.getElementById("hero-skill-chips");
       const topSkills = (dev.skills ?? []).slice(0, 8);
-      skillChips.innerHTML = topSkills.map(s => `<span class="skill-chip">${escapeHtml(s.name)}</span>`).join("");
+      skillChips.innerHTML = topSkills.map(s => `<li class="skill-chip">${escapeHtml(s.name)}</li>`).join("");
       if ((dev.skills ?? []).length > topSkills.length) {
-        skillChips.innerHTML += `<span class="skill-chip skill-chip-more">+${dev.skills.length - topSkills.length}</span>`;
+        skillChips.innerHTML += `<li class="skill-chip skill-chip-more">+${dev.skills.length - topSkills.length}</li>`;
       }
 
       document.getElementById("hero-match").textContent = `${dev.match}%`;
@@ -333,11 +333,11 @@
     function renderSkills(skills) {
       const grid = document.getElementById("skills-grid");
       if (!skills.length) {
-        grid.innerHTML = '<p class="no-data">Nenhuma skill detectada ainda.</p>';
+        grid.innerHTML = '<li class="no-data">Nenhuma skill detectada ainda.</li>';
         return;
       }
       grid.innerHTML = skills.slice(0, 24).map(s => `
-        <div class="skill-row">
+        <li class="skill-row">
           <div class="skill-row-top">
             <span class="skill-name">${escapeHtml(s.name)}
               <span class="skill-origem ${s.source === "manual" ? "skill-origem--declarada" : "skill-origem--github"}">${s.source === "manual" ? "declarada" : "detectada no GitHub"}</span>
@@ -347,7 +347,7 @@
           <div class="skill-bar" role="progressbar" aria-valuenow="${s.confidence}" aria-valuemin="0" aria-valuemax="100" aria-label="${escapeHtml(s.name)}">
             <div class="skill-fill" style="width:0%" data-w="${s.confidence}%"></div>
           </div>
-        </div>
+        </li>
       `).join("");
 
       requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -363,13 +363,13 @@
       const list    = document.getElementById("roadmap-list");
       section.hidden = false;
       list.innerHTML = roadmaps.map(r => `
-        <div class="roadmap-row">
+        <li class="roadmap-row">
           <span class="roadmap-job">${r.job_title ? escapeHtml(r.job_title) : `Vaga #${r.job_id}`}</span>
           <div class="roadmap-bar-wrap" role="progressbar" aria-valuenow="${r.progress}" aria-valuemin="0" aria-valuemax="100" aria-label="${r.job_title ? escapeHtml(r.job_title) : `Vaga #${r.job_id}`}">
             <div class="roadmap-bar-fill" style="width:0%" data-w="${r.progress}%"></div>
           </div>
           <span class="roadmap-pct">${r.progress}%</span>
-        </div>
+        </li>
       `).join("");
 
       requestAnimationFrame(() => requestAnimationFrame(() => {
