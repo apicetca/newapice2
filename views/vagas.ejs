@@ -66,22 +66,22 @@
       Cada vaga tem uma trilha de aprendizado personalizada para o seu perfil. Saiba exatamente o que estudar antes de candidatar.
     </p>
     <% } %>
-    <div class="hero-stats" id="hero-stats" aria-label="Estatísticas">
-      <div class="hstat">
+    <ul class="hero-stats" id="hero-stats" aria-label="Estatísticas">
+      <li class="hstat">
         <div class="hstat-val" id="stat-vagas">—</div>
         <div class="hstat-lbl">Vagas abertas</div>
-      </div>
-      <div class="hstat-sep" aria-hidden="true"></div>
-      <div class="hstat">
+      </li>
+      <li class="hstat-sep" aria-hidden="true"></li>
+      <li class="hstat">
         <div class="hstat-val" id="stat-empresas">—</div>
         <div class="hstat-lbl">Empresas</div>
-      </div>
-      <div class="hstat-sep" aria-hidden="true"></div>
-      <div class="hstat">
+      </li>
+      <li class="hstat-sep" aria-hidden="true"></li>
+      <li class="hstat">
         <div class="hstat-val" id="stat-skills">—</div>
         <div class="hstat-lbl">Skills mapeadas</div>
-      </div>
-    </div>
+      </li>
+    </ul>
   </section>
 
   <!-- ══════════ BANNER LOGIN (se não autenticado) ══════════ -->
@@ -116,22 +116,22 @@
       <div class="filter-sep" aria-hidden="true"></div>
 
       <!-- Filtro por nível -->
-      <div class="filter-group" role="group" aria-label="Nível">
+      <fieldset class="filter-group" role="group" aria-label="Nível">
         <button class="filter-chip active" data-filter="nivel" data-val="todos" aria-pressed="true">Todos</button>
         <button class="filter-chip" data-filter="nivel" data-val="estagio" aria-pressed="false">Estágio</button>
         <button class="filter-chip" data-filter="nivel" data-val="junior"  aria-pressed="false">Júnior</button>
         <button class="filter-chip" data-filter="nivel" data-val="pleno"   aria-pressed="false">Pleno</button>
-      </div>
+      </fieldset>
 
       <div class="filter-sep" aria-hidden="true"></div>
 
       <!-- Filtro por área -->
-      <div class="filter-group" role="group" aria-label="Área">
+      <fieldset class="filter-group" role="group" aria-label="Área">
         <button class="filter-chip active" data-filter="area" data-val="todas" aria-pressed="true">Todas</button>
         <button class="filter-chip" data-filter="area" data-val="backend"  aria-pressed="false">Backend</button>
         <button class="filter-chip" data-filter="area" data-val="frontend" aria-pressed="false">Frontend</button>
         <button class="filter-chip" data-filter="area" data-val="fullstack" aria-pressed="false">Fullstack</button>
-      </div>
+      </fieldset>
 
     </div>
 
@@ -158,13 +158,13 @@
       <div class="job-card" role="listitem">
         <div class="job-card-accent" aria-hidden="true"></div>
         <div class="job-card-body">
-          <div class="job-card-top">
+          <header class="job-card-top">
             <div class="job-meta">
               <a href="/vagas/<%= job.id %>" class="job-title"><%= job.title %></a>
               <div class="job-company"><%= job.company ?? "Empresa" %></div>
             </div>
             <span class="level-badge"><%= ({estagio:"Estágio",junior:"Júnior",pleno:"Pleno"})[job.level] ?? job.level %></span>
-          </div>
+          </header>
           <% if (job.description) { %><p class="job-desc"><%= job.description %></p><% } %>
         </div>
       </div>
@@ -325,16 +325,16 @@
         const remaining= allHard.length - visible.length;
 
         const skillTagsHtml = visible.map(s => `
-          <span class="skill-tag ${s.importance === "desejavel" ? "skill-tag-desejev" : ""}"
+          <li class="skill-tag ${s.importance === "desejavel" ? "skill-tag-desejev" : ""}"
                 title="${s.importance === "desejavel" ? "Desejável" : "Obrigatória"}">
             ${IC.monitor} ${s.name}
-          </span>`).join("");
+          </li>`).join("");
 
         const softHtml = softSkills.length ? softSkills.slice(0, 2).map(s => `
-          <span class="skill-tag skill-tag-soft">${IC.users} ${s.name}</span>`).join("") : "";
+          <li class="skill-tag skill-tag-soft">${IC.users} ${s.name}</li>`).join("") : "";
 
         const moreHtml = remaining > 0
-          ? `<span class="skills-more">+${remaining}</span>` : "";
+          ? `<li class="skills-more">+${remaining}</li>` : "";
 
         // CTA: sempre leva para a página completa da vaga (detalhes + candidatura)
         const ctaHref   = `/vagas/${job.id}`;
@@ -344,7 +344,7 @@
           <div class="job-card-accent" aria-hidden="true"></div>
           <div class="job-card-body">
 
-            <div class="job-card-top">
+            <header class="job-card-top">
               <div class="job-icon-wrap" aria-hidden="true">${jobIcon(job.title)}</div>
               <div class="job-meta">
                 <a href="/vagas/${job.id}" class="job-title">${escapeHtml(job.title)}</a>
@@ -357,34 +357,34 @@
                     aria-label="Nível: ${LEVEL_LABEL[job.level] ?? job.level}">
                 ${LEVEL_LABEL[job.level] ?? job.level}
               </span>
-            </div>
+            </header>
 
             ${job.description ? `<p class="job-desc">${escapeHtml(job.description)}</p>` : ""}
 
             ${allHard.length ? `
               <div class="skill-block">
                 <div class="skill-block-label">Habilidades técnicas</div>
-                <div class="skills-row" aria-label="Skills obrigatórias e desejáveis">
+                <ul class="skills-row" aria-label="Skills obrigatórias e desejáveis">
                   ${skillTagsHtml}${moreHtml}
-                </div>
+                </ul>
               </div>` : ""}
 
             ${softSkills.length ? `
               <div class="skill-block">
                 <div class="skill-block-label">Habilidades comportamentais</div>
-                <div class="skills-row" aria-label="Soft skills">${softHtml}</div>
+                <ul class="skills-row" aria-label="Soft skills">${softHtml}</ul>
               </div>` : ""}
 
           </div>
 
-          <div class="job-card-footer">
+          <footer class="job-card-footer">
             <a href="${ctaHref}" class="btn-roadmap" aria-label="${ctaLabel} para ${escapeHtml(job.title)}">
               ${ctaLabel} ${IC.arrow}
             </a>
             <button class="btn-share" aria-label="Compartilhar vaga" onclick="shareJob(event, ${job.id}, '${job.title.replace(/'/g,"\\'")}')">
               ${IC.share}
             </button>
-          </div>`;
+          </footer>`;
 
         grid.appendChild(card);
       });

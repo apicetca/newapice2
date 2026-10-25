@@ -49,7 +49,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 
 | # | Página | `<div>` | Telas (papel e rota) | Status |
 |---:|---|---:|---|---|
-| 1 | [vagas.ejs](../views/vagas.ejs) | 63 | visitante `/vagas`<br>dev `/vagas`<br>empresa `/vagas` | pendente |
+| 1 | [vagas.ejs](../views/vagas.ejs) | 63 | visitante `/vagas`<br>dev `/vagas`<br>empresa `/vagas` | concluída — ver registro |
 | 2 | [progresso.ejs](../views/progresso.ejs) | 46 | dev `/meu-progresso` | pendente |
 | 3 | [repositorios.ejs](../views/repositorios.ejs) | 36 | dev `/repositorios` | pendente |
 | 4 | [perfil-dev.ejs](../views/perfil-dev.ejs) | 34 | dev `/perfil` | pendente |
@@ -145,7 +145,26 @@ Contagem feita no CSS que a própria página carrega (sem `design-system.css`, `
 
 Uma entrada por página, na ordem em que for processada: resultado das perguntas 1 e 2, commit, `<div>` trocadas, `<div>` mantidas com o motivo e, se falhar, o que falhou.
 
-_Nenhuma página processada ainda._
+### 1. vagas — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar vagas`: 9 de 9 capturas iguais (visitante, dev e empresa × 1440/768/375), todas na 1ª captura.
+- **Pergunta 2 (funções):** SIM. `verificar-funcoes comparar vagas`: OK nas 3 telas; `npm test`: 668 passaram.
+- **Arquivos:** `views/vagas.ejs`, `public/css/vagas.css` (usado só por esta página, então B e C só nela).
+- **Trocadas (13):**
+  - `.hero-stats` → `<ul>`; as 3 `.hstat` → `<li>`; os 2 `.hstat-sep` → `<li aria-hidden="true">` (lista de estatísticas; o separador vira item decorativo para o `<ul>` só ter `<li>`).
+  - os 2 `.filter-group` (Nível, Área) → `<fieldset>`, como em `empresa-vagas`.
+  - `.job-card-top` → `<header>` no card do servidor e no gerado pelo JS (título, empresa e nível do card).
+  - os 2 `.skills-row` do JS → `<ul>`, com cada `.skill-tag`/`.skills-more` como `<li>` (antes `<span>`); o `aria-label` que já existia passa a ser válido.
+  - `.job-card-footer` do JS → `<footer>` (botão da vaga e compartilhar).
+  - CSS: `.hero-stats` e `.skills-row` ganharam `margin:0;padding:0;list-style:none`; `.filter-group` ganhou `margin:0;padding:0;border:0;min-inline-size:auto`.
+- **Mantidas (50) e motivo:**
+  - `.jobs-grid` (2) e `.job-card` do servidor e do `createElement`: o teste QA-033 exige `<div class="job-card" role="listitem">`; um `<ul>` exigiria `<li>` nos cards.
+  - `.filter-bar` (`role="search"`): `<search>` está fora da lista; `<form>` faria Enter no campo de busca recarregar a página.
+  - `.hstat-val`/`.hstat-lbl` (6): par valor/rótulo dentro de cada item; `<dl>` está fora da lista.
+  - skeletons de carregamento (3 `.skeleton-card` + 12 `.skel`) e `.hero-eyebrow`: decorativos, com `aria-hidden`.
+  - layout sem significado próprio: `.login-banner-inner`, `.banner-text`, `.filter-inner`, `.search-wrap`, `.filter-sep` (2), `.results-row`, `.job-card-accent` (2), `.job-card-body` (2), `.job-icon-wrap`, `.job-meta` (2), `.job-company` (2).
+  - `.skill-block` (2) e `.skill-block-label` (2): o rótulo não é heading, então `<section>` não se aplica.
+  - estados vazio/erro do JS: `.empty-state` (2) e `.empty-icon` (2).
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 

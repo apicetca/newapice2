@@ -8,7 +8,7 @@
 .hero-title em{font-style:normal;color:var(--accent)}
 .hero-slogan{display:inline-block;font-family:var(--font-body);font-size:.8rem;color:var(--teal);background:var(--teal-dim);border:1px solid var(--teal-border);border-radius:var(--radius-sm);padding:5px 14px;margin-bottom:16px}
 .hero-sub{font-size:.9rem;color:var(--muted);max-width:460px;margin:0 auto 26px}
-.hero-stats{display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap}
+.hero-stats{display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap;margin:0;padding:0;list-style:none}
 .hstat{text-align:center}
 .hstat-val{font-family:var(--font-display);font-size:1.35rem;font-weight:700;line-height:1;color:var(--text)}
 .hstat-lbl{font-size:.68rem;color:var(--muted);margin-top:3px}
@@ -21,7 +21,7 @@
 .search-input::placeholder{color:var(--muted);opacity:.55}
 .search-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.15)}
 .filter-sep{width:1px;height:22px;background:var(--border-lite);flex-shrink:0}
-.filter-group{display:flex;gap:5px;flex-wrap:wrap}
+.filter-group{display:flex;gap:5px;flex-wrap:wrap;margin:0;padding:0;border:0;min-inline-size:auto}
 .filter-chip{padding:5px 12px;border-radius:99px;font-size:.74rem;font-weight:600;font-family:var(--font-body);border:1px solid var(--border-lite);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
 .filter-chip:hover{color:var(--text);border-color:var(--muted)}
 .filter-chip.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent-text)}
@@ -50,7 +50,7 @@
 .skill-block{display:flex;flex-direction:column;gap:6px}
 .skill-block-label{font-size:.67rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:6px}
 .skill-block-label::after{content:"";flex:1;height:1px;background:var(--border)}
-.skills-row{display:flex;flex-wrap:wrap;gap:5px}
+.skills-row{display:flex;flex-wrap:wrap;gap:5px;margin:0;padding:0;list-style:none}
 .skill-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:.7rem;font-weight:500;border:1px solid var(--border-lite);background:var(--bg-3);color:var(--text);transition:border-color .12s}
 .skill-tag:hover{border-color:var(--accent)}
 .skill-tag-soft{border-color:rgba(192,132,252,.25);background:var(--purple-dim);color:var(--purple)}
