@@ -59,7 +59,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 8 | [perfil-dev-empresa.ejs](../views/perfil-dev-empresa.ejs) | 23 | empresa `/empresa/dev/{dev}` | concluída — ver registro |
 | 9 | [roadmap/detalhe.ejs](../views/roadmap/detalhe.ejs) | 16 | dev `/trilha/{roadmap}` | concluída — ver registro |
 | 10 | [empresa-mensagens.ejs](../views/empresa-mensagens.ejs) | 14 | empresa `/empresa/mensagens` | concluída — ver registro |
-| 11 | [mensagens.ejs](../views/mensagens.ejs) | 14 | dev `/mensagens` | pendente |
+| 11 | [mensagens.ejs](../views/mensagens.ejs) | 14 | dev `/mensagens` | concluída — ver registro |
 | 12 | [assinar.ejs](../views/assinar.ejs) | 13 | dev `/planos/{planoDev}/assinar`<br>empresa `/planos/{planoEmpresa}/assinar` | pendente |
 | 13 | [planos.ejs](../views/planos.ejs) | 12 | dev `/planos`<br>empresa `/planos` | pendente |
 | 14 | [redefinir-senha.ejs](../views/redefinir-senha.ejs) | 10 | visitante `/redefinir-senha` | pendente |
@@ -112,6 +112,7 @@ Estas páginas seguem o ciclo normalmente. A lista serve só para a conferência
 - `minha-assinatura`: o cartão "Assinatura atual" (`.sub-current-head` → `<header>`) e os painéis "Trocar cartão"/"Trocar de plano" (`.sub-panel` → `<section>`) só aparecem com assinatura paga ativa; a conta dev tem plano liberado pela equipe e a empresa não tem assinatura.
 - `perfil-dev-empresa`: a lista de roadmaps do candidato (`#roadmap-list` → `<ul>`) só aparece se ele tiver roadmap; o candidato usado no base (id 5) não tem nenhum.
 - `empresa-mensagens`: as mensagens (`.msg-bubble-row` → `<article>`) e o painel do candidato (`.msg-info-block` → `<section>`) só aparecem com conversa aberta; a empresa de teste não tem conversas.
+- `mensagens`: as capturas visuais mostram a página sem conversa aberta, então o visual das mensagens (`<article>`) e do painel da empresa (`<section>`) não é comparado — a pergunta 2 exercitou os dois com uma conversa real.
 
 **Páginas com animações próprias** (o base visual leva toda animação ao estado final e não registra transições, então o movimento em si não foi comparado). As **27 pendentes** têm animação própria: cada uma carrega um CSS de página com pelo menos `fadeUp`.
 
@@ -343,6 +344,21 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `#convList`: os itens são `<button>`; `<ul>` exigiria envolvê-los em `<li>`.
   - `#threadEmpty`, `#threadActive`, `#threadBody`, `#infoPanelBody`: estados e contêineres preenchidos pelo JS.
   - no painel do JS: `.msg-info-meta`, a `<div>` dos chips de skill, e o último `.msg-info-block` (só um link, sem título).
+
+### 11. mensagens — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar mensagens`: 3 de 3 capturas iguais (dev × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK (o roteiro abre uma conversa real, então as mensagens em `<article>` e o painel foram exercitados); `npm test`: 668 passaram.
+- **Arquivos:** só `views/mensagens.ejs`; nenhum CSS mudou.
+- **Cobertura:** a captura visual mostra a página sem conversa aberta, então o visual das mensagens não é comparado; está na conferência manual.
+- **Trocadas (5):**
+  - `.msg-sidebar-head` → `<header>` (botão "Nova conversa").
+  - `.msg-bubble-row` do JS → `<article>` (mesma decisão de `empresa-mensagens`).
+  - os 2 `.msg-info-block` do painel da empresa ("Sobre a empresa", "Vagas em aberto", ambos com `<h4>`) → `<section>`.
+- **Mantidas (10) e motivo:**
+  - `.msg-layout`, `.msg-search-row`, `#convList` (itens são `<button>`), `#threadEmpty`, `#threadActive`, `#threadBody`, `#infoPanelBody`: mesmos motivos de `empresa-mensagens`.
+  - `#jobSearchResults` (modal "Nova conversa"): os resultados são `<button>`; `<ul>` exigiria `<li>` em volta.
+  - no painel do JS: `.msg-info-meta` e `.msg-info-jobs`.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
