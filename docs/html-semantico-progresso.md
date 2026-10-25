@@ -63,7 +63,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 12 | [assinar.ejs](../views/assinar.ejs) | 13 | dev `/planos/{planoDev}/assinar`<br>empresa `/planos/{planoEmpresa}/assinar` | concluída — ver registro |
 | 13 | [planos.ejs](../views/planos.ejs) | 12 | dev `/planos`<br>empresa `/planos` | concluída sem troca — ver registro |
 | 14 | [redefinir-senha.ejs](../views/redefinir-senha.ejs) | 10 | visitante `/redefinir-senha` | concluída — ver registro |
-| 15 | [cadastro.ejs](../views/cadastro.ejs) | 9 | visitante `/cadastro` | pendente |
+| 15 | [cadastro.ejs](../views/cadastro.ejs) | 9 | visitante `/cadastro` | concluída — ver registro |
 | 16 | [esqueci-senha.ejs](../views/esqueci-senha.ejs) | 9 | visitante `/esqueci-senha` | pendente |
 | 17 | [index.ejs](../views/index.ejs) | 9 | visitante `/` | pendente |
 | 18 | [mentor.ejs](../views/mentor.ejs) | 9 | dev `/mentor` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
@@ -391,6 +391,17 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.pass-wrap.field-wrap` (2): posicionam o ícone e o botão de mostrar senha dentro do campo.
   - `.lp-right-glow`, `.lp-preview`, `.lp-status-bar`, `.lp-avatar`: ilustração decorativa (`aria-hidden`).
   - `.lp-card-info`: nome e cargo são `<p>`, sem heading, então `<hgroup>` não se aplica.
+
+### 15. cadastro — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar cadastro`: 3 de 3 capturas iguais (visitante × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK; `npm test`: 668 passaram.
+- **Arquivos:** só `views/cadastro.ejs`; nenhum CSS mudou.
+- **Trocadas (1):** `.lp-welcome` → `<header>` (selo, `<h1>` e subtítulo), igual ao que `login`, `esqueci-senha` e `redefinir-senha` já usam.
+- **Mantidas (8) e motivo:**
+  - `.lp-layout`, `.lp-left-inner`: layout.
+  - `.type-tabs` (`role="tablist"`): a `<div>` é o elemento certo para esse papel ARIA.
+  - `.field-wrap` (5, sendo 2 `.pass-wrap`): posicionam o ícone e o botão de mostrar senha dentro de cada campo.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
