@@ -68,14 +68,14 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 17 | [index.ejs](../views/index.ejs) | 9 | visitante `/` | concluída sem troca — ver registro |
 | 18 | [mentor.ejs](../views/mentor.ejs) | 9 | dev `/mentor` | concluída — ver registro |
 | 19 | [roadmap/index.ejs](../views/roadmap/index.ejs) | 9 | dev `/trilha` | concluída — ver registro |
-| 20 | [roadmap/novo.ejs](../views/roadmap/novo.ejs) | 9 | dev `/trilha/novo` | pendente |
-| 21 | [assinatura-resultado.ejs](../views/assinatura-resultado.ejs) | 8 | dev `/assinatura/retorno`<br>empresa `/assinatura/retorno` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
-| 22 | [dashboard.ejs](../views/dashboard.ejs) | 8 | dev `/dashboard` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
-| 23 | [login.ejs](../views/login.ejs) | 7 | visitante `/login` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
-| 24 | [sobre.ejs](../views/sobre.ejs) | 7 | visitante `/sobre` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
-| 25 | [para-empresas.ejs](../views/para-empresas.ejs) | 4 | visitante `/para-empresas` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
-| 26 | [para-devs.ejs](../views/para-devs.ejs) | 3 | visitante `/para-devs` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
-| 27 | [empresa-matchs.ejs](../views/empresa-matchs.ejs) | 1 | empresa `/empresa/matchs` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
+| 20 | [roadmap/novo.ejs](../views/roadmap/novo.ejs) | 9 | dev `/trilha/novo` | concluída sem troca — ver registro |
+| 21 | [assinatura-resultado.ejs](../views/assinatura-resultado.ejs) | 8 | dev `/assinatura/retorno`<br>empresa `/assinatura/retorno` | concluída sem troca — ver registro |
+| 22 | [dashboard.ejs](../views/dashboard.ejs) | 8 | dev `/dashboard` | concluída sem troca — ver registro |
+| 23 | [login.ejs](../views/login.ejs) | 7 | visitante `/login` | concluída sem troca — ver registro |
+| 24 | [sobre.ejs](../views/sobre.ejs) | 7 | visitante `/sobre` | concluída sem troca — ver registro |
+| 25 | [para-empresas.ejs](../views/para-empresas.ejs) | 4 | visitante `/para-empresas` | concluída sem troca — ver registro |
+| 26 | [para-devs.ejs](../views/para-devs.ejs) | 3 | visitante `/para-devs` | concluída sem troca — ver registro |
+| 27 | [empresa-matchs.ejs](../views/empresa-matchs.ejs) | 1 | empresa `/empresa/matchs` | concluída sem troca — ver registro |
 
 ### Sem `<div>` — nada a converter
 
@@ -454,6 +454,46 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.rm-card-info` (título e meta são `<p>`, sem heading, então `<hgroup>` não se aplica) e `.rm-card-badges`.
   - `.rm-progress` (`role="progressbar"`) com `.rm-progress-track`/`.rm-progress-fill`.
 - **Observação (não alterado):** os cards usam `<article role="listitem">`, que o axe acusa como role não permitido (mesmo problema do QA-033). A correção trocaria `<article>` por `<li>`, o que está fora da regra de só trocar `<div>`.
+
+### 20. roadmap/novo — concluída sem troca
+
+- **Nenhum arquivo alterado**; perguntas 1 e 2 não se aplicam.
+- **Mantidas (9) e motivo:** o formulário já usa `<fieldset>` + `<legend>` para cada grupo. `.rm-radio-row` (2) está dentro do `<fieldset>`, então outro seria redundante; `.rm-field` (2) tem um campo só; `.rm-alert` (2, com `role` próprio), `#rmLoadingOverlay` (`role="status"`) e o spinner são estados; `.rm-page` é layout.
+
+### 21. assinatura-resultado — concluída sem troca
+
+- **Nenhum arquivo alterado**; perguntas 1 e 2 não se aplicam.
+- **Mantidas (8) e motivo:** o bloco principal já é `<section class="card sub-state">`. Ficam `.sub-wrap` (largura), os 5 `.sub-actions` (grupos de botões), `.sub-notice--warn` (aviso sem título) e a `<div>` de texto dentro dele (é parágrafo; `<p>` está fora da lista).
+
+### 22. dashboard — concluída sem troca
+
+- **Nenhum arquivo alterado**; perguntas 1 e 2 não se aplicam.
+- **Mantidas (8) e motivo:** `#content`, `.dash-layout` e `.dash-main` são estado e layout. `#today-cards` e `#trilha-tasks` são contêineres que o JS preenche com `<article>`/`<section>`. Os 3 atalhos de `.stats` são links: `<ul>` exigiria envolver cada `<a>` num `<li>`, e `<nav>` criaria uma segunda navegação sem nome. `.aside-mentor` e `.card-skills` (JS) são grupos sem título.
+
+### 23. login — concluída sem troca
+
+- **Nenhum arquivo alterado**; perguntas 1 e 2 não se aplicam.
+- **Mantidas (7) e motivo:** o bloco de boas-vindas já é `<header>`. Ficam `.lp-layout` e `.lp-left-inner` (layout), `.type-tabs` (`role="tablist"`, e a `<div>` é o elemento certo para esse papel), `.github-block` (bloco do GitHub sem título), `.field-wrap` (2) e `.field-label-row` (posicionam ícone/botão e alinham rótulo com o link "Esqueci minha senha").
+
+### 24. sobre — concluída sem troca
+
+- **Nenhum arquivo alterado**; perguntas 1 e 2 não se aplicam.
+- **Mantidas (7) e motivo:** `.pillars-grid` e `.team-grid` posicionam `<article>`s (um `<ul>` exigiria envolver cada um num `<li>`, mudando o aninhamento). Os 4 `.pillar-card__top` (selo "FTS" e ícone) ficam fora do `<h3>`, mesma decisão de `index`/`para-devs`. `.about-cta-actions` é um grupo de botões.
+
+### 25. para-empresas — concluída sem troca
+
+- **Nenhum arquivo alterado**; perguntas 1 e 2 não se aplicam.
+- **Mantidas (4) e motivo:** `.pd-why__grid` posiciona os `<article>` (um `<ul>` mudaria o aninhamento); os 3 `.pd-feature__top` (selo "FIS" e ícone) ficam fora do `<h3>`.
+
+### 26. para-devs — concluída sem troca
+
+- **Nenhum arquivo alterado**; perguntas 1 e 2 não se aplicam.
+- **Mantidas (3) e motivo:** mesmas de `para-empresas` — `.pd-why__grid` e os 2 `.pd-feature__top`.
+
+### 27. empresa-matchs — concluída sem troca
+
+- **Nenhum arquivo alterado**; perguntas 1 e 2 não se aplicam.
+- **Mantida (1) e motivo:** `#match-empty` (`role="status"`) — o teste QA-033 exige `<div>`; além disso, `<section>` pediria título e `<output>` não aceita os `<p>` que ela recebe.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
