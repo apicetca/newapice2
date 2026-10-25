@@ -42,12 +42,12 @@
 
   <main class="page-content" id="main-content" style="max-width:760px;margin:0 auto">
 
-    <div class="repos-page-header">
-      <div>
+    <header class="repos-page-header">
+      <hgroup>
         <h1 class="repos-page-title">Insights de mercado</h1>
         <p class="repos-page-sub">Tecnologias mais demandadas nas vagas cadastradas na Ápice, atualizado periodicamente.</p>
-      </div>
-    </div>
+      </hgroup>
+    </header>
 
     <!-- SEO (QA-020): com um resumo já cacheado, o conteúdo sai pronto no
          HTML inicial — sem isso, a página inteira dependia do fetch
@@ -57,10 +57,10 @@
     </div>
 
     <div id="state-empty" hidden>
-      <div class="repos-empty">
+      <section class="repos-empty">
         <h2>Ainda não há dados suficientes</h2>
         <p>Volte em breve — assim que houver vagas com skills cadastradas, os insights aparecem aqui.</p>
-      </div>
+      </section>
     </div>
 
     <div id="state-content" <%= insights ? "" : "hidden" %>>
@@ -71,9 +71,9 @@
       </div>
 
       <h2 style="font-size:1rem;margin-bottom:12px">Tecnologias mais demandadas</h2>
-      <div id="tech-list" style="display:flex;flex-wrap:wrap;gap:8px"><%
-        if (insights) { (insights.tecnologias_top || []).forEach(t => { %><span class="skill-tag"><%= t.nome %><% if (t.vagas) { %> · <%= t.vagas %> vaga<%= t.vagas !== 1 ? "s" : "" %><% } %></span><%
-        }) } %></div>
+      <ul id="tech-list" style="display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none"><%
+        if (insights) { (insights.tecnologias_top || []).forEach(t => { %><li class="skill-tag"><%= t.nome %><% if (t.vagas) { %> · <%= t.vagas %> vaga<%= t.vagas !== 1 ? "s" : "" %><% } %></li><%
+        }) } %></ul>
     </div>
 
   </main>
@@ -105,7 +105,7 @@
           : '';
 
         $('tech-list').innerHTML = (data.tecnologias_top || []).map(t => `
-          <span class="skill-tag">${escHtml(t.nome)}${t.vagas ? ` · ${t.vagas} vaga${t.vagas !== 1 ? 's' : ''}` : ''}</span>
+          <li class="skill-tag">${escHtml(t.nome)}${t.vagas ? ` · ${t.vagas} vaga${t.vagas !== 1 ? 's' : ''}` : ''}</li>
         `).join('');
 
         $('state-content').hidden = false;
