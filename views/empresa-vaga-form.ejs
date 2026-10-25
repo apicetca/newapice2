@@ -182,7 +182,7 @@
         <p class="form-hint" style="margin-bottom:12px">Skills que o candidato DEVE ter. Têm peso dobrado no cálculo de match.</p>
 
         <div class="skill-selector" id="sel-required">
-          <div class="chips-area" id="chips-required"></div>
+          <ul class="chips-area" id="chips-required"></ul>
           <div class="skill-autocomplete-wrap">
             <span class="skill-autocomplete-icon" aria-hidden="true">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -204,7 +204,7 @@
         <p class="form-hint" style="margin-bottom:12px">Diferenciais — o candidato não precisa ter, mas aumentam o score de match.</p>
 
         <div class="skill-selector" id="sel-desired">
-          <div class="chips-area" id="chips-desired"></div>
+          <ul class="chips-area" id="chips-desired"></ul>
           <div class="skill-autocomplete-wrap">
             <span class="skill-autocomplete-icon" aria-hidden="true">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -225,7 +225,7 @@
         </h2>
         <p class="form-hint" style="margin-bottom:10px">Palavras-chave que ajudam na busca. Pressione Enter ou vírgula para adicionar.</p>
 
-        <div class="chips-area" id="chips-tags"></div>
+        <ul class="chips-area" id="chips-tags"></ul>
         <div class="tag-input-wrap" style="margin-top:8px">
           <input type="text" id="tag-input" class="tag-input"
             aria-label="Adicionar tag"
@@ -285,13 +285,13 @@
     const isReq = type === "required";
 
     area.innerHTML = list.map(s => `
-      <span class="skill-chip ${isReq ? "" : "desired"}">
+      <li class="skill-chip ${isReq ? "" : "desired"}">
         ${s.name}
         <button class="chip-remove" type="button" onclick="removeSkill('${type}', ${s.id})"
                 aria-label="Remover ${s.name}">
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-      </span>
+      </li>
     `).join("");
   }
 
@@ -376,12 +376,12 @@
   function renderTags() {
     const area = document.getElementById("chips-tags");
     area.innerHTML = formTags.map(t => `
-      <span class="tag-chip">
+      <li class="tag-chip">
         ${t}
         <button class="chip-remove" type="button">
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-      </span>
+      </li>
     `).join("");
     area.querySelectorAll(".chip-remove").forEach((btn, i) => {
       btn.addEventListener("click", () => removeTag(formTags[i]));

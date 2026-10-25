@@ -123,10 +123,10 @@
       });
     } else {
       body.innerHTML = messages.map(m => `
-        <div class="msg-bubble-row ${m.role === "user" ? "mine" : ""}">
+        <article class="msg-bubble-row ${m.role === "user" ? "mine" : ""}">
           <span class="msg-bubble">${escapeHtml(m.content)}</span>
           <span class="msg-bubble-time">${new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
-        </div>`).join("");
+        </article>`).join("");
     }
     body.scrollTop = body.scrollHeight;
   }
@@ -217,9 +217,9 @@
     const body = $("mentorBody");
     document.getElementById("mentorEmpty")?.remove();
     body.innerHTML += `
-      <div class="msg-bubble-row mine">
+      <article class="msg-bubble-row mine">
         <span class="msg-bubble">${escapeHtml(mensagem)}${anexoNome ? `<br><em>📎 ${escapeHtml(anexoNome)}</em>` : ""}</span>
-      </div>
+      </article>
       <p class="msg-conv-loading" id="mentorTyping">Mentor está digitando...</p>`;
     body.scrollTop = body.scrollHeight;
     input.value = "";

@@ -64,12 +64,12 @@
     <!-- ── Hero ── -->
     <article class="vaga-hero" id="vaga-hero" aria-label="Informações da vaga">
       <% if (job) { %>
-      <div class="vaga-hero-top">
-        <div class="vaga-hero-info">
+      <header class="vaga-hero-top">
+        <hgroup class="vaga-hero-info">
           <h1 class="vaga-title"><%= job.title %></h1>
           <p class="vaga-company"><%= job.company ?? "Empresa" %></p>
-        </div>
-      </div>
+        </hgroup>
+      </header>
       <% } %>
     </article>
 
@@ -147,27 +147,27 @@ function matchTip(pct) {
 // ── Render ──────────────────────────────────────────
 function renderHero(job) {
   const badges = [
-    `<span class="vaga-badge vbadge-level">${LEVEL_LABEL[job.level] ?? job.level}</span>`,
-    `<span class="vaga-badge vbadge-modality">${MODALITY_LABEL[job.modality] ?? "Remoto"}</span>`,
-    `<span class="vaga-badge vbadge-contract">${CONTRACT_LABEL[job.contract_type] ?? "Estágio"}</span>`,
+    `<li class="vaga-badge vbadge-level">${LEVEL_LABEL[job.level] ?? job.level}</li>`,
+    `<li class="vaga-badge vbadge-modality">${MODALITY_LABEL[job.modality] ?? "Remoto"}</li>`,
+    `<li class="vaga-badge vbadge-contract">${CONTRACT_LABEL[job.contract_type] ?? "Estágio"}</li>`,
   ];
   if (job.english_level && job.english_level !== "nenhum") {
-    badges.push(`<span class="vaga-badge vbadge-english">Inglês: ${ENGLISH_LABEL[job.english_level]}</span>`);
+    badges.push(`<li class="vaga-badge vbadge-english">Inglês: ${ENGLISH_LABEL[job.english_level]}</li>`);
   }
 
   document.getElementById("vaga-hero").innerHTML = `
-    <div class="vaga-hero-top">
+    <header class="vaga-hero-top">
       <div class="vaga-icon-wrap" aria-hidden="true">${jobIcon(job.title)}</div>
-      <div class="vaga-hero-info">
+      <hgroup class="vaga-hero-info">
         <h1 class="vaga-title">${escapeHtml(job.title)}</h1>
         <p class="vaga-company">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/></svg>
           ${escapeHtml(job.company ?? "Empresa")}
           ${job.location ? `<span style="margin-left:6px">· ${escapeHtml(job.location)}</span>` : ""}
         </p>
-      </div>
-    </div>
-    <div class="vaga-badges">${badges.join("")}</div>`;
+      </hgroup>
+    </header>
+    <ul class="vaga-badges">${badges.join("")}</ul>`;
 
   // title/description/og/twitter já vêm corretos do servidor (QA-020) —
   // só o que depende de location.origin (canonical, JSON-LD) é montado aqui.
@@ -228,10 +228,10 @@ function renderMatch(match, isLoggedIn, matchProjetado) {
   const cls = matchClass(pct);
 
   card.innerHTML = `
-    <div class="match-card-header">
+    <header class="match-card-header">
       <span class="match-card-title">Seu match com a vaga</span>
       <span class="match-percent-big ${cls}">${pct}%</span>
-    </div>
+    </header>
     <div class="match-bar-track">
       <div class="match-bar-fill ${cls}" id="match-fill" style="width:0%"></div>
     </div>
@@ -239,16 +239,16 @@ function renderMatch(match, isLoggedIn, matchProjetado) {
     ${matchProjetado != null && matchProjetado > pct
       ? `<p class="match-roadmap-tip">📈 Sua compatibilidade sobe para ~${matchProjetado}% ao concluir este roadmap.</p>`
       : ""}
-    <div class="match-scores">
-      <div class="score-item">
+    <ul class="match-scores">
+      <li class="score-item">
         <span class="score-val">${match.scores.skills}%</span>
         <span class="score-lbl">Skills</span>
-      </div>
-      <div class="score-item">
+      </li>
+      <li class="score-item">
         <span class="score-val">${match.scores.seniority}%</span>
         <span class="score-lbl">Senioridade</span>
-      </div>
-    </div>
+      </li>
+    </ul>
     <p class="match-ia-explicacao" id="match-ia-explicacao" hidden></p>`;
 
   requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -321,7 +321,7 @@ function renderMainCol(job, match, isLoggedIn) {
       const m   = matchMap[s.skill_id];
       const has = m?.has ?? false;
       return `
-        <div class="skill-row ${isLoggedIn && has ? "has" : "miss"}">
+        <li class="skill-row ${isLoggedIn && has ? "has" : "miss"}">
           <span class="skill-row-icon" aria-hidden="true">${isLoggedIn && has ? ICON_CHECK : ICON_CIRCLE}</span>
           <span class="skill-row-name">${s.name}</span>
           ${isLoggedIn && has && m.confidence
@@ -330,7 +330,7 @@ function renderMainCol(job, match, isLoggedIn) {
           <span class="skill-row-badge ${s.importance === 'obrigatoria' ? 'badge-obrig' : 'badge-desej'}">
             ${s.importance === "obrigatoria" ? "Obrigatória" : "Desejável"}
           </span>
-        </div>`;
+        </li>`;
     }
 
     html += `<section class="vaga-section">
@@ -339,10 +339,10 @@ function renderMainCol(job, match, isLoggedIn) {
         Habilidades técnicas
         ${isLoggedIn ? `<span style="font-size:.75rem;font-weight:400;color:var(--muted);margin-left:4px">(você tem · falta aprender)</span>` : ""}
       </h2>
-      <div class="skill-breakdown">
+      <ul class="skill-breakdown">
         ${obrig.map(skillRowHtml).join("")}
         ${desej.map(skillRowHtml).join("")}
-      </div>
+      </ul>
     </section>`;
   }
 
@@ -475,7 +475,7 @@ function renderSideCol(job, isLoggedIn, userType) {
   }
 
   const tagsHtml = job.tags
-    ? `<div class="tag-list">${job.tags.split(",").map(t => `<span class="tag-item">${escapeHtml(t.trim())}</span>`).join("")}</div>`
+    ? `<ul class="tag-list">${job.tags.split(",").map(t => `<li class="tag-item">${escapeHtml(t.trim())}</li>`).join("")}</ul>`
     : "";
 
   const applyHtml = renderApplyButton(job, isLoggedIn, userType);

@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="/css/header.css" />
   <link rel="stylesheet" href="/css/empresa-dashboard.css" />
   <style>
-    .bar-list { display: flex; flex-direction: column; gap: 12px; padding: 20px 24px; }
+    .bar-list { display: flex; flex-direction: column; gap: 12px; padding: 20px 24px; margin: 0; list-style: none; } /* é um <ul>: neutraliza o estilo padrão de lista */
     .bar-row { display: flex; align-items: center; gap: 12px; }
     .bar-label { width: 160px; flex-shrink: 0; font-size: .82rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .bar-track { flex: 1; height: 8px; background: var(--bg-3); border-radius: 4px; overflow: hidden; }
@@ -37,12 +37,12 @@
 
     <section class="section" aria-label="Skills mais comuns entre desenvolvedores">
       <header class="section-header"><h2 class="section-title">Skills mais comuns entre devs</h2></header>
-      <figure class="jobs-table-wrap"><div class="bar-list" id="skills-bars"></div></figure>
+      <figure class="jobs-table-wrap"><ul class="bar-list" id="skills-bars"></ul></figure>
     </section>
 
     <section class="section" aria-label="Vagas ativas por nível">
       <header class="section-header"><h2 class="section-title">Vagas ativas por nível</h2></header>
-      <figure class="jobs-table-wrap"><div class="bar-list" id="nivel-bars"></div></figure>
+      <figure class="jobs-table-wrap"><ul class="bar-list" id="nivel-bars"></ul></figure>
     </section>
 
     <section class="section" aria-label="Vagas com mais candidaturas">
@@ -84,14 +84,14 @@ const TIPO_LABEL = { dev: "Desenvolvedores", empresa: "Empresas", admin: "Admins
 
 function renderBars(containerId, items, labelKey, valueKey) {
   const el = document.getElementById(containerId);
-  if (!items.length) { el.innerHTML = `<p style="color:var(--muted);font-size:.85rem">Sem dados suficientes ainda.</p>`; return; }
+  if (!items.length) { el.innerHTML = `<li style="color:var(--muted);font-size:.85rem">Sem dados suficientes ainda.</li>`; return; }
   const max = Math.max(...items.map(i => i[valueKey]));
   el.innerHTML = items.map(i => `
-    <div class="bar-row">
+    <li class="bar-row">
       <span class="bar-label">${i[labelKey]}</span>
       <span class="bar-track"><span class="bar-fill" style="width:${max ? (i[valueKey] / max * 100) : 0}%"></span></span>
       <span class="bar-val">${i[valueKey]}</span>
-    </div>`).join("");
+    </li>`).join("");
 }
 
 async function init() {

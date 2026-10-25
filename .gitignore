@@ -12,3 +12,13 @@ README.md
 issues.json
 CHANGELOG-QA.md
 .claude/skills/fix-qa/SKILL.md
+
+# Sessões do Playwright para scripts/comparar-telas.js — contêm cookie de login
+auth-dev.json
+auth-empresa.json
+auth-admin.json
+
+# Base e resultados das comparações visual/funcional — contêm dados reais
+# (nomes, conversas, repositórios) das contas usadas nas sessões
+tests/visual/
+tests/funcoes/

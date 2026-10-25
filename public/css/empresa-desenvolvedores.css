@@ -436,6 +436,10 @@
    marca a tela de carregamento como hidden, mas ela continua com
    display:flex e fica "presa" na tela por cima do conteúdo já carregado. */
 .loading-screen[hidden] { display: none; }
+/* Mesmo problema, mas com display:flex no style="" do elemento — só
+   !important vence um estilo inline. Sem isto, o aviso de upgrade de
+   empresa-candidaturas.ejs aparecia também para quem já é Premium. */
+#premium-upsell[hidden] { display: none !important; }
 
 .spinner {
   width: 30px; height: 30px;

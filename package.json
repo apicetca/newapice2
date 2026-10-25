@@ -8,7 +8,9 @@
     "mp:sync-plans": "node scripts/mp-sync-plans.js",
     "migrate:roadmap": "node migrations/run-roadmap-migration.js",
     "seed:roadmap": "node seeds/run-roadmap-seed.js",
-    "migrate:analise-perfil": "node migrations/run-analise-perfil-migration.js"
+    "migrate:analise-perfil": "node migrations/run-analise-perfil-migration.js",
+    "visual:base": "node scripts/comparar-telas.js base",
+    "visual:comparar": "node scripts/comparar-telas.js comparar"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +39,8 @@
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.62.1",
     "jest": "^30.5.1",
+    "pixelmatch": "^8.0.0",
+    "pngjs": "^7.0.0",
     "supertest": "^7.2.2"
   },
   "overrides": {
