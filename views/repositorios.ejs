@@ -23,19 +23,19 @@
   <main class="page-content" id="main-content">
 
     <!-- ── Page header ──────────────────────────────── -->
-    <div class="repos-page-header">
-      <div>
+    <header class="repos-page-header">
+      <hgroup>
         <h1 class="repos-page-title">Repositórios</h1>
         <p class="repos-page-sub">Gerencie os repositórios que aparecerão no seu perfil público.</p>
         <p class="repos-page-sub repos-page-note">Os repositórios desta lista são os que contam na análise do seu perfil.</p>
-      </div>
+      </hgroup>
       <button type="button" class="btn-primary-dev" id="btn-open-add">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
         Adicionar repositório
       </button>
-    </div>
+    </header>
 
 
       <!-- ── Skeleton loading ──────────────────────────── -->
@@ -50,7 +50,7 @@
 
       <!-- ── Estado vazio ───────────────────────────────── -->
       <div id="state-empty" hidden>
-        <div class="repos-empty">
+        <section class="repos-empty">
           <div class="repos-empty-icon" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 6h18M3 12h18M3 18h18"/>
@@ -65,7 +65,7 @@
             </svg>
             Adicionar repositório
           </button>
-        </div>
+        </section>
       </div>
 
       <!-- ── Grid de cards ─────────────────────────────── -->
@@ -84,14 +84,14 @@
        aria-modal="true" aria-labelledby="modal-add-title">
     <div class="modal">
 
-      <div class="modal-head">
+      <header class="modal-head">
         <h2 id="modal-add-title">Adicionar repositório</h2>
         <button type="button" class="modal-close" id="btn-close-add" aria-label="Fechar">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
           </svg>
         </button>
-      </div>
+      </header>
 
       <div class="modal-search-wrap">
         <input type="search" class="modal-search" id="modal-search"
@@ -123,14 +123,14 @@
        aria-modal="true" aria-labelledby="modal-edit-title">
     <div class="modal" style="width:440px">
 
-      <div class="modal-head">
+      <header class="modal-head">
         <h2 id="modal-edit-title">Editar repositório</h2>
         <button type="button" class="modal-close" id="btn-close-edit" aria-label="Fechar">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
           </svg>
         </button>
-      </div>
+      </header>
 
       <div class="edit-field">
         <label for="edit-title">Título exibido no perfil</label>
@@ -142,7 +142,7 @@
         <textarea id="edit-desc" placeholder="Descreva este repositório..."></textarea>
       </div>
 
-      <div class="modal-foot" style="justify-content:space-between">
+      <footer class="modal-foot" style="justify-content:space-between">
         <button type="button" class="btn-ghost" id="btn-generate-desc" title="Gerar descrição profissional com IA a partir do README">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3M12 18v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M3 12h3M18 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
           Gerar com IA
@@ -151,7 +151,7 @@
           <button type="button" class="btn-ghost" id="btn-cancel-edit">Cancelar</button>
           <button type="button" class="btn-primary-dev" id="btn-save-edit">Salvar</button>
         </div>
-      </div>
+      </footer>
 
     </div>
   </div>

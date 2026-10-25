@@ -51,7 +51,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 |---:|---|---:|---|---|
 | 1 | [vagas.ejs](../views/vagas.ejs) | 63 | visitante `/vagas`<br>dev `/vagas`<br>empresa `/vagas` | concluída — ver registro |
 | 2 | [progresso.ejs](../views/progresso.ejs) | 46 | dev `/meu-progresso` | concluída — ver registro |
-| 3 | [repositorios.ejs](../views/repositorios.ejs) | 36 | dev `/repositorios` | pendente |
+| 3 | [repositorios.ejs](../views/repositorios.ejs) | 36 | dev `/repositorios` | concluída — ver registro |
 | 4 | [perfil-dev.ejs](../views/perfil-dev.ejs) | 34 | dev `/perfil` | pendente |
 | 5 | [minha-assinatura.ejs](../views/minha-assinatura.ejs) | 31 | dev `/minha-assinatura`<br>empresa `/minha-assinatura` | pendente |
 | 6 | [perfil-empresa.ejs](../views/perfil-empresa.ejs) | 30 | empresa `/empresa/perfil` | pendente |
@@ -108,6 +108,7 @@ Estas páginas seguem o ciclo normalmente. A lista serve só para a conferência
 **Conversões que o base não cobre** (o conteúdo convertido é gerado pelo JS só quando há dados, e as contas de teste não têm esses dados):
 
 - `progresso`: o card de roadmap (`.card-top` → `<header>`, `.card-stats` → `<ul>`) só aparece com roadmap em andamento; a conta dev não tem nenhum.
+- `repositorios`: os modais (`.modal-head` → `<header>`, `.modal-foot` → `<footer>`) ficam fechados nas capturas — o roteiro de funções abre os dois; o estado vazio (`.repos-empty` → `<section>`) só aparece sem repositórios.
 
 **Páginas com animações próprias** (o base visual leva toda animação ao estado final e não registra transições, então o movimento em si não foi comparado). As **27 pendentes** têm animação própria: cada uma carrega um CSS de página com pelo menos `fadeUp`.
 
@@ -192,6 +193,27 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.gp-legend` (`aria-hidden`): legenda decorativa.
   - no card do JS: `.roadmap-card-inner`, `.card-stripe`, `.card-content`, `.card-info`, `.card-title` (não é heading), `.card-company`, `.card-badges`, `.card-progress`, `.card-prog-header`: layout interno do card.
   - estados do JS: `.empty-icon` e os 2 invólucros com `style` da mensagem de erro de carregamento.
+
+### 3. repositorios — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar repositorios`: 3 de 3 capturas iguais (dev × 1440/768/375).
+- **Pergunta 2 (funções):** SIM. `verificar-funcoes comparar repositorios`: OK (o roteiro abre os dois modais); `npm test`: 668 passaram.
+- **Arquivos:** só `views/repositorios.ejs`. Nenhum CSS mudou: `.modal-foot > div` (do inventário) continua valendo porque a `<div>` interna do rodapé foi mantida.
+- **Cobertura:** os modais ficam fechados nas capturas e o estado vazio só aparece sem repositórios; ambos estão na conferência manual.
+- **Trocadas (7):**
+  - `.repos-page-header` → `<header>`; a `<div>` interna (`<h1>` + 2 `<p>`) → `<hgroup>`.
+  - `.repos-empty` → `<section>` (tem `<h2>`).
+  - os 2 `.modal-head` → `<header>` (título do modal + fechar).
+  - `.modal-foot` do modal de edição → `<footer>`.
+- **Mantidas (29) e motivo:**
+  - `.repos-grid` e o `.repo-card` gerado pelo JS: `dev.css` já tem `.repos-grid > li { display: contents }`, pensado para `<li>` envolvendo o card; trocar o card por `<li>` faria ele perder a caixa, e envolvê-lo mudaria o aninhamento.
+  - `#modal-error`: o teste QA-019 exige `<div>`.
+  - `#modal-add`/`#modal-edit` (`role="dialog"`) e `.modal` (2): `<dialog>` está fora da lista e mudaria o comportamento de abrir/fechar.
+  - `#state-loading`, `#state-empty`, `#state-repos`, `#modal-loading`: estados que o JS mostra/esconde.
+  - `.repos-skeleton` + 4 `.repo-skel`, `.repos-empty-icon`: decorativos.
+  - `.modal-search-wrap`, `.modal-body`, `.edit-field` (2, um campo cada — `<fieldset>` não se aplica), `<div>` interna do `.modal-foot` (o CSS `.modal-foot > div` depende dela).
+  - `#toast` (`role="status"`): `<output>` está fora da lista.
+  - no JS: `.repo-icon`, `.repo-info`, `.repo-meta`, `.repo-actions`, `.modal-repo-icon`, `.modal-repo-info`, `.modal-repo-meta`: layout interno dos itens.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
