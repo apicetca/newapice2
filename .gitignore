@@ -17,3 +17,8 @@ CHANGELOG-QA.md
 auth-dev.json
 auth-empresa.json
 auth-admin.json
+
+# Base e resultados das comparações visual/funcional — contêm dados reais
+# (nomes, conversas, repositórios) das contas usadas nas sessões
+tests/visual/
+tests/funcoes/
