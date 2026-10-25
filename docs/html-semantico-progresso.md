@@ -65,8 +65,8 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 14 | [redefinir-senha.ejs](../views/redefinir-senha.ejs) | 10 | visitante `/redefinir-senha` | concluída — ver registro |
 | 15 | [cadastro.ejs](../views/cadastro.ejs) | 9 | visitante `/cadastro` | concluída — ver registro |
 | 16 | [esqueci-senha.ejs](../views/esqueci-senha.ejs) | 9 | visitante `/esqueci-senha` | concluída — ver registro |
-| 17 | [index.ejs](../views/index.ejs) | 9 | visitante `/` | pendente |
-| 18 | [mentor.ejs](../views/mentor.ejs) | 9 | dev `/mentor` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
+| 17 | [index.ejs](../views/index.ejs) | 9 | visitante `/` | concluída sem troca — ver registro |
+| 18 | [mentor.ejs](../views/mentor.ejs) | 9 | dev `/mentor` | concluída — ver registro |
 | 19 | [roadmap/index.ejs](../views/roadmap/index.ejs) | 9 | dev `/trilha` | pendente |
 | 20 | [roadmap/novo.ejs](../views/roadmap/novo.ejs) | 9 | dev `/trilha/novo` | pendente |
 | 21 | [assinatura-resultado.ejs](../views/assinatura-resultado.ejs) | 8 | dev `/assinatura/retorno`<br>empresa `/assinatura/retorno` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
@@ -113,6 +113,7 @@ Estas páginas seguem o ciclo normalmente. A lista serve só para a conferência
 - `perfil-dev-empresa`: a lista de roadmaps do candidato (`#roadmap-list` → `<ul>`) só aparece se ele tiver roadmap; o candidato usado no base (id 5) não tem nenhum.
 - `empresa-mensagens`: as mensagens (`.msg-bubble-row` → `<article>`) e o painel do candidato (`.msg-info-block` → `<section>`) só aparecem com conversa aberta; a empresa de teste não tem conversas.
 - `mensagens`: as capturas visuais mostram a página sem conversa aberta, então o visual das mensagens (`<article>`) e do painel da empresa (`<section>`) não é comparado — a pergunta 2 exercitou os dois com uma conversa real.
+- `mentor`: o histórico da conta dev está vazio, então as mensagens do histórico (`<article>`) não aparecem nas capturas; a mensagem enviada pelo roteiro de funções foi comparada.
 
 **Páginas com animações próprias** (o base visual leva toda animação ao estado final e não registra transições, então o movimento em si não foi comparado). As **27 pendentes** têm animação própria: cada uma carrega um CSS de página com pelo menos `fadeUp`.
 
@@ -414,6 +415,31 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.field-wrap`: posiciona o ícone dentro do campo de e-mail.
   - `.lp-right-glow`, `.lp-preview`, `.lp-status-bar`, `.lp-avatar`: ilustração decorativa (`aria-hidden`).
   - `.lp-card-info`: nome e cargo são `<p>`, sem heading, então `<hgroup>` não se aplica.
+
+### 17. index — concluída sem troca
+
+- **Nenhum arquivo alterado**, então as perguntas 1 e 2 não se aplicam e não há commit próprio.
+- **Mantidas (9) e motivo:**
+  - `.bg-decor` (`aria-hidden`): decoração de fundo do hero.
+  - `.logos__viewport`: máscara/rolagem do carrossel de logos (a lista em si já é `<ul>`).
+  - `.step-card__top` (4): selo "FIG 0.x" e ícone (ambos `aria-hidden`); o `<h3>` fica fora deles, então `<header>` só faria sentido mudando o aninhamento (mesma decisão de `para-devs`/`sobre`).
+  - `.cta-final__inner`, `.cta-final__actions`: layout e grupo de botões.
+  - `.footer__bottom`: fica dentro do `<footer>` do site, e um `<footer>` não pode conter outro.
+
+### 18. mentor — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar mentor`: 3 de 3 capturas iguais (dev × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK (o roteiro envia uma pergunta, então a mensagem enviada — agora `<article>` — entra no estado comparado); `npm test`: 668 passaram.
+- **Arquivos:** só `views/mentor.ejs`; nenhum CSS mudou.
+- **Cobertura:** o histórico da conta dev está vazio, então as mensagens do histórico não aparecem nas capturas; está na conferência manual.
+- **Trocadas (2):** `.msg-bubble-row` → `<article>` no histórico e na mensagem enviada (mesma decisão de `mensagens`/`empresa-mensagens`).
+- **Mantidas (7) e motivo:**
+  - `.msg-layout`: layout.
+  - `.msg-thread-empty` (2: plano PRO e erro): estados sem título.
+  - `#mentorBody`: área da conversa (mistura mensagens, "digitando..." e o estado vazio).
+  - `#mentorAnexoPreview`: chip do arquivo anexado.
+  - `#mentorEmpty` e a `<div>` centralizada do botão de entrevista (JS): estado vazio.
+  - `createElement("div")` em `escapeHtml()`: elemento temporário que nunca entra no DOM.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
