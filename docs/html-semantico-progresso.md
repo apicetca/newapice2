@@ -52,7 +52,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 1 | [vagas.ejs](../views/vagas.ejs) | 63 | visitante `/vagas`<br>dev `/vagas`<br>empresa `/vagas` | concluída — ver registro |
 | 2 | [progresso.ejs](../views/progresso.ejs) | 46 | dev `/meu-progresso` | concluída — ver registro |
 | 3 | [repositorios.ejs](../views/repositorios.ejs) | 36 | dev `/repositorios` | concluída — ver registro |
-| 4 | [perfil-dev.ejs](../views/perfil-dev.ejs) | 34 | dev `/perfil` | pendente |
+| 4 | [perfil-dev.ejs](../views/perfil-dev.ejs) | 34 | dev `/perfil` | concluída — ver registro |
 | 5 | [minha-assinatura.ejs](../views/minha-assinatura.ejs) | 31 | dev `/minha-assinatura`<br>empresa `/minha-assinatura` | pendente |
 | 6 | [perfil-empresa.ejs](../views/perfil-empresa.ejs) | 30 | empresa `/empresa/perfil` | pendente |
 | 7 | [vaga-publica.ejs](../views/vaga-publica.ejs) | 28 | visitante `/vagas/{vaga}`<br>dev `/vagas/{vaga}`<br>empresa `/vagas/{vaga}` | pendente |
@@ -214,6 +214,25 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.modal-search-wrap`, `.modal-body`, `.edit-field` (2, um campo cada — `<fieldset>` não se aplica), `<div>` interna do `.modal-foot` (o CSS `.modal-foot > div` depende dela).
   - `#toast` (`role="status"`): `<output>` está fora da lista.
   - no JS: `.repo-icon`, `.repo-info`, `.repo-meta`, `.repo-actions`, `.modal-repo-icon`, `.modal-repo-info`, `.modal-repo-meta`: layout interno dos itens.
+
+### 4. perfil-dev — concluída
+
+- **Pergunta 1 (visual):** SIM. Como `perfil.css` mudou, rodou em todas as páginas que o usam: perfil-dev (3), perfil-empresa (3), minha-assinatura (6), assinar (6), planos (6), assinatura-resultado (6) — 30 de 30 capturas iguais.
+- **Pergunta 2 (funções):** SIM nas mesmas 6 páginas (10 telas OK); `npm test`: 668 passaram. Nenhuma página protegida usa `perfil.css`.
+- **Arquivos:** `views/perfil-dev.ejs`, `public/css/perfil.css` (compartilhado; mudança só aditiva nas classes `.profile-chips` e `.profile-stats`).
+- **Trocadas (6):**
+  - `.profile-meta` → `<header>` (nome `<h1>`, e-mail e badges do hero).
+  - `#hero-chips` (`.profile-chips`) → `<ul>`; os 3 badges que o JS gera nele → `<li class="chip …">` (antes `<span>`). O badge de plano em `#plan-info` continua `<span>`.
+  - `#hero-stats` (`.profile-stats`) → `<ul>`; os `.stat-item` que o JS gera (2 lugares) → `<li>`.
+  - CSS: `.profile-chips` e `.profile-stats` ganharam `margin-bottom:0;padding:0;list-style:none` (mantêm o `margin-top` da classe).
+- **Mantidas (28) e motivo:**
+  - `.perfil-layout`, `#state-loading` + 3 skeletons, `#state-content`: layout e estados de carregamento.
+  - `.profile-hero-inner`, `.avatar-wrap`, `.avatar-ring`, `.avatar-placeholder` (inclusive o gerado pelo JS): layout/avatar decorativo.
+  - `.form-alert` (`role="alert"`), `.field-row`, `.form-actions`, `.reanalyze-bar`, `.add-skill-row`, `#plan-info`, `#perfil-repos-preview` (e os itens com `style` gerados nele), `.danger-zone`: layout ou grupos sem título próprio.
+  - `.skills-grid`: os itens são gerados por `renderSkills` com estrutura própria; trocar exigiria mudar também os filhos.
+  - `.skill-why` (`role="region"`): o título é um `<p>`, não heading, então `<section>` não se aplica.
+  - `#info-rows` e os 3 `.info-row`: pares rótulo/valor; `<dl>` está fora da lista.
+  - `#toast` (`role="status"`): `<output>` está fora da lista.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 

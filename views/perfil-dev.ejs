@@ -53,13 +53,13 @@
                 <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/webp,image/gif" aria-hidden="true" tabindex="-1" />
               </div>
 
-              <div class="profile-meta">
+              <header class="profile-meta">
                 <h1 class="profile-name" id="hero-name">—</h1>
                 <p  class="profile-sub"  id="hero-email">—</p>
-                <div class="profile-chips" id="hero-chips" aria-label="Badges do perfil"></div>
-              </div>
+                <ul class="profile-chips" id="hero-chips" aria-label="Badges do perfil"></ul>
+              </header>
 
-              <div class="profile-stats" id="hero-stats" aria-label="Estatísticas"></div>
+              <ul class="profile-stats" id="hero-stats" aria-label="Estatísticas"></ul>
 
             </div>
           </section>
@@ -341,31 +341,31 @@
       // Chips
       const chips = $("hero-chips");
       chips.innerHTML = "";
-      chips.innerHTML += `<span class="chip chip-accent">${nivelLabel[data.nivel] ?? data.nivel}</span>`;
+      chips.innerHTML += `<li class="chip chip-accent">${nivelLabel[data.nivel] ?? data.nivel}</li>`;
 
       if (data.github_login) {
-        chips.innerHTML += `<span class="chip chip-blue">
+        chips.innerHTML += `<li class="chip chip-blue">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.44 9.8 8.21 11.39.6.11.82-.26.82-.57 0-.28-.01-1.23-.02-2.24-3.01.55-3.8-.73-4.03-1.41-.14-.34-.72-1.41-1.23-1.69-.42-.23-1.02-.78-.01-.79.94-.02 1.62.87 1.84 1.23 1.08 1.81 2.81 1.3 3.5.99.1-.78.42-1.3.76-1.6-2.67-.3-5.46-1.34-5.46-5.93 0-1.3.46-2.38 1.23-3.22-.12-.3-.54-1.52.12-3.18 0 0 1-.31 3.3 1.23.96-.27 1.98-.4 3-.4s2.04.13 3 .4c2.3-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.87.12 3.18.77.84 1.23 1.9 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22 0 1.61-.02 2.9-.02 3.29 0 .32.22.69.83.57A12 12 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
           @${escapeHtml(data.github_login)}
-        </span>`;
+        </li>`;
       }
 
       const since = data.created_at
         ? new Date(data.created_at).toLocaleDateString("pt-BR", { year: "numeric", month: "long" })
         : "—";
-      chips.innerHTML += `<span class="chip chip-muted">Desde ${since}</span>`;
+      chips.innerHTML += `<li class="chip chip-muted">Desde ${since}</li>`;
 
       // Stats
       const dominated = (data.skills ?? []).filter(s => s.confidence >= 60).length;
       $("hero-stats").innerHTML = `
-        <div class="stat-item">
+        <li class="stat-item">
           <span class="stat-value">${data.skills?.length ?? 0}</span>
           <span class="stat-label">habilidades</span>
-        </div>
-        <div class="stat-item">
+        </li>
+        <li class="stat-item">
           <span class="stat-value">${dominated}</span>
           <span class="stat-label">dominadas</span>
-        </div>
+        </li>
       `;
 
       // Show re-analyze bar for GitHub OAuth users (they have an avatar set by OAuth)
@@ -730,8 +730,8 @@
           // Update stats
           const dominated = (profile.skills ?? []).filter(s => s.confidence >= 60).length;
           $("hero-stats").innerHTML = `
-            <div class="stat-item"><span class="stat-value">${profile.skills.length}</span><span class="stat-label">habilidades</span></div>
-            <div class="stat-item"><span class="stat-value">${dominated}</span><span class="stat-label">dominadas</span></div>
+            <li class="stat-item"><span class="stat-value">${profile.skills.length}</span><span class="stat-label">habilidades</span></li>
+            <li class="stat-item"><span class="stat-value">${dominated}</span><span class="stat-label">dominadas</span></li>
           `;
         }
       } catch {
