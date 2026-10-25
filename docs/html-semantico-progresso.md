@@ -64,7 +64,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 13 | [planos.ejs](../views/planos.ejs) | 12 | dev `/planos`<br>empresa `/planos` | concluída sem troca — ver registro |
 | 14 | [redefinir-senha.ejs](../views/redefinir-senha.ejs) | 10 | visitante `/redefinir-senha` | concluída — ver registro |
 | 15 | [cadastro.ejs](../views/cadastro.ejs) | 9 | visitante `/cadastro` | concluída — ver registro |
-| 16 | [esqueci-senha.ejs](../views/esqueci-senha.ejs) | 9 | visitante `/esqueci-senha` | pendente |
+| 16 | [esqueci-senha.ejs](../views/esqueci-senha.ejs) | 9 | visitante `/esqueci-senha` | concluída — ver registro |
 | 17 | [index.ejs](../views/index.ejs) | 9 | visitante `/` | pendente |
 | 18 | [mentor.ejs](../views/mentor.ejs) | 9 | dev `/mentor` | pendente (revisada antes nesta conversa sem troca proposta; passa pelo ciclo de novo) |
 | 19 | [roadmap/index.ejs](../views/roadmap/index.ejs) | 9 | dev `/trilha` | pendente |
@@ -402,6 +402,18 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.lp-layout`, `.lp-left-inner`: layout.
   - `.type-tabs` (`role="tablist"`): a `<div>` é o elemento certo para esse papel ARIA.
   - `.field-wrap` (5, sendo 2 `.pass-wrap`): posicionam o ícone e o botão de mostrar senha dentro de cada campo.
+
+### 16. esqueci-senha — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar esqueci-senha`: 3 de 3 capturas iguais (visitante × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK; `npm test`: 668 passaram.
+- **Arquivos:** só `views/esqueci-senha.ejs`; nenhum CSS mudou.
+- **Trocadas (1):** `.lp-card-head` → `<header>` (topo do cartão ilustrativo, igual em `redefinir-senha`).
+- **Mantidas (8) e motivo:**
+  - `.lp-layout`, `.lp-left-inner`: layout.
+  - `.field-wrap`: posiciona o ícone dentro do campo de e-mail.
+  - `.lp-right-glow`, `.lp-preview`, `.lp-status-bar`, `.lp-avatar`: ilustração decorativa (`aria-hidden`).
+  - `.lp-card-info`: nome e cargo são `<p>`, sem heading, então `<hgroup>` não se aplica.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
