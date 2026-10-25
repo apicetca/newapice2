@@ -69,14 +69,14 @@
       <ol class="rm-fase-list">
         <% fases.forEach(function(fase, i) { %>
           <li class="rm-fase">
-            <div class="rm-fase-head">
+            <header class="rm-fase-head">
               <span class="rm-fase-numero"><%= i + 1 %></span>
-              <div class="rm-fase-info">
+              <hgroup class="rm-fase-info">
                 <h2 class="rm-fase-nome"><%= fase.nome %></h2>
                 <p class="rm-fase-objetivo"><%= fase.objetivo %></p>
-              </div>
+              </hgroup>
               <span class="rm-fase-pct"><%= fase.pct %>%</span>
-            </div>
+            </header>
 
             <div class="rm-progress rm-progress--fase" role="progressbar" aria-valuenow="<%= fase.pct %>" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso da fase <%= fase.nome %>">
               <div class="rm-progress-track">

@@ -57,7 +57,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 6 | [perfil-empresa.ejs](../views/perfil-empresa.ejs) | 30 | empresa `/empresa/perfil` | concluída — ver registro |
 | 7 | [vaga-publica.ejs](../views/vaga-publica.ejs) | 28 | visitante `/vagas/{vaga}`<br>dev `/vagas/{vaga}`<br>empresa `/vagas/{vaga}` | concluída — ver registro |
 | 8 | [perfil-dev-empresa.ejs](../views/perfil-dev-empresa.ejs) | 23 | empresa `/empresa/dev/{dev}` | concluída — ver registro |
-| 9 | [roadmap/detalhe.ejs](../views/roadmap/detalhe.ejs) | 16 | dev `/trilha/{roadmap}` | pendente |
+| 9 | [roadmap/detalhe.ejs](../views/roadmap/detalhe.ejs) | 16 | dev `/trilha/{roadmap}` | concluída — ver registro |
 | 10 | [empresa-mensagens.ejs](../views/empresa-mensagens.ejs) | 14 | empresa `/empresa/mensagens` | pendente |
 | 11 | [mensagens.ejs](../views/mensagens.ejs) | 14 | dev `/mensagens` | pendente |
 | 12 | [assinar.ejs](../views/assinar.ejs) | 13 | dev `/planos/{planoDev}/assinar`<br>empresa `/planos/{planoEmpresa}/assinar` | pendente |
@@ -110,6 +110,7 @@ Estas páginas seguem o ciclo normalmente. A lista serve só para a conferência
 - `progresso`: o card de roadmap (`.card-top` → `<header>`, `.card-stats` → `<ul>`) só aparece com roadmap em andamento; a conta dev não tem nenhum.
 - `repositorios`: os modais (`.modal-head` → `<header>`, `.modal-foot` → `<footer>`) ficam fechados nas capturas — o roteiro de funções abre os dois; o estado vazio (`.repos-empty` → `<section>`) só aparece sem repositórios.
 - `minha-assinatura`: o cartão "Assinatura atual" (`.sub-current-head` → `<header>`) e os painéis "Trocar cartão"/"Trocar de plano" (`.sub-panel` → `<section>`) só aparecem com assinatura paga ativa; a conta dev tem plano liberado pela equipe e a empresa não tem assinatura.
+- `perfil-dev-empresa`: a lista de roadmaps do candidato (`#roadmap-list` → `<ul>`) só aparece se ele tiver roadmap; o candidato usado no base (id 5) não tem nenhum.
 
 **Páginas com animações próprias** (o base visual leva toda animação ao estado final e não registra transições, então o movimento em si não foi comparado). As **27 pendentes** têm animação própria: cada uma carrega um CSS de página com pelo menos `fadeUp`.
 
@@ -308,6 +309,22 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.dev-tabs` (`role="tablist"`) e os `.dev-tab-panel` (`role="tabpanel"`, 2 no template): a `<div>` é o elemento certo para esses papéis ARIA.
   - `.tab-empty`: estado vazio das abas, sem título.
   - dentro dos itens do JS: `.skill-row-top`, `.skill-bar`/`.skill-fill` e `.roadmap-bar-wrap`/`.roadmap-bar-fill` (barras com `role="progressbar"` e o preenchimento visual).
+
+### 9. roadmap/detalhe — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar roadmap/detalhe`: 3 de 3 capturas iguais (dev × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK; `npm test`: 668 passaram.
+- **Arquivos:** só `views/roadmap/detalhe.ejs`; nenhum CSS mudou (`trilha.css` estiliza `.rm-fase-head`/`.rm-fase-info` pela classe).
+- **Trocadas (2, repetidas em cada fase):**
+  - `.rm-fase-head` → `<header>` (número, título, objetivo e percentual da fase).
+  - `.rm-fase-info` (`<h2>` + `<p>` do objetivo) → `<hgroup>`.
+- **Mantidas (14) e motivo:**
+  - `.rm-page`: layout.
+  - `.rm-alert` (3: aviso, info e resultado do projeto, com `role` próprio): avisos sem título.
+  - `.rm-progress` (2, `role="progressbar"`) com `.rm-progress-track`/`.rm-progress-fill`: barra e preenchimento visual.
+  - `.rm-actions`: grupo dos formulários "regenerar"/"arquivar".
+  - `.rm-etapa-conteudo` e `.rm-etapa-meta`: conteúdo e metadados de cada etapa (que já é um `<li>`).
+  - `.rm-projeto`: o rótulo "Projeto prático" é um `<p>`, não heading, então `<section>` não se aplica.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
