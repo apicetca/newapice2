@@ -61,8 +61,8 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 10 | [empresa-mensagens.ejs](../views/empresa-mensagens.ejs) | 14 | empresa `/empresa/mensagens` | concluída — ver registro |
 | 11 | [mensagens.ejs](../views/mensagens.ejs) | 14 | dev `/mensagens` | concluída — ver registro |
 | 12 | [assinar.ejs](../views/assinar.ejs) | 13 | dev `/planos/{planoDev}/assinar`<br>empresa `/planos/{planoEmpresa}/assinar` | concluída — ver registro |
-| 13 | [planos.ejs](../views/planos.ejs) | 12 | dev `/planos`<br>empresa `/planos` | pendente |
-| 14 | [redefinir-senha.ejs](../views/redefinir-senha.ejs) | 10 | visitante `/redefinir-senha` | pendente |
+| 13 | [planos.ejs](../views/planos.ejs) | 12 | dev `/planos`<br>empresa `/planos` | concluída sem troca — ver registro |
+| 14 | [redefinir-senha.ejs](../views/redefinir-senha.ejs) | 10 | visitante `/redefinir-senha` | concluída — ver registro |
 | 15 | [cadastro.ejs](../views/cadastro.ejs) | 9 | visitante `/cadastro` | pendente |
 | 16 | [esqueci-senha.ejs](../views/esqueci-senha.ejs) | 9 | visitante `/esqueci-senha` | pendente |
 | 17 | [index.ejs](../views/index.ejs) | 9 | visitante `/` | pendente |
@@ -371,6 +371,26 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.sub-actions` (2): grupos de botões.
   - `.sub-notice` (2, `role="note"`) e a `<div>` de texto dentro de cada um: avisos; o texto é parágrafo, mas `<p>` está fora da lista.
   - `#brick-loading`, `#cardPaymentBrick_container` (contêiner do Mercado Pago, com `data-*`), `#checkout-error`: estados e contêiner externo.
+
+### 13. planos — concluída sem troca
+
+- **Nenhum arquivo alterado**, então as perguntas 1 e 2 não se aplicam (nada a comparar) e não há commit próprio.
+- **Mantidas (12) e motivo:**
+  - `#plans-status`: contêiner onde o JS coloca os avisos.
+  - os 5 avisos `.sub-notice` gerados pelo JS (aviso de indisponibilidade, problema na cobrança, assinatura ativa, pendente, cancelada): mensagens de status sem título; nenhuma tag da lista descreve um aviso.
+  - a `<div>` de texto dentro de cada aviso (5) e `.sub-notice-actions`: o texto é parágrafo, mas `<p>` está fora da lista.
+
+### 14. redefinir-senha — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar redefinir-senha`: 3 de 3 capturas iguais (visitante × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK; `npm test`: 668 passaram.
+- **Arquivos:** só `views/redefinir-senha.ejs`; nenhum CSS mudou (`.lp-card-head` é estilizado pela classe; `.lp-preview > *` continua com os mesmos filhos).
+- **Trocadas (1):** `.lp-card-head` → `<header>` (topo do cartão ilustrativo `<article class="lp-card">`, na coluna decorativa com `aria-hidden`).
+- **Mantidas (9) e motivo:**
+  - `.lp-layout`, `.lp-left-inner`: layout das duas colunas.
+  - `.pass-wrap.field-wrap` (2): posicionam o ícone e o botão de mostrar senha dentro do campo.
+  - `.lp-right-glow`, `.lp-preview`, `.lp-status-bar`, `.lp-avatar`: ilustração decorativa (`aria-hidden`).
+  - `.lp-card-info`: nome e cargo são `<p>`, sem heading, então `<hgroup>` não se aplica.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
