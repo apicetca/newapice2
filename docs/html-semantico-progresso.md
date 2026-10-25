@@ -53,7 +53,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 2 | [progresso.ejs](../views/progresso.ejs) | 46 | dev `/meu-progresso` | concluída — ver registro |
 | 3 | [repositorios.ejs](../views/repositorios.ejs) | 36 | dev `/repositorios` | concluída — ver registro |
 | 4 | [perfil-dev.ejs](../views/perfil-dev.ejs) | 34 | dev `/perfil` | concluída — ver registro |
-| 5 | [minha-assinatura.ejs](../views/minha-assinatura.ejs) | 31 | dev `/minha-assinatura`<br>empresa `/minha-assinatura` | pendente |
+| 5 | [minha-assinatura.ejs](../views/minha-assinatura.ejs) | 31 | dev `/minha-assinatura`<br>empresa `/minha-assinatura` | concluída — ver registro |
 | 6 | [perfil-empresa.ejs](../views/perfil-empresa.ejs) | 30 | empresa `/empresa/perfil` | pendente |
 | 7 | [vaga-publica.ejs](../views/vaga-publica.ejs) | 28 | visitante `/vagas/{vaga}`<br>dev `/vagas/{vaga}`<br>empresa `/vagas/{vaga}` | pendente |
 | 8 | [perfil-dev-empresa.ejs](../views/perfil-dev-empresa.ejs) | 23 | empresa `/empresa/dev/{dev}` | pendente |
@@ -109,6 +109,7 @@ Estas páginas seguem o ciclo normalmente. A lista serve só para a conferência
 
 - `progresso`: o card de roadmap (`.card-top` → `<header>`, `.card-stats` → `<ul>`) só aparece com roadmap em andamento; a conta dev não tem nenhum.
 - `repositorios`: os modais (`.modal-head` → `<header>`, `.modal-foot` → `<footer>`) ficam fechados nas capturas — o roteiro de funções abre os dois; o estado vazio (`.repos-empty` → `<section>`) só aparece sem repositórios.
+- `minha-assinatura`: o cartão "Assinatura atual" (`.sub-current-head` → `<header>`) e os painéis "Trocar cartão"/"Trocar de plano" (`.sub-panel` → `<section>`) só aparecem com assinatura paga ativa; a conta dev tem plano liberado pela equipe e a empresa não tem assinatura.
 
 **Páginas com animações próprias** (o base visual leva toda animação ao estado final e não registra transições, então o movimento em si não foi comparado). As **27 pendentes** têm animação própria: cada uma carrega um CSS de página com pelo menos `fadeUp`.
 
@@ -220,12 +221,12 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
 - **Pergunta 1 (visual):** SIM. Como `perfil.css` mudou, rodou em todas as páginas que o usam: perfil-dev (3), perfil-empresa (3), minha-assinatura (6), assinar (6), planos (6), assinatura-resultado (6) — 30 de 30 capturas iguais.
 - **Pergunta 2 (funções):** SIM nas mesmas 6 páginas (10 telas OK); `npm test`: 668 passaram. Nenhuma página protegida usa `perfil.css`.
 - **Arquivos:** `views/perfil-dev.ejs`, `public/css/perfil.css` (compartilhado; mudança só aditiva nas classes `.profile-chips` e `.profile-stats`).
-- **Trocadas (6):**
+- **Trocadas (7 `<div>`, mais 3 `<span>` → `<li>`):**
   - `.profile-meta` → `<header>` (nome `<h1>`, e-mail e badges do hero).
   - `#hero-chips` (`.profile-chips`) → `<ul>`; os 3 badges que o JS gera nele → `<li class="chip …">` (antes `<span>`). O badge de plano em `#plan-info` continua `<span>`.
   - `#hero-stats` (`.profile-stats`) → `<ul>`; os `.stat-item` que o JS gera (2 lugares) → `<li>`.
   - CSS: `.profile-chips` e `.profile-stats` ganharam `margin-bottom:0;padding:0;list-style:none` (mantêm o `margin-top` da classe).
-- **Mantidas (28) e motivo:**
+- **Mantidas (27) e motivo:**
   - `.perfil-layout`, `#state-loading` + 3 skeletons, `#state-content`: layout e estados de carregamento.
   - `.profile-hero-inner`, `.avatar-wrap`, `.avatar-ring`, `.avatar-placeholder` (inclusive o gerado pelo JS): layout/avatar decorativo.
   - `.form-alert` (`role="alert"`), `.field-row`, `.form-actions`, `.reanalyze-bar`, `.add-skill-row`, `#plan-info`, `#perfil-repos-preview` (e os itens com `style` gerados nele), `.danger-zone`: layout ou grupos sem título próprio.
@@ -233,6 +234,27 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.skill-why` (`role="region"`): o título é um `<p>`, não heading, então `<section>` não se aplica.
   - `#info-rows` e os 3 `.info-row`: pares rótulo/valor; `<dl>` está fora da lista.
   - `#toast` (`role="status"`): `<output>` está fora da lista.
+
+### 5. minha-assinatura — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar minha-assinatura`: 6 de 6 capturas iguais (dev e empresa × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK nas 2 telas; `npm test`: 668 passaram.
+- **Arquivos:** só `views/minha-assinatura.ejs`; nenhum CSS mudou (`.sub-current-head` e `.sub-panel` são estilizados pela classe).
+- **Cobertura:** nenhuma das contas mostra o cartão "Assinatura atual" (dev tem plano liberado pela equipe; empresa não tem assinatura) e os painéis só abrem com assinatura ativa; está na conferência manual.
+- **Trocadas (3):**
+  - `.sub-current-head` → `<header>` (rótulo "Plano atual", `<h2>` e chip de status).
+  - `#panel-cartao` e `#panel-plano` (`.sub-panel`) → `<section>` (cada um tem `<h3>`).
+- **Mantidas (28) e motivo:**
+  - `<div>` interna de `.sub-current-head` ("Plano atual" + `<h2>`): `<hgroup>` não aceita `<span>`.
+  - `.sub-wrap`, `#content` (`.sub-stack`), os `#loading`/`#card-loading`: layout e estados.
+  - avisos `.sub-notice` (3, com `role` próprio) e a `<div>` de texto dentro deles (é parágrafo; `<p>` está fora da lista), `.sub-notice-actions`.
+  - `#info-grid` e os `.sub-info-item` do JS: pares rótulo/valor; `<dl>` está fora da lista.
+  - `.sub-actions` (5): grupos de botões.
+  - `#cardBrickTrocaCartao`: contêiner do formulário do Mercado Pago.
+  - `#plan-options`: os filhos são links `<a>`; `<ul>` exigiria envolvê-los em `<li>`.
+  - `#history` e as `<div>` dentro das `<td>` do histórico: o CSS `.sub-history td > div` (inventário) depende delas.
+  - `#cancel-modal` (overlay) e `.sub-modal` (`role="dialog"`): `<dialog>` está fora da lista e mudaria o comportamento.
+  - `#mp-config`: só carrega `data-*` para o JS.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 

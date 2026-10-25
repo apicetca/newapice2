@@ -59,19 +59,19 @@
 
       <!-- Assinatura atual -->
       <section class="card" id="current-card" aria-labelledby="current-title" hidden>
-        <div class="sub-current-head">
+        <header class="sub-current-head">
           <div>
             <span class="sub-info-label">Plano atual</span>
             <h2 class="sub-plan-name" id="current-title"></h2>
           </div>
           <span class="chip" id="status-chip"></span>
-        </div>
+        </header>
         <div class="sub-info-grid" id="info-grid"></div>
         <p class="sub-recurring" id="status-text" style="margin-bottom:1.25rem"></p>
         <div class="sub-actions" id="actions"></div>
 
         <!-- Trocar cartão -->
-        <div class="sub-panel" id="panel-cartao" hidden>
+        <section class="sub-panel" id="panel-cartao" hidden>
           <h3>Trocar cartão</h3>
           <p class="sub-recurring" style="margin-bottom:1rem">O novo cartão passa a ser usado nas próximas cobranças da assinatura (inclusive na próxima tentativa, se a última foi recusada). Nada é cobrado agora.</p>
           <div class="sub-brick-loading" id="card-loading" role="status" aria-live="polite">
@@ -83,10 +83,10 @@
           <div class="sub-actions" style="margin-top:.75rem">
             <button type="button" class="btn-secondary" id="card-close">Fechar</button>
           </div>
-        </div>
+        </section>
 
         <!-- Trocar de plano -->
-        <div class="sub-panel" id="panel-plano" hidden>
+        <section class="sub-panel" id="panel-plano" hidden>
           <h3>Trocar de plano</h3>
           <p class="sub-recurring" style="margin-bottom:1rem">A troca cria a assinatura do novo plano (cobrada no ato) e cancela a atual. Os recursos do plano atual continuam liberados até o fim do período já pago.</p>
           <div class="sub-plan-options" id="plan-options">
@@ -98,7 +98,7 @@
             </a>
             <% }) %>
           </div>
-        </div>
+        </section>
       </section>
 
       <!-- Sem assinatura -->
