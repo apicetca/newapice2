@@ -60,7 +60,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 9 | [roadmap/detalhe.ejs](../views/roadmap/detalhe.ejs) | 16 | dev `/trilha/{roadmap}` | concluída — ver registro |
 | 10 | [empresa-mensagens.ejs](../views/empresa-mensagens.ejs) | 14 | empresa `/empresa/mensagens` | concluída — ver registro |
 | 11 | [mensagens.ejs](../views/mensagens.ejs) | 14 | dev `/mensagens` | concluída — ver registro |
-| 12 | [assinar.ejs](../views/assinar.ejs) | 13 | dev `/planos/{planoDev}/assinar`<br>empresa `/planos/{planoEmpresa}/assinar` | pendente |
+| 12 | [assinar.ejs](../views/assinar.ejs) | 13 | dev `/planos/{planoDev}/assinar`<br>empresa `/planos/{planoEmpresa}/assinar` | concluída — ver registro |
 | 13 | [planos.ejs](../views/planos.ejs) | 12 | dev `/planos`<br>empresa `/planos` | pendente |
 | 14 | [redefinir-senha.ejs](../views/redefinir-senha.ejs) | 10 | visitante `/redefinir-senha` | pendente |
 | 15 | [cadastro.ejs](../views/cadastro.ejs) | 9 | visitante `/cadastro` | pendente |
@@ -359,6 +359,18 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.msg-layout`, `.msg-search-row`, `#convList` (itens são `<button>`), `#threadEmpty`, `#threadActive`, `#threadBody`, `#infoPanelBody`: mesmos motivos de `empresa-mensagens`.
   - `#jobSearchResults` (modal "Nova conversa"): os resultados são `<button>`; `<ul>` exigiria `<li>` em volta.
   - no painel do JS: `.msg-info-meta` e `.msg-info-jobs`.
+
+### 12. assinar — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar assinar`: 6 de 6 capturas iguais (dev e empresa × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK nas 2 telas; `npm test`: 668 passaram.
+- **Arquivos:** só `views/assinar.ejs`; nenhum CSS mudou (`.sub-state` é estilizado pela classe e já é `<section>` em `minha-assinatura`).
+- **Trocadas (2):** os 2 blocos `.sub-state` ("Você já assina este plano" e "Assinaturas temporariamente indisponíveis", cada um com `<h2>`) → `<section>`. O segundo é o que aparece no base (Mercado Pago não configurado localmente).
+- **Mantidas (11) e motivo:**
+  - `.sub-wrap`, `.sub-layout`: layout.
+  - `.sub-actions` (2): grupos de botões.
+  - `.sub-notice` (2, `role="note"`) e a `<div>` de texto dentro de cada um: avisos; o texto é parágrafo, mas `<p>` está fora da lista.
+  - `#brick-loading`, `#cardPaymentBrick_container` (contêiner do Mercado Pago, com `data-*`), `#checkout-error`: estados e contêiner externo.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
