@@ -55,7 +55,7 @@ Nunca editar estes `.ejs`. Elas continuam na base e entram nas perguntas 1 e 2 s
 | 4 | [perfil-dev.ejs](../views/perfil-dev.ejs) | 34 | dev `/perfil` | concluída — ver registro |
 | 5 | [minha-assinatura.ejs](../views/minha-assinatura.ejs) | 31 | dev `/minha-assinatura`<br>empresa `/minha-assinatura` | concluída — ver registro |
 | 6 | [perfil-empresa.ejs](../views/perfil-empresa.ejs) | 30 | empresa `/empresa/perfil` | concluída — ver registro |
-| 7 | [vaga-publica.ejs](../views/vaga-publica.ejs) | 28 | visitante `/vagas/{vaga}`<br>dev `/vagas/{vaga}`<br>empresa `/vagas/{vaga}` | pendente |
+| 7 | [vaga-publica.ejs](../views/vaga-publica.ejs) | 28 | visitante `/vagas/{vaga}`<br>dev `/vagas/{vaga}`<br>empresa `/vagas/{vaga}` | concluída — ver registro |
 | 8 | [perfil-dev-empresa.ejs](../views/perfil-dev-empresa.ejs) | 23 | empresa `/empresa/dev/{dev}` | pendente |
 | 9 | [roadmap/detalhe.ejs](../views/roadmap/detalhe.ejs) | 16 | dev `/trilha/{roadmap}` | pendente |
 | 10 | [empresa-mensagens.ejs](../views/empresa-mensagens.ejs) | 14 | empresa `/empresa/mensagens` | pendente |
@@ -271,6 +271,25 @@ Uma entrada por página, na ordem em que for processada: resultado das perguntas
   - `.vaga-info` (dentro de cada item): título e meta da vaga.
   - `#info-rows` e os 4 `.info-row`: pares rótulo/valor; `<dl>` está fora da lista.
   - `#toast` (`role="status"`): `<output>` está fora da lista.
+
+### 7. vaga-publica — concluída
+
+- **Pergunta 1 (visual):** SIM. `comparar vaga-publica`: 9 de 9 capturas iguais (visitante, dev e empresa × 3 larguras).
+- **Pergunta 2 (funções):** SIM. OK nas 3 telas; `npm test`: 668 passaram.
+- **Arquivos:** `views/vaga-publica.ejs`, `public/css/vaga-publica.css` (usado só por esta página).
+- **Trocadas (12 `<div>`, mais 6 `<span>` → `<li>`):**
+  - `.vaga-hero-top` → `<header>` e `.vaga-hero-info` (`<h1>` + empresa) → `<hgroup>`, no HTML do servidor e no gerado pelo JS.
+  - `.vaga-badges` → `<ul>`, com os 4 selos (nível, modalidade, contrato, inglês) como `<li>`.
+  - `.match-card-header` → `<header>`; `.match-scores` → `<ul>` com os 2 `.score-item` como `<li>`.
+  - `.skill-breakdown` → `<ul>` com cada `.skill-row` como `<li>`.
+  - `.tag-list` → `<ul>` com cada `.tag-item` como `<li>`.
+  - CSS: `.vaga-badges`, `.match-scores`, `.skill-breakdown` e `.tag-list` ganharam `padding:0;list-style:none` e margem zerada (mantendo o `margin-top` que a classe já tinha).
+- **Mantidas (16) e motivo:**
+  - `#state-loading`, `#state-error`, `#state-content`: os testes QA-019 e QA-020 exigem `<div>`.
+  - `.vaga-grid`: layout das duas colunas.
+  - `.vaga-icon-wrap` (decorativo), `.match-bar-track`/`.match-bar-fill` (barra visual), `.match-login-prompt`.
+  - `.vaga-action-card` (2): cartão lateral de ações, sem título.
+  - as `<div>` de rótulo/valor dentro de cada `.vaga-meta-item` (já um `<li>`): `<dl>` está fora da lista.
 
 ## Roteiro de cada página (`verificar-funcoes.js`)
 
