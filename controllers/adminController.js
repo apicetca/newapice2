@@ -15,6 +15,22 @@ function githubKey(row) {
   return login.trim().toLowerCase() || null;
 }
 
+// Equivalente para empresas: o plano vale por conta e uma empresa pode ter
+// mais de uma. Mesmo CNPJ (só os dígitos) é o sinal forte; mesmo nome
+// fantasia ou razão social (sem acento, caixa ou pontuação) é mais fraco.
+// Tudo é digitado no cadastro, então o painel só avisa e o admin decide.
+const somenteDigitos = s => String(s ?? "").replace(/\D/g, "");
+const nomeNormalizado = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "")
+  .replace(/[^a-z0-9]/gi, "").toLowerCase();
+
+function motivoMesmaEmpresa(a, b) {
+  const cnpj = somenteDigitos(a.cnpj);
+  if (cnpj && cnpj === somenteDigitos(b.cnpj)) return "CNPJ";
+  const nomesB = [b.nome_fantasia, b.razao_social].map(nomeNormalizado).filter(Boolean);
+  const mesmoNome = [a.nome_fantasia, a.razao_social].map(nomeNormalizado).some(n => n && nomesB.includes(n));
+  return mesmoNome ? "nome" : null;
+}
+
 const adminController = {
   getDashboard: async (req, res) => {
     try {
@@ -155,6 +171,14 @@ const adminController = {
         total_vagas:  Number(r.total_vagas),
         vagas_ativas: Number(r.vagas_ativas),
         plan_code: planCodes[r.id],
+        outras_contas: rows
+          .filter(o => o.id !== r.id)
+          .map(o => ({ o, motivo: motivoMesmaEmpresa(r, o) }))
+          .filter(({ motivo }) => motivo)
+          .map(({ o, motivo }) => ({
+            id: o.id, email: o.email, nome: o.nome_fantasia || o.razao_social || null,
+            plan_code: planCodes[o.id], motivo,
+          })),
       })));
     } catch (err) {
       console.error("[GET /api/admin/empresas]", err.message);
