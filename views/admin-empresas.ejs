@@ -73,7 +73,14 @@ const SETOR_LABEL = {
   saude:"Saúde", varejo:"Varejo", industria:"Indústria",
   consultoria:"Consultoria", outro:"Outro",
 };
+const PLAN_LABEL = { empresa_free: "Free", empresa_basico: "Básico", empresa_premium: "Premium" };
 let allEmpresas = [];
+
+// O plano vale por conta e uma empresa pode ter mais de uma (mesmo CNPJ ou
+// mesmo nome): o admin precisa saber disso ao trocar o plano.
+function contaLabel(o) {
+  return `${o.email}${o.nome ? ` — ${o.nome}` : ""} (mesmo ${o.motivo})`;
+}
 let activeFilter = "todas";
 
 function formatDate(raw) {
@@ -104,10 +111,13 @@ function renderTable(empresas) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td data-label="Empresa">
-        <span class="job-title-cell">${escapeHtml(e.nome_fantasia ?? e.razao_social ?? "—")}</span>
-        ${e.cnpj ? `<span class="job-company-level">CNPJ ${e.cnpj}</span>` : ""}
+        <span class="job-title-cell">${escapeHtml(e.nome_fantasia || e.razao_social || "—")}</span>
+        ${e.cnpj ? `<span class="job-company-level">CNPJ ${escapeHtml(e.cnpj)}</span>` : ""}
+        ${e.outras_contas.length
+          ? `<br><small style="color:var(--yellow)">⚠ outra(s) conta(s) desta empresa: ${e.outras_contas.map(o => escapeHtml(contaLabel(o))).join(", ")}</small>`
+          : ""}
       </td>
-      <td data-label="E-mail">${e.email}</td>
+      <td data-label="E-mail">${escapeHtml(e.email)}</td>
       <td data-label="Setor"><span class="badge badge-muted">${SETOR_LABEL[e.setor] ?? "—"}</span></td>
       <td data-label="Vagas ativas"><strong>${e.vagas_ativas}</strong> / ${e.total_vagas}</td>
       <td data-label="Plano">
@@ -162,17 +172,34 @@ async function reload() {
 }
 
 async function changePlan(id, planCode) {
+  // Se a empresa tem outra conta, o plano trocado só nesta não vale quando
+  // ela entra pela outra — oferece aplicar em todas.
+  const empresa = allEmpresas.find(e => e.id === id);
+  const outras  = (empresa?.outras_contas ?? []).filter(o => o.plan_code !== planCode);
+  const ids     = [id];
+  if (outras.length && confirm(
+    `Esta empresa parece ter outra(s) conta(s):\n` +
+    outras.map(o => `• ${contaLabel(o)}`).join("\n") +
+    `\n\nAplicar o plano ${PLAN_LABEL[planCode]} nelas também? ` +
+    `Se não, ela continua no plano antigo quando entrar por essa(s) conta(s).`
+  )) {
+    ids.push(...outras.map(o => o.id));
+  }
+
   try {
-    const res = await fetch(`/api/admin/empresas/${id}/plan`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan_code: planCode }),
-    });
-    if (!res.ok) throw new Error();
-    showToast("Plano atualizado.");
-    await reload();
+    for (const target of ids) {
+      const res = await fetch(`/api/admin/empresas/${target}/plan`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan_code: planCode }),
+      });
+      if (!res.ok) throw new Error();
+    }
+    showToast(ids.length > 1 ? `Plano atualizado em ${ids.length} contas.` : "Plano atualizado.");
   } catch {
     showToast("Erro ao atualizar o plano.", true);
   }
+  // Recarrega mesmo no erro, pra o seletor não ficar mostrando um plano que não foi salvo.
+  await reload();
 }
 
 let toastTimer = null;
