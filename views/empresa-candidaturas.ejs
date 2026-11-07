@@ -58,6 +58,7 @@
 
   <output class="toast" id="toast" role="status" aria-live="polite"></output>
 
+  <script src="/js/ia-fetch.js"></script>
   <script>
     const JOB_ID = <%- jobId %>;
     let APPLICATIONS = [];
@@ -137,9 +138,8 @@
       btn.textContent = "Gerando...";
 
       try {
-        const res  = await fetch(`/api/empresa/candidaturas/${id}/resumo-ia`, { method: "POST" });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Erro ao gerar resumo.");
+        // Prazo de 60s: a IA (Gemini e, se ele falhar, o fallback) responde em até ~40s.
+        const data = await fetchIA(`/api/empresa/candidaturas/${id}/resumo-ia`, { method: "POST" }, 60000);
 
         const app = APPLICATIONS.find(a => String(a.id) === String(id));
         if (app) app.resumo_ia = data.resumo_ia;

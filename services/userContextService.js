@@ -11,6 +11,7 @@
 // padrão já usado em mentorChat.js.
 // ============================================
 const db = require("../database/db");
+const { getUserPlan } = require("./subscriptionService");
 
 const MAX_SKILLS = 20;
 const MAX_REPOS = 10;
@@ -176,6 +177,157 @@ async function buildUserContextBlock(user, include = ["skills", "nivel"]) {
   return `CONTEXTO DO USUÁRIO\n${parts.join("\n")}`;
 }
 
+// ──────────────────────────────────────────────────────────
+// Resumo para o Mentor de carreira (services/mentorChat.js), montado a cada
+// pergunta: nível e plano, skills da análise do perfil, repositórios,
+// roadmaps com o progresso e candidaturas. Só dados técnicos e de
+// progresso — nunca nome, e-mail, senha ou dado de pagamento (o plano vai
+// só pelo nome). Cada parte é isolada: se uma consulta falhar, o resumo
+// sai sem ela, e o mentor responde mesmo assim.
+// ──────────────────────────────────────────────────────────
+const MENTOR_MAX_SKILLS = 15;
+const MENTOR_MAX_REPOS = 8;
+const MENTOR_MAX_CANDIDATURAS = 5;
+const MENTOR_PROXIMAS_ETAPAS = 3;
+
+const STATUS_ETAPA = { pendente: "pendente", em_andamento: "em andamento", concluida: "concluída" };
+const STATUS_PROJETO = {
+  pendente: "projeto pendente",
+  em_revisao: "projeto em revisão",
+  verificado: "projeto verificado",
+  nao_verificado: "projeto entregue (não verificado)",
+};
+
+const curto = (texto, max = 120) => (texto && texto.length > max ? `${texto.slice(0, max)}…` : texto);
+const pct = (feitas, total) => (total ? Math.round((feitas / total) * 100) : 0);
+
+async function mentorNivelEPlano(userId) {
+  const [nivel, plano] = await Promise.all([getNivel(userId), getUserPlan(userId, "dev")]);
+  const partes = [];
+  if (nivel) partes.push(`Nível: ${nivel}`);
+  if (plano?.name) partes.push(`Plano: ${plano.name}`);
+  return partes.join(" · ") || null;
+}
+
+async function mentorSkills(githubId) {
+  const skills = (await getSkillsSummary(githubId)).slice(0, MENTOR_MAX_SKILLS);
+  if (!skills.length) return "Skills (análise do perfil): nenhuma detectada ainda.";
+  return `Skills (análise do perfil, com a confiança): ${skills.map(s => `${s.nome} ${s.confianca}%`).join(", ")}`;
+}
+
+async function mentorRepositorios(userId) {
+  const [[contagem]] = await db.query(
+    "SELECT COUNT(*) AS total, COALESCE(SUM(is_public = 1), 0) AS visiveis FROM user_repositories WHERE user_id = ?",
+    [userId]
+  );
+  const total = Number(contagem?.total ?? 0);
+  if (!total) return "Repositórios no perfil: nenhum ainda.";
+  const visiveis = (await getReposSummary(userId)).slice(0, MENTOR_MAX_REPOS);
+  const lista = visiveis.map(r => `${r.nome} (${r.linguagem ?? "linguagem não informada"})${r.descricao ? `: ${curto(r.descricao)}` : ""}`);
+  return `Repositórios no perfil: ${total} (${Number(contagem.visiveis)} visíveis no perfil público)`
+    + (lista.length ? `. Visíveis: ${lista.join("; ")}` : "");
+}
+
+async function mentorRoadmaps(usuarioId) {
+  const [roadmaps] = await db.query(
+    `SELECT r.id, r.tipo_objetivo, r.area, r.horas_semana, r.status, r.origem, j.title AS vaga_titulo
+     FROM roadmaps r LEFT JOIN jobs j ON j.id = r.vaga_id
+     WHERE r.usuario_id = ?
+     ORDER BY (r.status = 'ativo') DESC, r.gerado_em DESC`,
+    [usuarioId]
+  );
+  if (!roadmaps.length) return "Roadmap: nenhum criado ainda.";
+
+  const ativos = roadmaps.filter(r => r.status === "ativo");
+  const arquivados = roadmaps.length - ativos.length;
+  if (!ativos.length) return `Roadmap: nenhum ativo (${arquivados} arquivado${arquivados === 1 ? "" : "s"}).`;
+
+  const atual = ativos[0];
+  const [fases] = await db.query(
+    "SELECT id, nome, projeto_status FROM roadmap_fases WHERE roadmap_id = ? ORDER BY ordem",
+    [atual.id]
+  );
+  const [etapas] = fases.length
+    ? await db.query(
+        "SELECT fase_id, titulo, habilidade, horas_estimadas, status FROM roadmap_etapas WHERE fase_id IN (?) ORDER BY fase_id, ordem",
+        [fases.map(f => f.id)]
+      )
+    : [[]];
+
+  const objetivo = atual.tipo_objetivo === "area"
+    ? `área ${atual.area}`
+    : atual.vaga_titulo ? `vaga "${atual.vaga_titulo}"` : "uma vaga que não está mais disponível";
+  const origem = atual.origem === "modelo" ? "montado a partir do roadmap-modelo (dá para regenerar)" : "montado pela IA";
+  const concluidas = etapas.filter(e => e.status === "concluida").length;
+
+  const linhas = [
+    `Roadmap ativo: ${objetivo} · ${atual.horas_semana}h/semana · ${origem} · `
+      + `${pct(concluidas, etapas.length)}% concluído (${concluidas} de ${etapas.length} etapas)`,
+  ];
+  if (fases.length) {
+    linhas.push("Fases:");
+    fases.forEach((f, i) => {
+      const daFase = etapas.filter(e => e.fase_id === f.id);
+      const feitas = daFase.filter(e => e.status === "concluida").length;
+      linhas.push(`${i + 1}. ${f.nome} — ${pct(feitas, daFase.length)}% (${feitas}/${daFase.length} etapas) · ${STATUS_PROJETO[f.projeto_status] ?? "projeto pendente"}`);
+    });
+  }
+  // Na ordem das fases: as etapas ainda não concluídas, as em andamento antes.
+  const ordemDaFase = new Map(fases.map((f, i) => [f.id, i]));
+  const prioridade = e => (e.status === "em_andamento" ? 0 : 1);
+  const proximas = etapas
+    .filter(e => e.status !== "concluida")
+    .sort((a, b) => (ordemDaFase.get(a.fase_id) - ordemDaFase.get(b.fase_id)) || (prioridade(a) - prioridade(b)))
+    .slice(0, MENTOR_PROXIMAS_ETAPAS);
+  linhas.push(proximas.length
+    ? `Próximas etapas: ${proximas.map(e => `"${e.titulo}" (${e.habilidade}, ~${e.horas_estimadas}h, ${STATUS_ETAPA[e.status] ?? e.status})`).join("; ")}`
+    : "Próximas etapas: nenhuma — todas as etapas estão concluídas.");
+
+  const outrosAtivos = ativos.length - 1;
+  if (outrosAtivos || arquivados) {
+    linhas.push(`Outros roadmaps: ${outrosAtivos} ativo${outrosAtivos === 1 ? "" : "s"}, ${arquivados} arquivado${arquivados === 1 ? "" : "s"}.`);
+  }
+  return linhas.join("\n");
+}
+
+async function mentorCandidaturas(githubId) {
+  const [[contagem]] = await db.query(
+    "SELECT COUNT(*) AS total FROM job_applications WHERE dev_github_id = ?",
+    [githubId]
+  );
+  const total = Number(contagem?.total ?? 0);
+  if (!total) return "Candidaturas: nenhuma ainda.";
+  const [recentes] = await db.query(
+    `SELECT j.title, j.company, ja.created_at
+     FROM job_applications ja JOIN jobs j ON j.id = ja.job_id
+     WHERE ja.dev_github_id = ?
+     ORDER BY ja.created_at DESC LIMIT ?`,
+    [githubId, MENTOR_MAX_CANDIDATURAS]
+  );
+  const lista = recentes.map(c => `${c.title} (${c.company}, ${new Date(c.created_at).toLocaleDateString("pt-BR")})`);
+  return `Candidaturas: ${total}${lista.length ? ` — mais recentes: ${lista.join("; ")}` : ""}`;
+}
+
+async function buildMentorContext(user) {
+  const githubId = user.github_id ?? user.id;
+  const partes = await Promise.allSettled([
+    mentorNivelEPlano(user.id),
+    mentorSkills(githubId),
+    mentorRepositorios(user.id),
+    mentorRoadmaps(user.id),
+    mentorCandidaturas(githubId),
+  ]);
+
+  const linhas = [];
+  for (const parte of partes) {
+    if (parte.status === "fulfilled" && parte.value) linhas.push(parte.value);
+    if (parte.status === "rejected") console.error("[userContextService] resumo do mentor sem uma das partes:", parte.reason?.message);
+  }
+  if (!linhas.length) return "";
+  return "DADOS DO USUÁRIO (consultados agora no banco do Ápice — use para personalizar a resposta e não invente o que não estiver aqui)\n"
+    + linhas.join("\n");
+}
+
 module.exports = {
   getSkillsSummary,
   getReposSummary,
@@ -183,4 +335,5 @@ module.exports = {
   getRoadmapProgressSummary,
   getRoadmapAtivoSummary,
   buildUserContextBlock,
+  buildMentorContext,
 };

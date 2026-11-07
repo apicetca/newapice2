@@ -47,9 +47,12 @@ async function getOrGenerateSummary(applicationId) {
     system: SYSTEM_PROMPT,
     prompt: `Dados do candidato para resumo:\n${JSON.stringify(payload)}`,
     maxTokens: 1536,
+    // Sem resumo é falha: antes um texto de erro ia pro cache e ficava
+    // preso na candidatura (resumo_ia preenchido nunca é gerado de novo).
+    obrigatorios: ["resumo"],
   });
 
-  const resumo = result.resumo ?? "Não foi possível gerar o resumo agora.";
+  const resumo = result.resumo;
   await db.query("UPDATE job_applications SET resumo_ia = ? WHERE id = ?", [resumo, applicationId]);
 
   return resumo;

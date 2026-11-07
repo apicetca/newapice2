@@ -34,9 +34,10 @@ async function generateRepoDescription(userId, repoId, accessToken) {
     system: SYSTEM_PROMPT,
     prompt: `Gere uma descrição de portfólio para este projeto:\n${JSON.stringify(payload)}`,
     maxTokens: 1536,
+    obrigatorios: ["descricao"], // sem descrição, não grava texto vazio no repositório
   });
 
-  const descricao = result.descricao ?? "";
+  const descricao = result.descricao;
   await db.query(
     "UPDATE user_repositories SET ai_description = ? WHERE id = ? AND user_id = ?",
     [descricao, repoId, userId]

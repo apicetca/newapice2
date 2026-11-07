@@ -84,9 +84,10 @@ async function doGenerateInsights() {
     system: SYSTEM_PROMPT,
     prompt: `Tecnologias mais demandadas nas vagas ativas (ordenado por frequência):\n${JSON.stringify(tecnologiasTop)}`,
     maxTokens: 1536,
+    obrigatorios: ["resumo"], // sem resumo, nada de cache vazio por 24h
   });
 
-  const resumo = result.resumo ?? "";
+  const resumo = result.resumo;
 
   await db.query(
     "INSERT INTO mercado_insights (resumo, tecnologias_top) VALUES (?, ?)",

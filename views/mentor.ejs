@@ -88,6 +88,7 @@
   <p>&copy; <script>document.write(new Date().getFullYear())</script> Ápice. Todos os direitos reservados.</p>
 </footer>
 
+<script src="/js/ia-fetch.js"></script>
 <script>
   const $ = id => document.getElementById(id);
 
@@ -198,9 +199,80 @@
     }
   });
 
+  // Prazo do envio: o servidor tenta o Gemini e, se ele falhar, o fallback
+  // em até ~55s (services/mentorChat.js) — 60s dá folga para upload e banco.
+  const MENTOR_PRAZO_MS = 60000;
   let mentorEnviando = false;
+  let mensagemComFalha = null; // { mensagem, anexo } reenviada pelo "Tentar novamente"
 
-  $("mentorForm").addEventListener("submit", async e => {
+  async function enviarAoMentor(mensagem, anexo) {
+    mentorEnviando = true;
+    const btn = $("mentorSendBtn");
+    const input = $("mentorInput");
+    btn.disabled = true;
+    input.disabled = true;
+
+    const body = $("mentorBody");
+    $("mentorFalha")?.remove();
+    body.insertAdjacentHTML("beforeend", `<p class="msg-conv-loading" id="mentorTyping">Mentor está digitando...</p>`);
+    body.scrollTop = body.scrollHeight;
+
+    const formData = new FormData();
+    formData.append("mensagem", mensagem);
+    if (anexo) formData.append("anexo", anexo);
+
+    try {
+      const data = await fetchIA("/api/ai/mentor/mensagem", { method: "POST", body: formData }, MENTOR_PRAZO_MS);
+      mensagemComFalha = null;
+
+      const historico = await fetch("/api/ai/mentor/historico").then(r => (r.ok ? r.json() : null)).catch(() => null);
+      if (historico) {
+        renderMessages(historico);
+      } else {
+        // O histórico não veio: mostra a resposta que já chegou.
+        $("mentorTyping")?.remove();
+        $("mentorPendente")?.removeAttribute("id");
+        body.insertAdjacentHTML("beforeend", `
+          <article class="msg-bubble-row">
+            <span class="msg-bubble">${escapeHtml(data.resposta)}</span>
+          </article>`);
+        body.scrollTop = body.scrollHeight;
+      }
+    } catch (err) {
+      $("mentorTyping")?.remove();
+      if (err.repetivel) {
+        // Rede, prazo esgotado ou IA indisponível: a pergunta fica na tela,
+        // com o erro e o botão para reenviá-la.
+        mensagemComFalha = { mensagem, anexo };
+        body.insertAdjacentHTML("beforeend", `
+          <div class="msg-conv-loading" id="mentorFalha" role="alert">
+            <p>${escapeHtml(err.message)}</p>
+            <button type="button" class="btn-primary-dev" id="btn-mentor-reenviar" style="margin-top:10px">Tentar novamente</button>
+          </div>`);
+        body.scrollTop = body.scrollHeight;
+      } else {
+        // Erro no pedido (arquivo inválido, plano...): devolve o texto e o
+        // anexo para o usuário corrigir.
+        $("mentorPendente")?.remove();
+        input.value = mensagem;
+        if (anexo) setAnexo(anexo);
+        showToast(err.message, true);
+      }
+    } finally {
+      mentorEnviando = false;
+      btn.disabled = false;
+      input.disabled = false;
+      input.focus();
+    }
+  }
+
+  $("mentorBody").addEventListener("click", e => {
+    if (e.target.closest("#btn-mentor-reenviar") && mensagemComFalha && !mentorEnviando) {
+      enviarAoMentor(mensagemComFalha.mensagem, mensagemComFalha.anexo);
+    }
+  });
+
+  $("mentorForm").addEventListener("submit", e => {
     e.preventDefault();
     if (mentorEnviando) return; // evita disparo duplicado (Enter repetido antes da resposta anterior)
 
@@ -208,46 +280,22 @@
     const mensagem = input.value.trim();
     if (!mensagem) return;
 
-    mentorEnviando = true;
-    const btn = $("mentorSendBtn");
-    btn.disabled = true;
-    input.disabled = true;
+    // Mensagem nova em vez de reenviar a que falhou: a anterior sai da tela
+    // (o servidor já a tirou do histórico).
+    mensagemComFalha = null;
+    $("mentorFalha")?.remove();
+    $("mentorPendente")?.remove();
 
-    const anexoNome = anexoSelecionado?.name;
-    const body = $("mentorBody");
+    const anexo = anexoSelecionado;
     document.getElementById("mentorEmpty")?.remove();
-    body.innerHTML += `
-      <article class="msg-bubble-row mine">
-        <span class="msg-bubble">${escapeHtml(mensagem)}${anexoNome ? `<br><em>📎 ${escapeHtml(anexoNome)}</em>` : ""}</span>
-      </article>
-      <p class="msg-conv-loading" id="mentorTyping">Mentor está digitando...</p>`;
-    body.scrollTop = body.scrollHeight;
+    $("mentorBody").insertAdjacentHTML("beforeend", `
+      <article class="msg-bubble-row mine" id="mentorPendente">
+        <span class="msg-bubble">${escapeHtml(mensagem)}${anexo ? `<br><em>📎 ${escapeHtml(anexo.name)}</em>` : ""}</span>
+      </article>`);
     input.value = "";
-
-    const formData = new FormData();
-    formData.append("mensagem", mensagem);
-    if (anexoSelecionado) formData.append("anexo", anexoSelecionado);
     clearAnexo();
 
-    try {
-      const res = await fetch("/api/ai/mentor/mensagem", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao enviar mensagem.");
-
-      const res2 = await fetch("/api/ai/mentor/historico");
-      renderMessages(await res2.json());
-    } catch (err) {
-      document.getElementById("mentorTyping")?.remove();
-      showToast(err.message, true);
-    } finally {
-      mentorEnviando = false;
-      btn.disabled = false;
-      input.disabled = false;
-      input.focus();
-    }
+    enviarAoMentor(mensagem, anexo);
   });
 
   init();

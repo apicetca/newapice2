@@ -18,6 +18,22 @@ const helmet       = require("helmet");
 const rateLimit    = require("express-rate-limit");
 const db           = require("./database/db");
 const { getLatestInsights } = require("./services/marketInsights");
+const { configuracaoIA } = require("./services/geminiClient");
+
+// ── IA: confere as chaves na subida ───────────────────────
+// O site sobe mesmo sem elas (as telas de IA mostram "indisponível"), mas
+// o log já diz o motivo — chave ausente no Render é a causa mais comum de
+// "a IA não funciona em produção". Só a presença é conferida: testar a
+// chave de verdade gastaria cota a cada subida (GET /api/ai/health faz isso).
+{
+  const ia = configuracaoIA();
+  const fallback = ia.fallback.length ? ia.fallback.join(", ") : "nenhum provedor configurado";
+  if (ia.gemini) {
+    console.log(`[config] IA: Gemini (${ia.modelo}); fallback: ${fallback}.`);
+  } else {
+    console.error(`[config] GEMINI_API_KEY não definida — a IA depende só do fallback (${fallback}).`);
+  }
+}
 
 const app = express();
 const isProd = process.env.NODE_ENV === "production";
@@ -81,6 +97,15 @@ app.use("/api", (req, res, next) => {
 });
 app.get("/favicon.ico", (req, res) => {
   res.type("image/webp").sendFile(path.join(__dirname, "public", "img", "principal-gradiente.webp"));
+});
+
+// ── Health check (Render) ─────────────────────────────────
+// Público e barato: não chama a IA nem o banco e fica antes da sessão (não
+// cria sessão nem consulta o store) — só responde que o processo está de
+// pé. Para testar a IA de verdade, GET /api/ai/health (logado).
+app.get("/health", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json({ status: "ok" });
 });
 
 // ── Handler de JSON malformado ────────────────────────────

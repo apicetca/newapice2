@@ -63,6 +63,14 @@
       </section>
     </div>
 
+    <div id="state-error" hidden>
+      <section class="repos-empty" role="alert">
+        <h2>Não foi possível carregar os insights</h2>
+        <p id="erro-text">Tente novamente em instantes.</p>
+        <button type="button" class="btn-primary-dev" id="btn-tentar-novamente" style="margin-top:16px">Tentar novamente</button>
+      </section>
+    </div>
+
     <div id="state-content" <%= insights ? "" : "hidden" %>>
       <div class="dev-card" style="margin-bottom:20px">
         <p id="resumo-text" style="font-size:.95rem;line-height:1.7"><%= insights ? insights.resumo : "" %></p>
@@ -78,6 +86,7 @@
 
   </main>
 
+  <script src="/js/ia-fetch.js"></script>
   <script>
   (function () {
     'use strict';
@@ -90,14 +99,14 @@
     async function load() {
       // Já veio pronto do servidor (QA-020) — evita refazer o fetch à toa.
       if (!$('state-content').hidden) return;
+      $('state-error').hidden = true;
+      $('state-loading').hidden = false;
       try {
-        const res  = await fetch('/api/ai/insights-mercado');
-        const data = await res.json();
+        // Prazo de 60s: sem cache, a IA (Gemini e, se ele falhar, o fallback)
+        // gera o resumo em até ~40s.
+        const data = await fetchIA('/api/ai/insights-mercado', {}, 60000);
 
         $('state-loading').hidden = true;
-
-        if (res.status === 404) { $('state-empty').hidden = false; return; }
-        if (!res.ok) throw new Error(data.error || 'Erro ao carregar insights.');
 
         $('resumo-text').textContent = data.resumo;
         $('gerado-em').textContent   = data.gerado_em
@@ -111,10 +120,15 @@
         $('state-content').hidden = false;
       } catch (err) {
         $('state-loading').hidden = true;
-        $('state-empty').hidden = false;
+        // 404: ainda não há vagas com skills. Qualquer outra falha é erro de
+        // verdade (IA indisponível, rede, prazo) — com opção de tentar de novo.
+        if (err.status === 404) { $('state-empty').hidden = false; return; }
+        $('erro-text').textContent = err.message;
+        $('state-error').hidden = false;
       }
     }
 
+    $('btn-tentar-novamente').addEventListener('click', load);
     load();
   })();
   </script>

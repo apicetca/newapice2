@@ -163,6 +163,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 
+  <script src="/js/ia-fetch.js"></script>
   <script>
   (function () {
     'use strict';
@@ -476,9 +477,8 @@
       btn.textContent = 'Gerando...';
 
       try {
-        const res  = await fetch(`/api/user/repos/${editingId}/gerar-descricao`, { method: 'POST' });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Erro ao gerar descrição.');
+        // Prazo de 60s: a IA (Gemini e, se ele falhar, o fallback) responde em até ~40s.
+        const data = await fetchIA(`/api/user/repos/${editingId}/gerar-descricao`, { method: 'POST' }, 60000);
 
         editDesc.value = data.ai_description || '';
         toast('Descrição gerada! Revise e salve se estiver de acordo.');

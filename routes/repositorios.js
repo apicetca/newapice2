@@ -4,6 +4,7 @@ const axios   = require("axios");
 const db      = require("../database/db");
 const { isAuth } = require("../middlewares/auth");
 const { generateRepoDescription } = require("../services/portfolioDescriber");
+const { statusHttpDaIA, resumoDoErro } = require("../services/iaErros");
 
 // GET /api/user/repos — lista repos salvos no perfil
 router.get("/repos", isAuth, async (req, res) => {
@@ -166,11 +167,12 @@ router.post("/repos/:id/gerar-descricao", isAuth, async (req, res) => {
     const descricao = await generateRepoDescription(req.session.user.id, id, token);
     res.json({ ok: true, ai_description: descricao });
   } catch (err) {
-    console.error("[repos POST gerar-descricao]", err.message);
+    console.error("[repos POST gerar-descricao]", resumoDoErro(err));
     if (err.message === "Repositório não encontrado.") {
       return res.status(404).json({ error: err.message });
     }
-    res.status(502).json({ error: "Erro ao gerar descrição com IA. Tente novamente em instantes." });
+    // 503: IA indisponível agora; 502: resposta inutilizável; 500: interno.
+    res.status(statusHttpDaIA(err, 500)).json({ error: "Erro ao gerar descrição com IA. Tente novamente em instantes." });
   }
 });
 

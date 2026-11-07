@@ -94,6 +94,7 @@
 
 
 <script src="/js/escape-html.js"></script>
+<script src="/js/ia-fetch.js"></script>
 <script>
 // ── Botão "Voltar": usa o histórico do navegador em vez de um destino fixo.
 // Só troca pelo history.back() quando dá pra confirmar que a página anterior
@@ -267,9 +268,9 @@ async function loadMatchExplanation() {
   if (!el) return;
 
   try {
-    const res  = await fetch(`/api/ai/jobs/${JOB_ID}/match-explicacao`);
-    if (!res.ok) return; // sem explicação disponível — card fica só com o %, sem erro visível
-    const data = await res.json();
+    // Prazo de 60s: a IA (Gemini e, se ele falhar, o fallback) responde em até ~40s.
+    // Sem explicação disponível, o card fica só com o %, sem erro visível.
+    const data = await fetchIA(`/api/ai/jobs/${JOB_ID}/match-explicacao`, {}, 60000);
     if (!data.explicacao) return;
 
     el.textContent = `✨ ${data.explicacao}`;

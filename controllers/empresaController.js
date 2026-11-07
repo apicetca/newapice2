@@ -2,6 +2,7 @@ const db = require("../database/db");
 const { computeMatch } = require("../services/matchCalculator");
 const { canCreateJob, getUserPlan, getPlanCodesBulk } = require("../services/subscriptionService");
 const { getOrGenerateSummary } = require("../services/candidateSummarizer");
+const { statusHttpDaIA, resumoDoErro } = require("../services/iaErros");
 
 const NIVEL_MAP = { iniciante: "estagio", intermediario: "junior", avancado: "pleno" };
 
@@ -755,8 +756,9 @@ const empresaController = {
       const resumo = await getOrGenerateSummary(applicationId);
       res.json({ resumo_ia: resumo });
     } catch (err) {
-      console.error("[POST /api/empresa/candidaturas/:id/resumo-ia]", err.message);
-      res.status(502).json({ error: "Erro ao gerar resumo com IA. Tente novamente em instantes." });
+      console.error("[POST /api/empresa/candidaturas/:id/resumo-ia]", resumoDoErro(err));
+      // 503: IA indisponível agora; 502: resposta inutilizável; 500: interno.
+      res.status(statusHttpDaIA(err, 500)).json({ error: "Erro ao gerar resumo com IA. Tente novamente em instantes." });
     }
   },
 };

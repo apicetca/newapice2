@@ -170,9 +170,10 @@ async function getMatchExplanation(githubId, jobId, profileData = {}) {
     system: MATCH_IA_SYSTEM_PROMPT,
     prompt: `Dados do match candidato-vaga:\n${JSON.stringify(payload)}`,
     maxTokens: 1536,
+    obrigatorios: ["explicacao"], // sem explicação, não grava texto vazio no cache
   });
 
-  const explicacao = result.explicacao ?? "";
+  const explicacao = result.explicacao;
 
   // Guarda o percentual calculado (não o que a IA sugeriu) — é ele que diz se
   // a explicação ainda vale. O percentual exibido continua sendo o calculado.

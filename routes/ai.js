@@ -8,8 +8,13 @@ const { hasFeature } = require("../services/subscriptionService");
 const { getMatchExplanation } = require("../services/matchCalculator");
 const { getHistory, sendMessage } = require("../services/mentorChat");
 const { getInsightsFreshOrCached } = require("../services/marketInsights");
-const { askGeminiJSON, MODEL } = require("../services/geminiClient");
+const { askGeminiJSON, configuracaoIA, MODEL } = require("../services/geminiClient");
 const { extractText, SUPPORTED_MIME_TYPES } = require("../services/fileTextExtractor");
+const { statusHttpDaIA, resumoDoErro } = require("../services/iaErros");
+
+// Erros das rotas de IA: 503 quando a IA está indisponível agora (fora do
+// ar, sem cota, tempo esgotado, chave ausente/inválida), 502 quando ela
+// respondeu algo inutilizável e 500 para falhas internas (banco etc.).
 
 // Anexo do mentor: mantido só em memória (nunca gravado em disco) —
 // extraímos o texto e descartamos o buffer, então não precisa de
@@ -78,10 +83,11 @@ router.get("/health", isAuth, async (req, res) => {
       model: result.__provider ? `${result.__provider}/${result.__model}` : MODEL,
       fallback: Boolean(result.__provider),
       respondeu: Boolean(result),
+      configuracao: configuracaoIA(),
     });
   } catch (err) {
-    console.error("[GET /api/ai/health]", err.message);
-    res.status(502).json({ status: "erro", model: MODEL, motivo: err.message });
+    console.error("[GET /api/ai/health]", resumoDoErro(err));
+    res.status(statusHttpDaIA(err)).json({ status: "erro", model: MODEL, motivo: err.message, configuracao: configuracaoIA() });
   }
 });
 
@@ -98,8 +104,8 @@ router.get("/jobs/:id/match-explicacao", isAuth, ...intParam("id"), async (req, 
     const explanation = await getMatchExplanation(githubId, jobId, { nivel: req.session.user.nivel });
     res.json(explanation);
   } catch (err) {
-    console.error("[GET /api/ai/jobs/:id/match-explicacao]", err.message);
-    res.status(502).json({ error: "Erro ao gerar explicação com IA. Tente novamente em instantes." });
+    console.error("[GET /api/ai/jobs/:id/match-explicacao]", resumoDoErro(err));
+    res.status(statusHttpDaIA(err, 500)).json({ error: "Erro ao gerar explicação com IA. Tente novamente em instantes." });
   }
 });
 
@@ -146,11 +152,11 @@ router.post(
       const resposta = await sendMessage(userId, githubId, nivel, req.body.mensagem, anexoTexto);
       res.status(201).json({ resposta });
     } catch (err) {
-      console.error("[POST /api/ai/mentor/mensagem]", err.message);
+      console.error("[POST /api/ai/mentor/mensagem]", resumoDoErro(err));
       if (err.message.includes("Formato de arquivo não suportado") || err.message.includes("extrair texto")) {
         return res.status(400).json({ error: err.message });
       }
-      res.status(502).json({ error: "Erro ao falar com o mentor. Tente novamente em instantes." });
+      res.status(statusHttpDaIA(err, 500)).json({ error: "Erro ao falar com o mentor. Tente novamente em instantes." });
     }
   }
 );
@@ -164,11 +170,11 @@ router.get("/insights-mercado", async (req, res) => {
     const insights = await getInsightsFreshOrCached();
     res.json(insights);
   } catch (err) {
-    console.error("[GET /api/ai/insights-mercado]", err.message);
+    console.error("[GET /api/ai/insights-mercado]", resumoDoErro(err));
     if (err.message.includes("Nenhuma vaga")) {
       return res.status(404).json({ error: "Ainda não há dados suficientes de vagas pra gerar insights." });
     }
-    res.status(502).json({ error: "Erro ao gerar insights com IA. Tente novamente em instantes." });
+    res.status(statusHttpDaIA(err, 500)).json({ error: "Erro ao gerar insights com IA. Tente novamente em instantes." });
   }
 });
 

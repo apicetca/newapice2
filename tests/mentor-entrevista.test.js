@@ -26,6 +26,7 @@ jest.mock("../services/geminiClient", () => ({
 }));
 jest.mock("../services/userContextService", () => ({
   buildUserContextBlock: jest.fn().mockResolvedValue(""),
+  buildMentorContext: jest.fn().mockResolvedValue(""),
   getSkillsSummary: jest.fn(),
   getReposSummary: jest.fn(),
   getNivel: jest.fn(),

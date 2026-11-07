@@ -10,16 +10,18 @@
 // precisar de nenhuma alteração.
 //
 // mentorChat.js (memória via previous_interaction_id +
-// tools) NÃO passa por aqui — trocar de provedor no
-// meio de uma conversa quebraria o contexto, e as tools
-// estão no formato do @google/genai, sem tradução pro
-// formato OpenAI-compatible destes provedores.
+// tools) só usa askFallbackText, quando o Gemini falha:
+// a resposta sai daqui em texto, com as últimas
+// mensagens da conversa como contexto e SEM as tools —
+// elas estão no formato do @google/genai, sem tradução
+// pro formato OpenAI-compatible destes provedores.
 //
 // Todos os provedores abaixo falam o formato de API da
 // OpenAI (chat completions) — por isso o SDK oficial
 // `openai` funciona com todos, só trocando baseURL/key.
 // ============================================
 const OpenAI = require("openai");
+const { ErroIA } = require("./iaErros");
 
 // Provedor sem chave configurada é ignorado automaticamente —
 // nunca quebra o app por falta de uma env var opcional.
@@ -81,6 +83,12 @@ const FALLBACK_CHAIN = [
 // quase meio minuto sozinho antes de passar pro próximo da cadeia.
 const TIMEOUT_MS = 12000;
 
+// Prazo da cadeia inteira: sem ele, quatro provedores lentos somariam 48s
+// (4 × 12s) depois do tempo já gasto com o Gemini. Com os 20s do Gemini
+// (geminiClient.js), uma chamada de askGeminiJSON termina em até ~40s —
+// dentro dos 45s que o roadmap.ejs espera.
+const TOTAL_MS = 20000;
+
 const clients = {};
 function getProviderClient(provider) {
   const config = PROVIDERS[provider];
@@ -92,6 +100,9 @@ function getProviderClient(provider) {
       apiKey,
       baseURL: config.baseURL,
       timeout: TIMEOUT_MS,
+      // O SDK repete 2× por padrão (com espera) antes de desistir — aqui isso
+      // só atrasava a ida pro próximo provedor da cadeia, que já é o retry.
+      maxRetries: 0,
       ...(provider === "openrouter"
         ? {
             defaultHeaders: {
@@ -106,7 +117,7 @@ function getProviderClient(provider) {
 }
 
 // Remove cercas ```json / ``` que alguns modelos incluem mesmo
-// pedindo JSON puro — mesmo helper usado em geminiClient.js.
+// pedindo JSON puro. parseJsonLoose também é usado pelo geminiClient.js.
 function stripCodeFences(text) {
   const trimmed = text.trim();
   const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
@@ -135,21 +146,23 @@ function parseJsonLoose(text) {
   }
 }
 
-async function tryProvider(provider, model, { system, prompt, maxTokens, temperature }) {
+// Campos de texto obrigatórios que vieram ausentes ou vazios no JSON.
+function camposFaltando(resultado, obrigatorios = []) {
+  return obrigatorios.filter(campo => typeof resultado?.[campo] !== "string" || !resultado[campo].trim());
+}
+
+// Uma chamada de chat completions num provedor. Devolve o texto e se ele
+// parou no teto de tokens (finish_reason "length").
+async function completar(provider, model, { messages, maxTokens, temperature }, timeoutMs) {
   const client = getProviderClient(provider);
   if (!client) {
     throw new Error(`${provider}: sem chave configurada (env var ${PROVIDERS[provider].apiKeyEnv}).`);
   }
 
-  const completion = await client.chat.completions.create({
-    model,
-    messages: [
-      { role: "system", content: system },
-      { role: "user", content: prompt },
-    ],
-    max_tokens: maxTokens,
-    temperature,
-  });
+  const completion = await client.chat.completions.create(
+    { model, messages, max_tokens: maxTokens, temperature },
+    { timeout: timeoutMs },
+  );
 
   // A OpenRouter (e possivelmente outros provedores atrás do mesmo SDK)
   // às vezes devolve HTTP 200 com um erro embutido no corpo em vez de um
@@ -161,26 +174,32 @@ async function tryProvider(provider, model, { system, prompt, maxTokens, tempera
     throw new Error(`${provider}/${model}: ${completion.error.message || JSON.stringify(completion.error)}`);
   }
 
-  const text = completion.choices?.[0]?.message?.content ?? "";
+  const choice = completion.choices?.[0];
+  const text = choice?.message?.content ?? "";
   if (!text) throw new Error(`${provider}/${model}: resposta vazia.`);
-
-  try {
-    return parseJsonLoose(text);
-  } catch {
-    throw new Error(`${provider}/${model}: resposta não veio em JSON válido.`);
-  }
+  return { text, cortada: choice.finish_reason === "length" };
 }
 
-// Tenta cada provedor da cadeia de fallback em ordem, pulando os que
-// não têm chave configurada. Nunca expõe detalhes técnicos/chaves —
-// só loga qual provedor falhou e por quê, no servidor.
-async function askFallbackJSON({ system, prompt, maxTokens = 2048, temperature = 0.5 }) {
+// Tenta cada provedor da cadeia em ordem, pulando os que não têm chave
+// configurada, até um responder algo que `interpretar` aceite — ou o prazo
+// acabar. Nunca expõe detalhes técnicos/chaves: só loga, no servidor, qual
+// provedor falhou e por quê (a mensagem do SDK já traz o status HTTP).
+//
+// prazo: instante (Date.now()) até quando a cadeia pode rodar, se quem chama
+// tiver um prazo menor que TOTAL_MS a respeitar.
+async function percorrerCadeia(pedido, interpretar, prazo = Infinity) {
+  const fim = Math.min(Date.now() + TOTAL_MS, prazo);
   const errors = [];
 
   for (const { provider, model } of FALLBACK_CHAIN) {
+    const restante = fim - Date.now();
+    if (restante < 1000) {
+      errors.push("prazo esgotado");
+      break;
+    }
     try {
-      const result = await tryProvider(provider, model, { system, prompt, maxTokens, temperature });
-      return { ...result, __provider: provider, __model: model };
+      const resposta = await completar(provider, model, pedido, Math.min(TIMEOUT_MS, restante));
+      return interpretar(resposta, provider, model);
     } catch (err) {
       const motivo = err.message || String(err);
       console.error(`[ai-fallback] Falha em ${provider}/${model}:`, motivo);
@@ -189,7 +208,49 @@ async function askFallbackJSON({ system, prompt, maxTokens = 2048, temperature =
   }
 
   console.error("[ai-fallback] Todos os provedores de fallback falharam:", errors.join(" | "));
-  throw new Error("A IA está indisponível no momento. Tente novamente em alguns minutos.");
+  throw new ErroIA("A IA está indisponível no momento. Tente novamente em alguns minutos.", {
+    tipo: "indisponivel",
+    temporario: true,
+  });
 }
 
-module.exports = { askFallbackJSON, FALLBACK_CHAIN, PROVIDERS };
+// obrigatorios: campos de texto que o JSON tem que trazer preenchidos (mesma
+// semântica de askGeminiJSON) — sem eles, passa pro próximo provedor.
+async function askFallbackJSON({ system, prompt, maxTokens = 2048, temperature = 0.5, obrigatorios = [], prazo }) {
+  const messages = [
+    { role: "system", content: system },
+    { role: "user", content: prompt },
+  ];
+
+  return percorrerCadeia({ messages, maxTokens, temperature }, ({ text, cortada }, provider, model) => {
+    // JSON cortado no teto de tokens não fecha — melhor o próximo provedor.
+    if (cortada) throw new Error(`${provider}/${model}: resposta cortada no teto de ${maxTokens} tokens.`);
+    let resultado;
+    try {
+      resultado = parseJsonLoose(text);
+    } catch {
+      console.error(`[ai-fallback] ${provider}/${model} não devolveu JSON válido:`, text.slice(0, 500));
+      throw new Error(`${provider}/${model}: resposta não veio em JSON válido.`);
+    }
+    const faltando = camposFaltando(resultado, obrigatorios);
+    if (faltando.length) {
+      console.error(`[ai-fallback] ${provider}/${model} respondeu sem ${faltando.join(", ")}:`, text.slice(0, 500));
+      throw new Error(`${provider}/${model}: resposta sem ${faltando.join(", ")}.`);
+    }
+    return { ...resultado, __provider: provider, __model: model };
+  }, prazo);
+}
+
+// Resposta em texto livre, usada pelo mentor quando o Gemini falha.
+// messages: a conversa no formato OpenAI ({ role: "user" | "assistant",
+// content }), sem a mensagem de sistema. Devolve { text, cortada, provider,
+// model } — cortada: a resposta parou no teto de tokens.
+async function askFallbackText({ system, messages, maxTokens = 2048, temperature = 0.7, prazo }) {
+  return percorrerCadeia(
+    { messages: [{ role: "system", content: system }, ...messages], maxTokens, temperature },
+    (resposta, provider, model) => ({ ...resposta, provider, model }),
+    prazo,
+  );
+}
+
+module.exports = { askFallbackJSON, askFallbackText, parseJsonLoose, camposFaltando, FALLBACK_CHAIN, PROVIDERS };

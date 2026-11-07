@@ -35,6 +35,25 @@
     });
   }
 
+  // ── detalhe.ejs: "Regenerar roadmap" chama a IA ───────────
+  // Desabilita o botão durante o POST para um segundo clique não gerar o
+  // roadmap duas vezes; volta ao normal se a página sair do cache do
+  // navegador (botão Voltar).
+  const formRegenerar = document.querySelector('form[action$="/regenerar"]');
+  const btnRegenerar  = formRegenerar?.querySelector('button[type="submit"]');
+  if (btnRegenerar) {
+    const textoOriginal = btnRegenerar.textContent;
+    formRegenerar.addEventListener("submit", () => {
+      btnRegenerar.disabled = true;
+      btnRegenerar.textContent = "Regenerando...";
+    });
+    window.addEventListener("pageshow", e => {
+      if (!e.persisted) return;
+      btnRegenerar.disabled = false;
+      btnRegenerar.textContent = textoOriginal;
+    });
+  }
+
   // ── detalhe.ejs: marcação de etapas (fetch, sem recarregar) ──
   const STATUS_SEGUINTE = {
     pendente:     "em_andamento",
