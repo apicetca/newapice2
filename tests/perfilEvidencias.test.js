@@ -97,3 +97,29 @@ describe("views — 'por quê?' e aviso em /repositorios", () => {
     expect(repos).toContain("Os repositórios desta lista são os que contam na análise do seu perfil.");
   });
 });
+
+describe("plano no perfil do dev — preço de upgrade vem de config/plans.js", () => {
+  const { PLANS } = require("../config/plans");
+  const perfil = fs.readFileSync(path.join(__dirname, "..", "views", "perfil-dev.ejs"), "utf8");
+
+  test("GET /api/user/profile devolve o plano pago de upgrade quando o dev está no gratuito", async () => {
+    instalarFakeDb();
+    const res = await chamar();
+    expect(res.body.plan.upgrade).toEqual({
+      code: "dev_pro", name: PLANS.dev_pro.name, price_cents: PLANS.dev_pro.price_cents,
+    });
+  });
+
+  test("dev que já é PRO não recebe upgrade", async () => {
+    const { getUserPlan } = require("../services/subscriptionService");
+    getUserPlan.mockResolvedValueOnce({ code: "dev_pro", name: "PRO", price_cents: PLANS.dev_pro.price_cents, features: {} });
+    instalarFakeDb();
+    const res = await chamar();
+    expect(res.body.plan.upgrade).toBeNull();
+  });
+
+  test("a página não tem o preço do PRO escrito à mão (R$ 19,90 ficou defasado)", () => {
+    expect(perfil).not.toMatch(/R\$\s*19,90/);
+    expect(perfil).toMatch(/plan\.upgrade/);
+  });
+});

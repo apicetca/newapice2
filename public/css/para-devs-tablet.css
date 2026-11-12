@@ -171,6 +171,7 @@
 
   /* ── Por que evoluir ── */
   .pd-why {
+    overflow-x: clip; /* as linhas decorativas (834px do protótipo) passam da tela em 768px */
     --pd-linha-clara: #8d56ea;
     --pd-linha-escura: #2c0a66;
     --pd-losango: #9f68ff;
@@ -317,7 +318,7 @@
   /* badges maiores que em /para-devs; sem gap, "Plano FREE" + badge cabem nos 284px do card */
   .pd-empresa .pd-plan__head { gap: 0; }
   .pd-empresa .pd-badge { width: 113px; height: 36px; font-size: 15px; }
-  .pd-empresa .pd-plan--pro .pd-badge { width: 120px; height: 38px; margin-right: -3px; text-transform: none; }
+  .pd-empresa .pd-plan--pro .pd-badge { width: 120px; height: 38px; text-transform: none; }
   .pd-empresa .pd-why { --pd-linha-clara: #0ea785; --pd-linha-escura: #04503f; --pd-losango: #10b691; }
   .pd-empresa .pd-faq__icon { border-color: #10b691; background: #03241d; color: #10b691; }
 }

@@ -90,6 +90,7 @@
 .site-logo {
   display: inline-flex;
   align-items: center;
+  min-height: 24px; /* alvo de toque mínimo (WCAG 2.5.8) */
   gap: 8px;
   text-decoration: none;
   flex: 1;

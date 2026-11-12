@@ -222,3 +222,7 @@
   .rm-actions   { flex-direction: column; }
   .rm-actions form, .rm-actions .btn-ghost { width: 100%; }
 }
+
+/* Palavra ou URL longa quebra em vez de estourar a caixa/tela */
+.rm-fase-nome, .rm-fase-objetivo, .rm-etapa-titulo, .rm-etapa-descricao, .rm-projeto-enunciado { overflow-wrap: anywhere; }
+.rm-etapa-conteudo, .rm-fase-info { min-width: 0; }

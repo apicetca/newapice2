@@ -46,7 +46,7 @@
 .lvl-estagio{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal-border)}
 .lvl-junior{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border)}
 .lvl-pleno{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(251,191,36,.2)}
-.job-desc{font-size:.8rem;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.job-desc{overflow-wrap:anywhere;font-size:.8rem;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .skill-block{display:flex;flex-direction:column;gap:6px}
 .skill-block-label{font-size:.67rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:6px}
 .skill-block-label::after{content:"";flex:1;height:1px;background:var(--border)}

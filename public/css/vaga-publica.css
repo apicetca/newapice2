@@ -149,13 +149,13 @@
 
 /* ── Conteúdo da vaga (grid) ── */
 .vaga-grid {
-  display: grid; grid-template-columns: 1fr 320px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 320px;
   gap: 20px; align-items: start;
   animation: fadeUp .4s .1s ease both;
 }
 
 /* ── Coluna principal ── */
-.vaga-main-col { display: flex; flex-direction: column; gap: 16px; }
+.vaga-main-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; overflow-wrap: anywhere; }
 
 .vaga-section {
   background: rgba(15,15,23,.88);
@@ -198,7 +198,7 @@
 }
 
 /* ── Sidebar de ações ── */
-.vaga-side-col { display: flex; flex-direction: column; gap: 14px; }
+.vaga-side-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; overflow-wrap: anywhere; }
 
 .vaga-action-card {
   background: rgba(15,15,23,.88);
@@ -278,6 +278,9 @@
 @media (max-width: 720px) {
   .vaga-page { padding: 16px 16px 60px; }
   .vaga-hero { padding: 18px 16px; }
-  .vaga-grid { grid-template-columns: 1fr; }
+  .vaga-grid { grid-template-columns: minmax(0, 1fr); }
   .vaga-side-col { order: -1; }
 }
+
+/* Alvo de toque com no mínimo 24px (WCAG 2.5.8) */
+.vaga-back { display: inline-flex; align-items: center; min-height: 24px; }

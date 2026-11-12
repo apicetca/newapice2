@@ -33,7 +33,8 @@
     .dev-hero-main { flex: 1; min-width: 220px; }
     .dev-hero-name { font-size: 1.35rem; font-weight: 700; color: var(--text); margin: 0 0 .2rem; }
     .dev-hero-role { font-size: .85rem; color: var(--muted); margin-bottom: .6rem; }
-    .dev-hero-github { display: inline-flex; align-items: center; gap: .35rem; color: var(--muted); font-size: .82rem; text-decoration: none; margin-bottom: .75rem; }
+    .dev-tab-panel, .section-card { overflow-wrap: anywhere; } /* palavra ou URL longa quebra em vez de estourar */
+    .dev-hero-github { display: inline-flex; align-items: center; min-height: 24px; gap: .35rem; color: var(--muted); font-size: .82rem; text-decoration: none; margin-bottom: .75rem; }
     .dev-hero-github:hover { color: var(--text); }
     .dev-hero-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .85rem; margin-top: 0; padding: 0; list-style: none; /* é um <ul> */ }
     .skill-chip {
@@ -83,13 +84,13 @@
     .section-title { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 1.25rem; display: flex; align-items: center; gap: .5rem; }
 
     /* ── Skills ── */
-    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.1rem 1.5rem; margin: 0; padding: 0; list-style: none; /* é um <ul> */ }
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 1.1rem 1.5rem; margin: 0; padding: 0; list-style: none; /* é um <ul> */ }
     .skill-origem { display: inline-block; justify-self: start; font-size: .6rem; font-weight: 500; padding: 1px 6px; border-radius: 99px; border: 1px solid var(--border-lite); color: var(--muted); white-space: nowrap; vertical-align: middle; }
     .skill-origem--github    { border-color: var(--teal-border); color: var(--teal); }
     .skill-origem--declarada { border-color: var(--accent-border); color: var(--accent-text); }
     .skill-row { display: flex; flex-direction: column; gap: .45rem; min-width: 0; }
     /* colunas fixas: nome | selo | % — alinhadas em todas as skills */
-    .skill-row-top { display: grid; grid-template-columns: 6.5rem 1fr auto; align-items: center; gap: .5rem; }
+    .skill-row-top { display: grid; grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr) auto; align-items: center; gap: .5rem; }
     .skill-name { font-size: .82rem; color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .skill-pct  { font-family: var(--font-body); font-size: .75rem; color: var(--muted); min-width: 2.5rem; text-align: right; }
     .skill-bar  { height: 3px; background: var(--border-lite); border-radius: 2px; overflow: hidden; }
@@ -110,7 +111,7 @@
     .tab-empty p { font-size: .86rem; }
 
     /* ── Back button ── */
-    .back-btn { display: inline-flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .82rem; text-decoration: none; margin-bottom: 1.5rem; }
+    .back-btn { display: inline-flex; align-items: center; min-height: 24px; gap: .4rem; color: var(--muted); font-size: .82rem; text-decoration: none; margin-bottom: 1.5rem; }
     .back-btn:hover { color: var(--text); }
 
     /* ── Loading / error ── */

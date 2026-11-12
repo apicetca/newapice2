@@ -214,11 +214,12 @@
 
     <article class="pd-plan pd-plan--pro" aria-labelledby="plan-pro-name-tablet">
       <header class="pd-plan__head">
-        <h3 id="plan-pro-name-tablet">Premium</h3>
+        <h3 id="plan-pro-name-tablet">PRO</h3>
         <span class="pd-badge">Mensal</span>
       </header>
       <p class="pd-plan__desc">Acesso a todas as ferramentas e IA.</p>
-      <p class="pd-plan__price"><strong>R$<%= planos.premium.preco %></strong><span>/mês</span></p>
+      <p class="pd-plan__price"><strong>R$<%= planos.premium.mensal %></strong><span>/mês</span></p>
+      <p class="pd-plan__desc">Anual: R$<%= planos.premium.anual %>/mês (R$<%= planos.premium.anualTotal %> à vista ou em até <%= planos.maxParcelas %>x sem juros).</p>
       <ul class="pd-plan__list">
         <li>Vagas ativas ilimitadas</li>
         <li>Devs compatíveis com cada vaga</li>
@@ -227,10 +228,6 @@
         <li>Resumo de candidatos por IA</li>
       </ul>
     </article>
-
-    <p class="pd-plans__nota">
-      Precisa de um meio-termo? O plano <strong>Básico</strong> custa R$<%= planos.basico.preco %>/mês e permite até <%= planos.basico.vagas %> vagas ativas.
-    </p>
 
   </section>
 
@@ -291,7 +288,7 @@
 
       <li><details class="pd-faq__item">
         <summary>O que acontece se eu atingir o limite de vagas do plano FREE?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>No FREE você tem <%= planos.free.vagas %> vaga ativa por vez. Para publicar outra, encerre a atual ou assine um plano pago: o Básico (até <%= planos.basico.vagas %> vagas ativas) ou o Premium (vagas ilimitadas).</p>
+        <p>No FREE você tem <%= planos.free.vagas %> vaga ativa por vez. Para publicar outra, encerre a atual ou assine o plano PRO, com vagas ilimitadas.</p>
       </details></li>
 
       <li><details class="pd-faq__item">

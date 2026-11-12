@@ -314,7 +314,9 @@
         <span class="chip ${isPro ? "chip-accent" : "chip-muted"}">${plan.name}${isPro ? "" : " (gratuito)"}</span>
         ${isPro
           ? `<a href="/minha-assinatura" style="color:var(--accent);font-size:.82rem">Gerenciar assinatura</a>`
-          : `<a href="/planos" style="color:var(--accent);font-size:.82rem">Virar PRO — R$ 19,90/mês</a>`
+          : `<a href="/planos" style="color:var(--accent);font-size:.82rem;display:inline-flex;align-items:center;min-height:24px">${plan.upgrade
+              ? `Virar ${escapeHtml(plan.upgrade.name)} — R$ ${(plan.upgrade.price_cents / 100).toFixed(2).replace(".", ",")}/mês`
+              : "Ver planos"}</a>`
         }`;
       $("plan-features").textContent = isPro
         ? "Você tem acesso ao roadmap personalizado com recursos recomendados, ao mentor de carreira (com simulação de entrevista técnica) e ao destaque no perfil para empresas."
