@@ -1,0 +1,304 @@
+/* =============================================
+   mentor-desktop.css
+   Tela do Mentor de carreira no desktop (a partir de 1024px), conforme o
+   protótipo (quadro de 1440×1024): um cartão com barra lateral (título,
+   busca, "Nova conversa" e histórico) e a área do chat — estado vazio em
+   degradê, balões e campo em pílula.
+
+   Celular e tablet continuam com o layout de mensagens.css: nada aqui
+   vale abaixo de 1024px, a não ser esconder a barra lateral, que só
+   existe no desktop.
+
+   Medidas: px do protótipo em 1440px multiplicados por --u — 1px até
+   1440px de largura, crescendo até 1.4px em telas maiores, para manter as
+   proporções.
+============================================= */
+
+.mentor-sidebar { display: none; }
+
+@media (min-width: 1024px) {
+
+  /* ── Página ── */
+  .page-content.msg-page.mentor-page {
+    --u: clamp(1px, calc(100vw / 1440), 1.4px);
+    --mentor-topo: min(calc(58 * var(--u)), 6vh);
+    --mentor-base: min(calc(81 * var(--u)), 8vh);
+    --mentor-texto: calc(10 * var(--u));
+    position: relative;
+    max-width: none;
+    margin: 0;
+    padding: var(--mentor-topo) 8.65vw var(--mentor-base);
+    overflow: visible;
+  }
+
+  /* Brilho roxo logo abaixo do cabeçalho */
+  .mentor-page::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: calc(60 * var(--u));
+    background: linear-gradient(rgba(124, 58, 237, .15), rgba(124, 58, 237, 0));
+    pointer-events: none;
+  }
+
+  /* ── Cartão ── */
+  .msg-layout.mentor-layout {
+    position: relative;
+    grid-template-columns: clamp(240px, 25.5%, calc(303 * var(--u))) minmax(0, 1fr) !important;
+    gap: 0;
+    height: calc(100vh - var(--header-h) - var(--mentor-topo) - var(--mentor-base));
+    min-height: 480px;
+    background: #020202;
+    border: 3px solid #1c1c1c;
+    border-radius: calc(20 * var(--u));
+    box-shadow: 0 0 2px 1px rgba(28, 28, 28, .55);
+    overflow: hidden;
+  }
+
+  /* Estados (carregando, plano, erro, conversa): sem a moldura própria —
+     o cartão é a moldura. Fora a conversa, ocupam o cartão inteiro. */
+  .mentor-layout > .msg-thread {
+    grid-column: 1 / -1;
+    background: #000;
+    border: 0;
+    border-radius: 0;
+    animation: none;
+  }
+  .mentor-layout > #mentorChat { grid-column: 2; }
+  .mentor-layout:has(> #mentorChat:not([hidden])) > .mentor-sidebar { display: flex; }
+
+  /* ── Barra lateral ── */
+  .mentor-sidebar {
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    padding: calc(17 * var(--u)) calc(13.5 * var(--u)) calc(16 * var(--u)) calc(16 * var(--u));
+    background: #020202;
+    border-right: calc(3 * var(--u)) solid #141414;
+    overflow: hidden; /* só a lista de conversas rola */
+  }
+
+  .mentor-sidebar-head {
+    display: flex;
+    align-items: center;
+    gap: calc(12 * var(--u));
+    padding: 0 0 calc(10 * var(--u)) calc(2 * var(--u));
+    border-bottom: calc(2.5 * var(--u)) solid #141414;
+  }
+  .mentor-sidebar-icone {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: calc(50 * var(--u));
+    height: calc(50 * var(--u));
+    border: calc(2 * var(--u)) solid #181818;
+    border-radius: 50%;
+    color: #fff;
+  }
+  .mentor-sidebar-icone svg { width: calc(15 * var(--u)); height: calc(15 * var(--u)); }
+  .mentor-sidebar-titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: calc(24 * var(--u));
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .mentor-busca {
+    display: flex;
+    align-items: center;
+    gap: calc(10 * var(--u));
+    height: calc(33.5 * var(--u));
+    margin-top: calc(11 * var(--u));
+    padding: 0 calc(11 * var(--u));
+    background: #0f0f0f;
+    border: calc(2 * var(--u)) solid #191919;
+    border-radius: calc(7 * var(--u));
+    color: #979797;
+    cursor: text;
+  }
+  .mentor-busca:focus-within { border-color: var(--accent-border); }
+  .mentor-busca svg { flex: none; width: calc(15 * var(--u)); height: calc(15 * var(--u)); }
+  .mentor-busca input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: calc(12 * var(--u));
+    color: #d9d9d9;
+  }
+  .mentor-busca input::placeholder { color: #616161; }
+
+  .mentor-nova {
+    display: flex;
+    align-items: center;
+    gap: calc(7.5 * var(--u));
+    margin-top: calc(14 * var(--u));
+    padding: calc(2 * var(--u));
+    background: none;
+    border: 0;
+    border-radius: calc(6 * var(--u));
+    font-family: var(--font-display);
+    font-size: calc(16 * var(--u));
+    font-weight: 600;
+    color: #d9d9d9;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .mentor-nova svg { flex: none; width: calc(21 * var(--u)); height: calc(21 * var(--u)); }
+  .mentor-nova:hover:not(:disabled) { background: #0f0f0f; color: #fff; }
+  .mentor-nova:disabled { opacity: .5; cursor: not-allowed; }
+
+  .mentor-historico-titulo {
+    margin: calc(10 * var(--u)) 0 calc(1 * var(--u));
+    font-family: var(--font-display);
+    font-size: calc(12 * var(--u));
+    font-weight: 600;
+    color: #979797;
+  }
+  /* Lista de conversas: cada uma é um botão que abre a conversa. */
+  .mentor-historico {
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
+  }
+  .mentor-historico-item {
+    display: flex;
+    align-items: center;
+    gap: calc(6 * var(--u));
+    width: 100%;
+    min-height: calc(20 * var(--u));
+    padding: 0 calc(4.5 * var(--u));
+    background: none;
+    border: 0;
+    border-radius: calc(7 * var(--u));
+    font-family: var(--font-body);
+    font-size: var(--mentor-texto);
+    color: #d9d9d9;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .mentor-historico-item::before { content: "•"; flex: none; }
+  .mentor-historico-item span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .mentor-historico-item:hover { background: #111; }
+  .mentor-historico-item.ativo { background: #191919; }
+  .mentor-historico-item:focus-visible { outline: 1px solid var(--accent-border); outline-offset: -1px; }
+  .mentor-historico-vazio {
+    margin: 0;
+    padding: 0 calc(4.5 * var(--u));
+    font-size: var(--mentor-texto);
+    color: #616161;
+  }
+
+  /* ── Área do chat ── */
+  #mentorChat > .msg-thread-header { display: none; }
+
+  #mentorChat .msg-thread-body {
+    gap: calc(20 * var(--u));
+    padding: calc(40 * var(--u)) calc(26 * var(--u)) calc(16 * var(--u)) calc(14.5 * var(--u));
+  }
+  #mentorChat .msg-bubble-row { max-width: 57%; margin-top: 0; }
+  #mentorChat .msg-bubble {
+    padding: calc(9 * var(--u)) calc(10 * var(--u)) calc(9 * var(--u)) calc(6 * var(--u));
+    background: #0f0f0f;
+    border: calc(2 * var(--u)) solid #191919;
+    border-radius: calc(8 * var(--u));
+    box-shadow: none;
+    font-size: var(--mentor-texto);
+    line-height: 1.5;
+    color: #d9d9d9;
+  }
+  #mentorChat .msg-bubble-row.mine .msg-bubble {
+    padding: calc(12 * var(--u)) calc(11 * var(--u));
+    background: rgba(124, 58, 237, .16);
+    border: calc(1 * var(--u)) solid rgba(124, 58, 237, .66);
+    border-radius: calc(9 * var(--u));
+    line-height: 1.3;
+    color: #d9d9d9;
+  }
+  #mentorChat .msg-bubble-time { display: none; }
+
+  /* Estado vazio: degradê no meio da área do chat */
+  #mentorChat.mentor-chat--vazio {
+    background:
+      radial-gradient(ellipse 24% 28% at 63% 38%, rgba(18, 78, 84, .4), rgba(18, 78, 84, 0) 100%),
+      radial-gradient(ellipse 46% 52% at 50% 46%, #29396a 0%, rgba(38, 55, 99, .95) 22%, rgba(30, 43, 78, .8) 45%, rgba(22, 31, 57, .5) 70%, rgba(14, 20, 38, .2) 88%, rgba(0, 0, 0, 0) 100%),
+      radial-gradient(ellipse 60% 44% at 50% 47%, #0c2730 0%, #0a2129 45%, #071820 70%, #030a0d 88%, #000 100%);
+  }
+  .mentor-vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: auto;
+    padding: 0 calc(24 * var(--u));
+    text-align: center;
+  }
+  .mentor-vazio-titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: calc(60.5 * var(--u));
+    font-weight: 400;
+    line-height: 1.15;
+    color: #fff;
+  }
+  .mentor-vazio-sub {
+    max-width: calc(640 * var(--u));
+    margin: calc(9 * var(--u)) 0 0;
+    font-family: var(--font-body);
+    font-size: calc(24 * var(--u));
+    line-height: calc(31 * var(--u));
+    color: #d9d9d9;
+  }
+
+  /* ── Campo em pílula, com a linha separadora acima ──
+     Um pouco menor que o protótipo, a pedido (48px de altura em vez de 61,
+     botões de 34px e texto de 16px). */
+  #mentorChat .mentor-anexo-preview { margin: 0 calc(14.5 * var(--u)); }
+  #mentorChat .msg-thread-input {
+    position: relative;
+    align-items: center;
+    gap: calc(22 * var(--u));
+    margin: calc(15 * var(--u)) calc(14.5 * var(--u)) calc(10.5 * var(--u));
+    padding: calc(5 * var(--u)) calc(6 * var(--u));
+    background: #101010;
+    border: calc(2 * var(--u)) solid #1a1a1a;
+    border-radius: 999px;
+    transition: border-color .15s;
+  }
+  #mentorChat .msg-thread-input:focus-within { border-color: rgba(124, 58, 237, .45); }
+  #mentorChat .msg-thread-input::before {
+    content: "";
+    position: absolute;
+    top: calc(-17 * var(--u));
+    left: calc(-2 * var(--u));
+    right: calc(-2 * var(--u));
+    height: calc(3 * var(--u));
+    background: #141414;
+  }
+  #mentorChat .msg-thread-input button { width: calc(34 * var(--u)); height: calc(34 * var(--u)); }
+  #mentorChat .msg-thread-input button svg { width: calc(17 * var(--u)); height: calc(17 * var(--u)); }
+  #mentorChat .msg-thread-input .mentor-anexo-btn { background: #1a1a1a; border: 0; color: #fff; }
+  #mentorChat .msg-thread-input .mentor-anexo-btn:hover { background: #242424; }
+  #mentorChat .msg-thread-input textarea {
+    min-height: calc(34 * var(--u));
+    padding: calc(7 * var(--u)) 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font-size: calc(16 * var(--u));
+    line-height: calc(20 * var(--u));
+    color: #fff;
+  }
+  #mentorChat .msg-thread-input textarea::placeholder { color: #616161; }
+}

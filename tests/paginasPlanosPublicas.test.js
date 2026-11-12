@@ -50,10 +50,10 @@ describe("para-empresas: o plano Básico deixou de existir para empresas", () =>
     expect(html).not.toMatch(/meio-termo/i);
   });
 
-  test("o plano pago se chama PRO nas duas versões (nunca 'Premium'); no tablet o título é só 'PRO' para caber ao lado do selo", async () => {
+  test("o plano pago se chama PRO nas duas versões (nunca 'Premium')", async () => {
     const html = await paraEmpresas();
     expect(html).not.toMatch(/<h[23][^>]*>\s*Premium\s*<\/h[23]>/);
     expect(html).toMatch(/<h2[^>]*>\s*Empresa PRO\s*<\/h2>/);
-    expect(html).toMatch(/<h3[^>]*>\s*PRO\s*<\/h3>/);
+    expect(html).toMatch(/<h3[^>]*>\s*Plano PRO\s*<\/h3>/);
   });
 });

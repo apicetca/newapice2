@@ -47,6 +47,17 @@ async function addUniqueKey(table, keyName, column) {
   await pool.query(`ALTER TABLE \`${table}\` ADD UNIQUE KEY \`${keyName}\` (\`${column}\`)`);
 }
 
+// Índice comum (não único) — idempotente, igual a addUniqueKey.
+async function addIndex(table, keyName, columns) {
+  const [[{ n }]] = await pool.query(
+    `SELECT COUNT(*) AS n FROM INFORMATION_SCHEMA.STATISTICS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND INDEX_NAME = ?`,
+    [table, keyName]
+  );
+  if (n > 0) return;
+  await pool.query(`ALTER TABLE \`${table}\` ADD KEY \`${keyName}\` (${columns.map(c => `\`${c}\``).join(", ")})`);
+}
+
 // Adiciona um novo valor a uma coluna ENUM existente, sem tocar nos
 // valores já cadastrados (ex: users.type ganhando 'admin' além de
 // 'dev'/'empresa'). Idempotente — não faz nada se o valor já existir.
@@ -326,6 +337,26 @@ async function testarConexao() {
     // usuário via previous_interaction_id em vez de reconstruir o
     // histórico inteiro como texto a cada chamada.
     await addColumn("mentor_conversas", "gemini_interaction_id", "VARCHAR(255) DEFAULT NULL");
+
+    // Conversas do mentor: uma linha por conversa (título = primeira
+    // pergunta), com as mensagens em mentor_conversas ligadas por chat_id.
+    // Ficam salvas entre logins e aparecem no histórico da tela do mentor.
+    // Mensagens antigas, sem chat_id, viram a primeira conversa do usuário
+    // na primeira vez que ele abre o histórico (services/mentorChat.js).
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS mentor_chats (
+        id         INT          NOT NULL AUTO_INCREMENT,
+        user_id    INT          NOT NULL,
+        title      VARCHAR(120) NOT NULL,
+        created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_mentor_chats_user (user_id, updated_at),
+        CONSTRAINT fk_mentor_chats_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+    `);
+    await addColumn("mentor_conversas", "chat_id", "INT DEFAULT NULL");
+    await addIndex("mentor_conversas", "idx_mentor_conversas_chat", ["chat_id", "created_at"]);
 
     // ── Resumo de candidato gerado por IA — exclusivo empresa Premium ──
     await addColumn("job_applications", "resumo_ia", "TEXT DEFAULT NULL");

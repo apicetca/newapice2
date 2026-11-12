@@ -1,0 +1,107 @@
+/* =============================================
+   faq-desktop.css — FAQ das páginas de visitante no desktop (home, Para Devs e
+   Para Empresas), conforme os protótipos de 1440px. A marcação é a do FAQ da
+   home (landing.css, que vale abaixo de 1024px); na Para Devs e na Para
+   Empresas o FAQ de desktop fica dentro de .layout-desktop. Usa o --u da
+   página (home-desktop.css / para-devs-desktop.css), que vêm depois deste
+   arquivo e acertam os espaços de cada página.
+============================================= */
+
+@media (min-width: 1024px) {
+  .faq {
+    display: block;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  .faq h2 {
+    font-family: var(--font-display);
+    font-size: calc(50 * var(--u));
+    font-weight: 700;
+    line-height: calc(58.5 * var(--u));
+    color: #fff;
+  }
+  .faq .faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: calc(15 * var(--u));
+    width: calc(1143 * var(--u));
+    max-width: none;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+  }
+  .faq .faq__item {
+    background: #080808;
+    border: calc(3 * var(--u)) solid #191919;
+    border-radius: calc(18 * var(--u));
+  }
+  .faq .faq__item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(24 * var(--u));
+    min-height: calc(114 * var(--u));
+    padding: 0 calc(32 * var(--u)) 0 calc(43 * var(--u));
+    list-style: none;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: calc(24 * var(--u));
+    font-weight: 600;
+    line-height: calc(30 * var(--u));
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .faq .faq__item summary::-webkit-details-marker { display: none; }
+  .faq .faq__item summary:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 4px; border-radius: calc(16 * var(--u)); }
+  /* "+" num quadrado roxo; com a resposta aberta o quadrado gira 45° (losango
+     verde) e o "+" vira "×", como no protótipo. O "+" do texto (o do celular)
+     some: aqui ele é desenhado. */
+  .faq .faq__icon {
+    position: relative;
+    font-size: 0;
+    line-height: 0;
+    color: transparent;
+    flex: none;
+    width: calc(44 * var(--u));
+    height: calc(44 * var(--u));
+    background: #1b102d;
+    border: calc(1.5 * var(--u)) solid var(--accent);
+    border-radius: calc(6 * var(--u));
+    transition: transform .25s ease, background-color .25s ease, border-color .25s ease;
+  }
+  .faq .faq__icon::before,
+  .faq .faq__icon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(24 * var(--u));
+    height: calc(2 * var(--u));
+    background: var(--accent);
+    transform: translate(-50%, -50%);
+    transition: width .25s ease, background-color .25s ease;
+  }
+  .faq .faq__icon::after { transform: translate(-50%, -50%) rotate(90deg); }
+  .faq .faq__item:hover .faq__icon { background: #24153c; }
+  .faq .faq__item[open] .faq__icon {
+    transform: rotate(45deg);
+    background: rgba(89, 228, 53, .16);
+    border-color: var(--teal);
+  }
+  .faq .faq__item[open] .faq__icon::before,
+  .faq .faq__item[open] .faq__icon::after { width: calc(29 * var(--u)); background: var(--teal); }
+  /* Aberta: a pergunta fica no lugar e a resposta vem logo abaixo
+     (4 linhas de resposta = 256 de altura, como nos protótipos) */
+  .faq .faq__item p {
+    max-width: calc(807 * var(--u));
+    margin: calc(-22 * var(--u)) 0 0 calc(43 * var(--u));
+    padding: 0 0 calc(38 * var(--u));
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: calc(23 * var(--u));
+    line-height: calc(30 * var(--u));
+    color: #d9d9d9;
+  }
+}

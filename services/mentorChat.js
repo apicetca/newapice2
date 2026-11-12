@@ -12,6 +12,11 @@
 // esgotado), a resposta sai do fallback multi-
 // provedor (services/aiFallback.js) em texto, com as
 // mesmas mensagens como contexto e sem ferramentas.
+//
+// Cada usuário tem várias conversas (mentor_chats,
+// título = primeira pergunta), salvas entre logins:
+// o histórico da tela lista as conversas e qualquer
+// uma pode ser aberta e continuada.
 // ============================================
 const db = require("../database/db");
 const { chatTurn, sendFunctionResults } = require("./geminiClient");
@@ -47,30 +52,95 @@ texto como está).`;
 
 const AVISO_CORTADA = "\n\n(A resposta foi interrompida pelo limite de tamanho. Peça para eu continuar de onde parei.)";
 
-async function getHistory(userId) {
-  const [rows] = await db.query(
-    "SELECT id, role, content, created_at FROM mentor_conversas WHERE user_id = ? ORDER BY created_at ASC",
-    [userId]
-  );
-  return rows;
+// ── Conversas ─────────────────────────────────────────
+const MAX_CONVERSAS = 50; // quantas aparecem no histórico (as mais recentes)
+const MAX_TITULO = 120;   // tamanho da coluna mentor_chats.title
+
+// Conversa que não existe ou é de outro usuário — as rotas respondem 404.
+class ConversaNaoEncontrada extends Error {
+  constructor() {
+    super("Conversa não encontrada.");
+    this.name = "ConversaNaoEncontrada";
+    this.status = 404;
+  }
 }
 
-// Apaga todo o histórico do mentor de um usuário — chamado no login
-// (ver controllers/authController.js e usersController.js), pra cada
-// sessão nova começar uma conversa do zero, sem continuar de onde a
-// anterior parou. Decisão de produto: o histórico nunca é preservado
-// entre logins, para nenhum usuário.
-async function clearHistory(userId) {
-  await db.query("DELETE FROM mentor_conversas WHERE user_id = ?", [userId]);
+// Título da conversa: a primeira linha da primeira pergunta, sem o anexo.
+function tituloDaPergunta(texto) {
+  const linha = String(texto ?? "").split("\n\n[Arquivo anexado]")[0].split("\n")[0].trim() || "Nova conversa";
+  return linha.length > MAX_TITULO ? `${linha.slice(0, MAX_TITULO - 1)}…` : linha;
+}
+
+// Mensagens de antes do histórico de conversas (sem chat_id) viram a
+// primeira conversa do usuário, na primeira vez que ele abre o histórico.
+async function adotarMensagensAntigas(userId) {
+  const [[primeira]] = await db.query(
+    `SELECT content FROM mentor_conversas
+     WHERE user_id = ? AND chat_id IS NULL
+     ORDER BY (role = 'user') DESC, created_at ASC, id ASC LIMIT 1`,
+    [userId]
+  );
+  if (!primeira) return;
+  const [chat] = await db.query(
+    "INSERT INTO mentor_chats (user_id, title) VALUES (?, ?)",
+    [userId, tituloDaPergunta(primeira.content)]
+  );
+  const [ligadas] = await db.query(
+    "UPDATE mentor_conversas SET chat_id = ? WHERE user_id = ? AND chat_id IS NULL",
+    [chat.insertId, userId]
+  );
+  // Outra aba adotou as mensagens antes desta: a conversa criada aqui ficou vazia.
+  if (!ligadas?.affectedRows) await db.query("DELETE FROM mentor_chats WHERE id = ?", [chat.insertId]);
+}
+
+// Histórico da barra lateral: as conversas do usuário, a mais recente primeiro.
+async function listConversas(userId) {
+  await adotarMensagensAntigas(userId);
+  const [rows] = await db.query(
+    `SELECT id, title, updated_at FROM mentor_chats
+     WHERE user_id = ? ORDER BY updated_at DESC, id DESC LIMIT ?`,
+    [userId, MAX_CONVERSAS]
+  );
+  return rows.map(r => ({ id: r.id, titulo: r.title, atualizada_em: r.updated_at }));
+}
+
+async function getConversa(userId, conversaId) {
+  const [[row]] = await db.query(
+    "SELECT id, title FROM mentor_chats WHERE id = ? AND user_id = ?",
+    [conversaId, userId]
+  );
+  return row ? { id: row.id, titulo: row.title } : null;
+}
+
+// Mensagens de uma conversa (ou da mais recente, sem conversaId), em ordem.
+async function getHistory(userId, conversaId) {
+  let conversa;
+  if (conversaId) {
+    conversa = await getConversa(userId, conversaId);
+    if (!conversa) throw new ConversaNaoEncontrada();
+  } else {
+    const [[ultima]] = await db.query(
+      "SELECT id, title FROM mentor_chats WHERE user_id = ? ORDER BY updated_at DESC, id DESC LIMIT 1",
+      [userId]
+    );
+    if (!ultima) return { conversa: null, mensagens: [] };
+    conversa = { id: ultima.id, titulo: ultima.title };
+  }
+  const [mensagens] = await db.query(
+    `SELECT id, role, content, created_at FROM mentor_conversas
+     WHERE chat_id = ? AND user_id = ? ORDER BY created_at ASC, id ASC`,
+    [conversa.id, userId]
+  );
+  return { conversa, mensagens };
 }
 
 // As últimas mensagens da conversa, da mais antiga para a mais nova — só
-// papel e texto (o histórico é apagado a cada login).
-async function getMensagensRecentes(userId) {
+// papel e texto.
+async function getMensagensRecentes(conversaId) {
   const [rows] = await db.query(
     `SELECT role, content FROM mentor_conversas
-     WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT ?`,
-    [userId, MENSAGENS_DE_CONTEXTO]
+     WHERE chat_id = ? ORDER BY created_at DESC, id DESC LIMIT ?`,
+    [conversaId, MENSAGENS_DE_CONTEXTO]
   );
   return rows.reverse().map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content ?? "") }));
 }
@@ -82,16 +152,30 @@ function limitar(texto, max) {
 // anexoTexto: conteúdo já extraído de um arquivo (PDF/.txt/.md) enviado
 // junto da mensagem, se houver — anexado à mensagem do usuário antes de
 // enviar pro Gemini e salvar, pra aparecer no histórico como contexto.
-async function sendMessage(userId, githubId, nivel, userMessage, anexoTexto) {
+// conversaId: conversa aberta na tela; sem ele, a pergunta começa uma
+// conversa nova. Devolve { texto, conversa: { id, titulo } }.
+async function sendMessage(userId, githubId, nivel, userMessage, anexoTexto, conversaId) {
   const inicio = Date.now();
   const content = anexoTexto
     ? `${userMessage}\n\n[Arquivo anexado]\n${anexoTexto}`
     : userMessage;
 
-  const historico = await getMensagensRecentes(userId);
+  let conversa;
+  let conversaCriada = false;
+  if (conversaId) {
+    conversa = await getConversa(userId, conversaId);
+    if (!conversa) throw new ConversaNaoEncontrada();
+  } else {
+    const titulo = tituloDaPergunta(userMessage);
+    const [criada] = await db.query("INSERT INTO mentor_chats (user_id, title) VALUES (?, ?)", [userId, titulo]);
+    conversa = { id: criada.insertId, titulo };
+    conversaCriada = true;
+  }
+
+  const historico = conversaCriada ? [] : await getMensagensRecentes(conversa.id);
   const [inserida] = await db.query(
-    "INSERT INTO mentor_conversas (user_id, role, content) VALUES (?, 'user', ?)",
-    [userId, content]
+    "INSERT INTO mentor_conversas (user_id, chat_id, role, content) VALUES (?, ?, 'user', ?)",
+    [userId, conversa.id, content]
   );
 
   try {
@@ -112,16 +196,23 @@ async function sendMessage(userId, githubId, nivel, userMessage, anexoTexto) {
     }
 
     await db.query(
-      "INSERT INTO mentor_conversas (user_id, role, content, gemini_interaction_id) VALUES (?, 'assistant', ?, ?)",
-      [userId, resposta.texto, resposta.interactionId]
+      "INSERT INTO mentor_conversas (user_id, chat_id, role, content, gemini_interaction_id) VALUES (?, ?, 'assistant', ?, ?)",
+      [userId, conversa.id, resposta.texto, resposta.interactionId]
     );
-    return resposta.texto;
+    // Sobe a conversa para o topo do histórico.
+    await db.query("UPDATE mentor_chats SET updated_at = CURRENT_TIMESTAMP WHERE id = ?", [conversa.id]);
+    return { texto: resposta.texto, conversa };
   } catch (err) {
     // Ficou sem resposta: tira a pergunta do histórico, senão ela some da
-    // tela só até a próxima carga e o "Tentar novamente" a duplicaria.
+    // tela só até a próxima carga e o "Tentar novamente" a duplicaria. Uma
+    // conversa criada agora, que ficaria vazia, sai junto.
     if (inserida?.insertId) {
       await db.query("DELETE FROM mentor_conversas WHERE id = ?", [inserida.insertId])
         .catch(e => console.error("[mentorChat] Não foi possível apagar a mensagem sem resposta:", e.message));
+    }
+    if (conversaCriada && conversa.id) {
+      await db.query("DELETE FROM mentor_chats WHERE id = ?", [conversa.id])
+        .catch(e => console.error("[mentorChat] Não foi possível apagar a conversa vazia:", e.message));
     }
     throw err;
   }
@@ -191,4 +282,4 @@ async function responderComFallback({ system, historico, content, prazo }) {
   return { texto: cortada ? text + AVISO_CORTADA : text, interactionId: null };
 }
 
-module.exports = { getHistory, sendMessage, clearHistory, MAX_HISTORY };
+module.exports = { listConversas, getHistory, sendMessage, ConversaNaoEncontrada, MAX_HISTORY };

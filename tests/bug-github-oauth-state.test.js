@@ -10,7 +10,6 @@ process.env.APP_URL = "http://localhost:3000";
 jest.mock("axios", () => ({ post: jest.fn(), get: jest.fn() }));
 jest.mock("../database/db", () => ({ query: jest.fn() }));
 jest.mock("../services/githubAnalyzer", () => ({ matchSkillsFromGitHub: jest.fn().mockResolvedValue() }));
-jest.mock("../services/mentorChat", () => ({ clearHistory: jest.fn().mockResolvedValue() }));
 
 const fs = require("fs");
 const path = require("path");

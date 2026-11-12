@@ -1,0 +1,106 @@
+/* =============================================
+   rodape-desktop.css — Rodapé das páginas de visitante (home e Sobre) no
+   desktop (1024px+), conforme os protótipos de 1440px. Abaixo disso a home
+   segue com o rodapé de landing.css, e a Sobre não tem rodapé (como antes).
+
+   Completo de propósito: na Sobre não há landing.css, então tudo o que o
+   rodapé precisa no desktop está aqui (e na home sobrescreve landing.css).
+============================================= */
+.site-footer--so-desktop { display: none; }
+
+@media (min-width: 1024px) {
+  .site-footer {
+    /* mesma escala da home e da Sobre (0,7 do protótipo, até 0,85 em telas largas) */
+    --u: clamp(0.7px, calc(100vw / 2057), 0.85px);
+    display: block;
+    position: relative;
+    z-index: 1;
+    height: calc(580 * var(--u));
+    padding: 0;
+    border-top: calc(3 * var(--u)) solid #141414;
+    background:
+      radial-gradient(ellipse 45% calc(150 * var(--u)) at 50% 100%, rgba(124, 58, 237, .2), transparent 75%),
+      #000;
+  }
+  .site-footer .container { width: calc(1184 * var(--u)); max-width: none; margin-inline: auto; padding-inline: 0; }
+
+  .site-footer .footer__grid {
+    display: grid;
+    grid-template-columns: calc(524 * var(--u)) calc(273 * var(--u)) calc(209 * var(--u)) 1fr;
+    gap: 0;
+    margin-bottom: 0;
+    padding-top: calc(83.2 * var(--u));
+  }
+  .site-footer .footer__brand { grid-column: auto; font-style: normal; }
+  .site-footer .footer__logo { display: inline-block; margin: 0; text-decoration: none; }
+  .site-footer .footer__logo-img { display: block; width: auto; height: calc(42.5 * var(--u)); margin-top: calc(1 * var(--u)); }
+  .site-footer .footer__tagline {
+    margin: calc(7.5 * var(--u)) 0 0;
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: calc(24 * var(--u));
+    line-height: calc(31 * var(--u));
+    color: #fff;
+  }
+  .site-footer .footer__nav-title {
+    margin: 0 0 calc(21.8 * var(--u));
+    font-family: var(--font-display);
+    font-size: calc(24 * var(--u));
+    font-weight: 700;
+    line-height: calc(30 * var(--u));
+    color: #fff;
+  }
+  .site-footer .footer__nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: calc(31 * var(--u));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .site-footer .footer__nav a {
+    display: block;
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: calc(24 * var(--u));
+    font-weight: 400;
+    line-height: calc(31 * var(--u));
+    color: #d9d9d9;
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .site-footer .footer__nav a:hover { color: #fff; }
+
+  .site-footer .footer__bottom {
+    position: absolute;
+    top: calc(468.5 * var(--u));
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0;
+    padding: 0;
+    font-family: "DM Mono", ui-monospace, monospace;
+    color: #fff;
+  }
+  .site-footer .footer__copy {
+    display: block;
+    margin-top: calc(15 * var(--u));
+    font-size: calc(24 * var(--u));
+    line-height: calc(31 * var(--u));
+  }
+  .site-footer .footer__social {
+    display: flex;
+    align-items: center;
+    gap: calc(55.5 * var(--u));
+    margin: 0 calc(80 * var(--u)) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .site-footer .footer__social li { display: flex; align-items: center; line-height: 0; }
+  .site-footer .footer__social a { display: block; color: #3a3a46; transition: color .15s; }
+  .site-footer .footer__social a:hover { color: #fff; }
+  .site-footer .footer__social svg { display: block; width: calc(46 * var(--u)); height: calc(46 * var(--u)); }
+  .site-footer .footer__social li:first-child svg { width: calc(50 * var(--u)); height: calc(50 * var(--u)); }
+  .site-footer .footer__nav a:focus-visible,
+  .site-footer .footer__social a:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 2px; border-radius: 2px; }
+}
