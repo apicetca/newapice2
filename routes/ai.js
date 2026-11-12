@@ -1,12 +1,12 @@
 const express = require("express");
 const multer  = require("multer");
 const router  = express.Router();
-const { param, body } = require("express-validator");
+const { param, body, query } = require("express-validator");
 const { isAuth } = require("../middlewares/auth");
 const { handleValidation } = require("../validators/handle-validation");
 const { hasFeature } = require("../services/subscriptionService");
 const { getMatchExplanation } = require("../services/matchCalculator");
-const { getHistory, sendMessage } = require("../services/mentorChat");
+const { listConversas, getHistory, sendMessage } = require("../services/mentorChat");
 const { getInsightsFreshOrCached } = require("../services/marketInsights");
 const { askGeminiJSON, configuracaoIA, MODEL } = require("../services/geminiClient");
 const { extractText, SUPPORTED_MIME_TYPES } = require("../services/fileTextExtractor");
@@ -112,15 +112,40 @@ router.get("/jobs/:id/match-explicacao", isAuth, ...intParam("id"), async (req, 
 // ── Mentor de carreira (chat) — exclusivo plano PRO ──────────
 const MENTOR_GATE_MSG = "O mentor de carreira é exclusivo do plano PRO. Faça upgrade para conversar com o mentor.";
 
-router.get("/mentor/historico", isAuth, requireDevType, requireFeature("mentor_carreira", MENTOR_GATE_MSG), async (req, res) => {
+// Conversa que não existe ou é de outro usuário (services/mentorChat.js).
+const conversaNaoEncontrada = err => err?.name === "ConversaNaoEncontrada";
+
+// GET /api/ai/mentor/conversas — histórico da barra lateral: as conversas
+// do usuário (salvas entre logins), a mais recente primeiro.
+router.get("/mentor/conversas", isAuth, requireDevType, requireFeature("mentor_carreira", MENTOR_GATE_MSG), async (req, res) => {
   try {
-    const history = await getHistory(req.session.user.id);
-    res.json(history);
+    res.json(await listConversas(req.session.user.id));
   } catch (err) {
-    console.error("[GET /api/ai/mentor/historico]", err.message);
-    res.status(500).json({ error: "Erro interno. Tente novamente." });
+    console.error("[GET /api/ai/mentor/conversas]", resumoDoErro(err));
+    res.status(500).json({ error: "Erro ao carregar as conversas. Tente novamente." });
   }
 });
+
+// GET /api/ai/mentor/historico?conversa=ID — mensagens de uma conversa
+// (sem ?conversa, da mais recente): { conversa: { id, titulo } | null, mensagens }.
+router.get(
+  "/mentor/historico",
+  isAuth,
+  requireDevType,
+  requireFeature("mentor_carreira", MENTOR_GATE_MSG),
+  query("conversa").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Conversa inválida."),
+  handleValidation,
+  async (req, res) => {
+    try {
+      const conversaId = req.query.conversa ? Number(req.query.conversa) : null;
+      res.json(await getHistory(req.session.user.id, conversaId));
+    } catch (err) {
+      if (conversaNaoEncontrada(err)) return res.status(404).json({ error: err.message });
+      console.error("[GET /api/ai/mentor/historico]", err.message);
+      res.status(500).json({ error: "Erro interno. Tente novamente." });
+    }
+  }
+);
 
 router.post(
   "/mentor/mensagem",
@@ -137,11 +162,14 @@ router.post(
     });
   },
   body("mensagem").trim().isLength({ min: 1, max: 2000 }).withMessage("Mensagem deve ter entre 1 e 2000 caracteres."),
+  // conversa: a conversa aberta na tela; sem ela, a pergunta começa uma nova.
+  body("conversa").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Conversa inválida."),
   handleValidation,
   async (req, res) => {
     const userId   = req.session.user.id;
     const githubId = req.session.user.github_id ?? userId;
     const nivel    = req.session.user.nivel;
+    const conversaId = req.body.conversa ? Number(req.body.conversa) : null;
 
     try {
       let anexoTexto;
@@ -149,9 +177,10 @@ router.post(
         anexoTexto = await extractText(req.file.buffer, req.file.mimetype);
       }
 
-      const resposta = await sendMessage(userId, githubId, nivel, req.body.mensagem, anexoTexto);
-      res.status(201).json({ resposta });
+      const { texto, conversa } = await sendMessage(userId, githubId, nivel, req.body.mensagem, anexoTexto, conversaId);
+      res.status(201).json({ resposta: texto, conversa });
     } catch (err) {
+      if (conversaNaoEncontrada(err)) return res.status(404).json({ error: err.message });
       console.error("[POST /api/ai/mentor/mensagem]", resumoDoErro(err));
       if (err.message.includes("Formato de arquivo não suportado") || err.message.includes("extrair texto")) {
         return res.status(400).json({ error: err.message });

@@ -1,0 +1,279 @@
+/* =============================================
+   home-desktop.css — Home no desktop (1024px+), conforme o protótipo de
+   1440px. Celular e tablet continuam só com landing.css: aqui, fora do
+   @media, apenas se escondem os elementos que só existem no desktop.
+
+   Medidas em --u (1px no frame de 1440px), para a página manter as
+   proporções do protótipo entre 1024px e telas maiores. O menu é o do
+   site (64px de altura, contra 131,5px no protótipo).
+============================================= */
+.hero__planos, .experiences__desc-desktop { display: none; }
+
+@media (min-width: 1024px) {
+  /* Escala: o protótipo desenha o menu com texto de 20px e o site tem 14px;
+     o resto vai na mesma proporção (0,7 do protótipo). Fica em 0,7 até 1440px
+     e cresce devagar até 0,85 em telas largas. */
+  .home { --u: clamp(0.7px, calc(100vw / 2057), 0.85px); }
+
+  /* O que o protótipo não tem no desktop */
+  .home .logos .section-label,
+  .home .experiences .section-label,
+  .home .experiences .section-desc:not(.experiences__desc-desktop),
+  .home .experiences__actions,
+  .home .cta-final { display: none; }
+
+  /* ── Títulos e textos de seção ── */
+  .home .section-header { margin-bottom: 0; padding-inline: 0; max-width: none; }
+  .home .section-header h2 {
+    font-size: calc(50 * var(--u));
+    font-weight: 700;
+    line-height: calc(58.5 * var(--u));
+    letter-spacing: 0;
+  }
+  .home .section-desc {
+    margin: calc(14 * var(--u)) auto 0;
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: calc(24 * var(--u));
+    line-height: calc(31 * var(--u));
+    color: #d9d9d9;
+  }
+  .home .section-desc strong { font-family: inherit; font-weight: 500; color: #fff; }
+
+  /* ══ HERO ══ */
+  .home .hero {
+    max-width: none;
+    height: calc(652 * var(--u));
+    margin: 0;
+    padding: calc(107.7 * var(--u)) 0 0;
+    border-bottom: calc(3 * var(--u)) solid #101010;
+    overflow: hidden;
+  }
+  .home .bg-decor__top-fade {
+    height: calc(90 * var(--u));
+    background: linear-gradient(180deg, rgba(89, 228, 53, .045) 0%, transparent 100%);
+  }
+  .home .bg-decor__glow-purple { display: none; }
+  .home .bg-decor__topo {
+    top: calc(7 * var(--u));
+    left: calc(-10 * var(--u));
+    width: calc(697 * var(--u));
+    opacity: .55;
+  }
+  .home .hero__title {
+    max-width: none;
+    margin: 0;
+    font-size: calc(60 * var(--u));
+    font-weight: 700;
+    line-height: calc(50.5 * var(--u));
+    letter-spacing: 0;
+  }
+  .home .hero__title .mark-purple { color: var(--accent); }
+  .home .hero__verde { color: var(--teal); }
+  .home .hero__sub {
+    max-width: calc(650 * var(--u));
+    margin: calc(24.3 * var(--u)) auto 0;
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: calc(24 * var(--u));
+    line-height: calc(31 * var(--u));
+    color: #d9d9d9;
+  }
+  .home .hero__actions { gap: calc(31.5 * var(--u)); margin: calc(25 * var(--u)) 0 0; }
+  .home .hero__actions .btn-primary--purple,
+  .home .hero__planos {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(62 * var(--u));
+    padding: 0;
+    border-radius: calc(7 * var(--u));
+    font-family: var(--font-display);
+    font-size: calc(20 * var(--u));
+    font-weight: 600;
+    letter-spacing: 0;
+    color: #fff;
+    text-decoration: none;
+  }
+  .home .hero__actions .btn-primary--purple {
+    width: calc(269.5 * var(--u));
+    background: #571eb8;
+    box-shadow: 0 calc(6 * var(--u)) calc(16 * var(--u)) rgba(124, 58, 237, .35);
+  }
+  .home .hero__actions .btn-primary--purple:hover { background: var(--accent); }
+  .home .hero__actions .btn-primary--purple svg { display: none; }
+  .home .hero__planos {
+    width: calc(286.5 * var(--u));
+    background: #000;
+    border: calc(1 * var(--u)) solid #252530;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .home .hero__planos:hover { border-color: var(--muted); transform: translateY(-1px); }
+  .home .hero__planos:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 3px; }
+
+  /* ══ EMPRESAS CONTRATANDO ══ */
+  .home .logos--big { padding: calc(66.5 * var(--u)) 0 0; }
+  .home .logos__title { margin-top: 0; }
+  .home .logos .section-desc { max-width: calc(870 * var(--u)); }
+  /* O mesmo carrossel do celular, na largura do conteúdo e com as logos no
+     tamanho do protótipo. O espaço vai como margem de cada logo (e não como
+     gap) para as duas cópias da lista emendarem sem salto no -50%. */
+  .home .logos__viewport {
+    width: calc(1182 * var(--u));
+    max-width: 100%;
+    margin: calc(53 * var(--u)) auto 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 calc(64 * var(--u)), #000 calc(100% - 64 * var(--u)), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 calc(64 * var(--u)), #000 calc(100% - 64 * var(--u)), transparent 100%);
+  }
+  .home .logos__track { gap: 0; }
+  .home .logos__item { margin-right: calc(55 * var(--u)); opacity: 1; filter: grayscale(1) brightness(10); }
+  .home .logos__item:hover { filter: none; }
+  .home .logos__item img { height: calc(53 * var(--u)); }
+  /* o desenho do PicPay fica acima do meio do SVG: margens diferentes em cima e embaixo */
+  .home .logos__item--picpay img { height: calc(262 * var(--u)); margin: calc(-96.7 * var(--u)) 0 calc(-112.3 * var(--u)); }
+
+  /* ══ UMA PLATAFORMA, DUAS EXPERIÊNCIAS ══ */
+  .home .experiences { padding: calc(139.5 * var(--u)) 0 0; }
+  .home .experiences__desc-desktop { display: block; max-width: calc(910 * var(--u)); }
+  /* Os cards do protótipo são os de landing.css em 1,5x */
+  .home .experiences__grid {
+    grid-template-columns: repeat(2, calc(575 * var(--u)));
+    justify-content: center;
+    gap: calc(34 * var(--u));
+    max-width: none;
+    margin-top: calc(86.5 * var(--u));
+    padding: 0;
+  }
+  .home .experiences__grid .card {
+    --card-accent-emp: #10b691;
+    height: calc(805 * var(--u));
+    padding: calc(28.5 * var(--u)) calc(27 * var(--u)) calc(36 * var(--u)) calc(25.5 * var(--u));
+    background: #000;
+    border-width: calc(3 * var(--u));
+    border-radius: calc(18 * var(--u));
+  }
+  .home .experiences__grid .ico--code { width: calc(52.5 * var(--u)); height: calc(33 * var(--u)); margin: calc(3 * var(--u)) 0 0 calc(6 * var(--u)); }
+  .home .experiences__grid .ico--case { width: calc(42 * var(--u)); height: calc(36 * var(--u)); margin: calc(1.5 * var(--u)) 0 0 calc(15 * var(--u)); }
+  .home .experiences__grid .h2 { font-size: calc(36 * var(--u)); line-height: calc(48 * var(--u)); letter-spacing: 0; }
+  .home .experiences__grid .t2 { margin-top: calc(1.5 * var(--u)); font-size: calc(24 * var(--u)); line-height: calc(29.5 * var(--u)); }
+  .home .experiences__grid .h3 { margin-top: calc(30 * var(--u)); font-size: calc(24 * var(--u)); line-height: calc(30 * var(--u)); }
+  .home .experiences__grid .list { margin-top: calc(12.5 * var(--u)); gap: calc(30 * var(--u)); }
+  .home .experiences__grid .list__item { grid-template-columns: calc(38.5 * var(--u)) 1fr; }
+  .home .experiences__grid .arrow { width: calc(22.5 * var(--u)); height: calc(30 * var(--u)); stroke-width: 1.4; }
+  .home .experiences__grid .t1 {
+    max-width: none;
+    font-weight: 400;
+    font-size: calc(23 * var(--u));
+    line-height: calc(30 * var(--u));
+    color: #d9d9d9;
+  }
+  .home .experiences__grid .lnk {
+    margin-top: calc(44.5 * var(--u));
+    padding-left: calc(3 * var(--u));
+    font-size: calc(24 * var(--u));
+    line-height: calc(29.5 * var(--u));
+  }
+
+  /* ══ ENTENDA COMO FUNCIONA ══ */
+  .home .how {
+    padding: calc(116.5 * var(--u)) 0 calc(125 * var(--u));
+    border-bottom: calc(3 * var(--u)) solid #101010;
+  }
+  .home .how .section-desc { max-width: calc(1000 * var(--u)); }
+  .home .steps {
+    grid-template-columns: repeat(2, calc(575 * var(--u)));
+    justify-content: center;
+    gap: calc(38 * var(--u)) calc(34 * var(--u));
+    max-width: none;
+    margin-top: calc(66.5 * var(--u));
+    padding: 0;
+  }
+  .home .step-card {
+    height: calc(300 * var(--u));
+    padding: calc(20 * var(--u)) calc(29.5 * var(--u)) 0;
+    background: #000;
+    border: calc(3 * var(--u)) solid #191919;
+    border-radius: calc(18 * var(--u));
+    box-shadow: none;
+  }
+  .home .step-card__top { align-items: flex-start; margin-bottom: 0; }
+  .home .step-card__num {
+    margin-top: calc(5 * var(--u));
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: calc(23 * var(--u));
+    line-height: calc(23 * var(--u));
+    letter-spacing: 0;
+    color: #2d2d2d;
+  }
+  .home .step-card__icon { width: calc(48 * var(--u)); height: calc(48 * var(--u)); color: #2d2d2d; }
+  .home .step-card__icon svg { width: 100%; height: 100%; stroke-width: 1.9; }
+  .home .step-card__title {
+    gap: calc(8 * var(--u));
+    margin: calc(-5.5 * var(--u)) 0 calc(16 * var(--u));
+    font-size: calc(36 * var(--u));
+    line-height: calc(44 * var(--u));
+    letter-spacing: 0;
+  }
+  /* Seta longa e fina do protótipo (a do texto, "→", fica no celular e no tablet) */
+  .home .step-card__arrow {
+    flex: none;
+    display: inline-block;
+    width: calc(23.5 * var(--u));
+    height: calc(15 * var(--u));
+    align-self: flex-start;
+    margin: calc(15.4 * var(--u)) 0 0 calc(-2.5 * var(--u));
+    overflow: hidden;
+    font-size: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16' fill='none' stroke='%2359e435' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 8h21.6M16 1.1 22.6 8 16 14.9'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  }
+  .home .step-card__desc {
+    max-width: calc(475 * var(--u));
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: calc(23 * var(--u));
+    line-height: calc(30 * var(--u));
+    color: #d9d9d9;
+  }
+
+  /* ══ RESULTADOS ══ */
+  .home .stats { padding: calc(130 * var(--u)) 0 0; overflow: visible; }
+  .home .stats h2 { max-width: calc(720 * var(--u)); margin-inline: auto; }
+  .home .stats .section-desc { max-width: calc(800 * var(--u)); }
+  .home .stats__grid {
+    display: flex;
+    justify-content: space-between;
+    width: calc(1134 * var(--u));
+    max-width: none;
+    margin: calc(97 * var(--u)) auto 0;
+    padding: 0;
+  }
+  .home .stats__item { padding: 0; }
+  .home .stats__headline {
+    margin: 0;
+    font-size: calc(36 * var(--u));
+    line-height: calc(44 * var(--u));
+  }
+  .home .stats__num { color: var(--accent); }
+  .home .stats__label {
+    display: block;
+    margin-top: calc(5 * var(--u));
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: calc(23 * var(--u));
+    line-height: calc(30 * var(--u));
+    color: #fff;
+  }
+
+  /* ══ PERGUNTAS FREQUENTES (o comum do desktop está em faq-desktop.css) ══ */
+  .home .faq { padding: calc(223.5 * var(--u)) 0 calc(206 * var(--u)); }
+  .home .faq .section-label {
+    margin-bottom: 0;
+    font-family: var(--font-display);
+    font-size: calc(20 * var(--u));
+    font-weight: 600;
+    line-height: calc(24 * var(--u));
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .home .faq h2 { margin-top: calc(15.2 * var(--u)); }
+  .home .faq__list { margin-top: calc(48.5 * var(--u)); }
+  /* aberta: 256 de altura em todas, como no protótipo da home */
+  .home .faq__item[open] { min-height: calc(256 * var(--u)); }
+}

@@ -32,6 +32,10 @@
   <%# para-devs.css é a versão de antes (celular e desktop); no tablet (768–1023px) vale para-devs-tablet.css %>
   <link rel="stylesheet" href="/css/para-devs.css" media="not all and (min-width: 768px) and (max-width: 1023.98px)" />
   <link rel="stylesheet" href="/css/para-devs-tablet.css" />
+  <%# Desktop (1024px+): protótipo de 1440px (desfaz o que de para-devs.css não vale lá) %>
+  <link rel="stylesheet" href="/css/faq-desktop.css" />
+  <link rel="stylesheet" href="/css/para-devs-desktop.css" />
+  <link rel="stylesheet" href="/css/rodape-desktop.css" />
   <link rel="stylesheet" href="/css/reveal.css" />
 </head>
 <body>
@@ -40,8 +44,8 @@
 
 <main id="main-content">
 
-  <%# Celular e desktop: a página de antes. No tablet (768–1023px) ela dá lugar
-      à versão do protótipo, mais abaixo. %>
+  <%# Celular: a página de antes. No tablet (768–1023px) e no desktop (1024px+)
+      ela dá lugar às versões dos protótipos, mais abaixo. %>
   <div class="layout-padrao">
 
   <!-- ══════════ HERO ══════════ -->
@@ -215,7 +219,7 @@
         <span class="pd-badge">Mensal</span>
       </header>
       <p class="pd-plan__desc">Acesso a todas as ferramentas e IA.</p>
-      <p class="pd-plan__price"><strong>R$<%= prices.pro %></strong><span>/mês</span></p>
+      <p class="pd-plan__price"><strong>R$<%= prices.pro.mensal %></strong><span>/mês</span></p>
       <ul class="pd-plan__list">
         <li>5 Roadmaps ativos simultaneamente</li>
         <li>Regeneração de roadmap semanal</li>
@@ -317,9 +321,155 @@
 
   </div>
 
+  <!-- ══════════ VERSÃO DESKTOP (1024px+, protótipo de 1440px) ══════════
+       Limites do config/plans.js; a verificação de projetos é automática (não é
+       feita por IA). -->
+  <div class="layout-desktop">
+
+  <section class="pd-hero" aria-labelledby="pd-title-desktop">
+    <h1 id="pd-title-desktop">
+      Quer <em class="mark-purple">potencializar</em> seu<br>
+      código e acelerar sua<br>
+      <em class="mark-green">contratação?</em>
+    </h1>
+    <p>
+      Conheça o plano para devs, onde suas habilidades serão validadas por inteligência artificial com base no seu código real, e você poderá fazer a gestão completa da sua evolução.
+    </p>
+  </section>
+
+  <section class="pd-plans" aria-label="Planos para desenvolvedores">
+
+    <article class="pd-plan" aria-labelledby="plan-free-name-desktop">
+      <header class="pd-plan__head">
+        <h2 id="plan-free-name-desktop">Plano FREE</h2>
+        <span class="pd-badge">Nível básico</span>
+      </header>
+      <p class="pd-plan__desc">Ferramentas essenciais, sem IA.</p>
+      <p class="pd-plan__price"><strong>R$<%= prices.free %></strong><span>/mês</span></p>
+      <ul class="pd-plan__list">
+        <li class="is-limitado">Apenas 1 roadmap ativo por vez</li>
+        <li class="is-limitado">Regeneração de roadmap limitada</li>
+        <li class="is-off">Sem verificação automática de projetos</li>
+        <li class="is-off">Sem Mentor de Carreira com IA</li>
+      </ul>
+      <a href="/cadastro" class="pd-btn pd-btn--ghost">Começar grátis</a>
+    </article>
+
+    <%# Seletor Mensal/Anual do protótipo, com os preços do config/plans.js (rota
+        /para-devs): o mensal é a assinatura; o anual, um pagamento único do ano,
+        mostrado pelo valor por mês. Sem JavaScript: o rádio marcado escolhe o
+        preço pelo CSS. %>
+    <article class="pd-plan pd-plan--pro" aria-labelledby="plan-pro-name-desktop">
+      <header class="pd-plan__head">
+        <h2 id="plan-pro-name-desktop">Plano PRO</h2>
+        <div class="pd-periodo" role="radiogroup" aria-label="Período de cobrança">
+          <label><input type="radio" name="pd-periodo" value="mensal" checked>Mensal</label>
+          <label><input type="radio" name="pd-periodo" value="anual">Anual</label>
+        </div>
+      </header>
+      <p class="pd-plan__desc">Acesso a todas as ferramentas e IA.</p>
+      <p class="pd-plan__price"><strong class="pd-preco-mensal">R$<%= prices.pro.mensal %></strong><strong class="pd-preco-anual">R$<%= prices.pro.anual %></strong><span>/mês</span></p>
+      <ul class="pd-plan__list">
+        <li>Até 5 roadmaps ativos simultaneamente</li>
+        <li>Regeneração de roadmap semanal</li>
+        <li>Verificação automática de projetos</li>
+        <li>Mentor de Carreira com IA</li>
+      </ul>
+      <p class="pd-plan__cobranca">R$<%= prices.pro.anualTotal %> por ano, à vista ou em até <%= prices.maxParcelas %>x</p>
+      <a href="/cadastro" class="pd-btn pd-btn--primary">Fazer upgrade</a>
+    </article>
+
+  </section>
+
+  <section class="pd-why" aria-labelledby="why-title-desktop">
+    <h2 id="why-title-desktop">Por que evoluir para o Plano PRO?</h2>
+    <div class="pd-why__grid">
+
+      <article class="pd-feature">
+        <div class="pd-feature__top">
+          <span class="pd-feature__tag">FIG 0.1</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m7.8 12.2 3 3 6-6.6"/></svg>
+        </div>
+        <h3><span class="pd-seta" aria-hidden="true">→</span><span>Verificação Automática de Projetos</span></h3>
+        <p>Não fique na dúvida se seu código está pronto. A plataforma confere o repositório de cada fase e mostra quais habilidades já aparecem no projeto e quais ainda faltam.</p>
+      </article>
+
+      <article class="pd-feature">
+        <div class="pd-feature__top">
+          <span class="pd-feature__tag">FIG 0.2</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.2 3.6v3.6h3.6"/><text x="12" y="15.3" text-anchor="middle">24</text></svg>
+        </div>
+        <h3><span class="pd-seta" aria-hidden="true">→</span><span>Mentor de Carreira 24h por dia</span></h3>
+        <p>Tire dúvidas técnicas e peça orientações de carreira com um assistente que entende o seu roadmap atual e seu histórico de estudos.</p>
+      </article>
+
+      <article class="pd-feature">
+        <div class="pd-feature__top">
+          <span class="pd-feature__tag">FIG 0.3</span>
+          <svg class="pd-feature__icone-largo" viewBox="0 0 30 24" aria-hidden="true"><rect x="1.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m20.5 10.2 7-4v11.6l-7-4z"/></svg>
+        </div>
+        <h3><span class="pd-seta" aria-hidden="true">→</span><span>Roadmaps Simultâneos</span></h3>
+        <p>Acompanhe até 5 roadmaps ativos ao mesmo tempo e conte com uma regeneração por semana para manter o seu plano de estudos sempre ajustado aos seus objetivos.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <%# Mesmo FAQ da home no desktop (faq-desktop.css). Respostas do protótipo,
+      com o que diverge do produto ajustado (o anual é pago de uma vez,
+      regeneração por semana/mês, roadmap e verificação sem IA). %>
+  <section class="faq faq--pd" aria-labelledby="faq-title-desktop">
+    <hgroup class="faq__header">
+      <h2 id="faq-title-desktop">FAQ</h2>
+      <p class="faq__sub">Tem dúvidas? Nós temos as respostas.</p>
+    </hgroup>
+    <ul class="faq__list">
+      <li><details class="faq__item">
+        <summary>O que acontece se eu fizer downgrade do PRO para o FREE?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>Ao alterar o seu plano do PRO para o Free, você mantém o acesso aos recursos pagos até o fim do período já faturado. Após esse prazo, sua conta voltará aos limites do plano gratuito (como limite de regeneração de roadmaps e projetos sem verificação automática), mas todo o seu progresso e histórico permanecem salvos.</p>
+      </details></li>
+      <li><details class="faq__item faq__item--longa">
+        <summary>Roadmaps do modelo de reserva gastam meu limite de regeneração?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>Não. Os roadmaps padrão ou do modelo de reserva não consomem o seu limite de regeneração. O limite só é usado quando você pede para regenerar um roadmap, refazendo as etapas que ainda faltam.</p>
+      </details></li>
+      <li><details class="faq__item">
+        <summary>Posso cancelar a assinatura a qualquer momento?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>Sim! Você pode cancelar a sua assinatura a qualquer momento diretamente no painel da sua conta, sem taxas de cancelamento ou multas de fidelidade. Você continuará com acesso ao plano PRO até a data de término do ciclo atual.</p>
+      </details></li>
+      <li><details class="faq__item">
+        <summary>Como funciona a verificação automática de projetos?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>A plataforma analisa o repositório do projeto que você envia (público, no GitHub): linguagens, dependências e README, validando se as habilidades exigidas naquela fase aparecem no código. Ao final, você vê o que já está pronto e o que ainda falta.</p>
+      </details></li>
+      <li><details class="faq__item">
+        <summary>Quando posso regerar o meu roadmap novamente?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>No plano PRO, você pode regenerar cada roadmap uma vez por semana; no Free, uma vez por mês. Caso atinja o limite, a opção de regenerar será liberada automaticamente na data indicada no próprio roadmap.</p>
+      </details></li>
+      <li><details class="faq__item">
+        <summary>Quais são as formas de pagamento aceitas?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>Aceitamos pagamentos via Cartão de Crédito, pelo Mercado Pago. No mensal, a cobrança é automática, todo mês; no anual, o ano é pago de uma vez, à vista ou em até <%= prices.maxParcelas %>x.</p>
+      </details></li>
+    </ul>
+  </section>
+
+  </div>
+
 </main>
+
+<%# Rodapé do protótipo de desktop; no celular e no tablet a página continua sem rodapé %>
+<%- include('partials/rodape', { soDesktop: true }) %>
 
 <script src="/js/plano-toggle.js" defer></script>
 <script src="/js/reveal.js" defer></script>
+<script>
+  // O link "FAQ" do rodapé aponta para #faq-title, o FAQ da versão do celular.
+  // No tablet e no desktop esse título fica escondido: rola até o FAQ visível.
+  function irParaFaqVisivel() {
+    if (location.hash !== "#faq-title") return;
+    const alvo = [...document.querySelectorAll('[id^="faq-title"]')].find(el => el.offsetParent !== null);
+    if (alvo && alvo.id !== "faq-title") alvo.scrollIntoView();
+  }
+  addEventListener("load", irParaFaqVisivel);
+  addEventListener("hashchange", irParaFaqVisivel);
+</script>
 </body>
 </html>

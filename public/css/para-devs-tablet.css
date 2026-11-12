@@ -304,8 +304,9 @@
   /* ── Para empresas: acentos verde-água (protótipo da página) ── */
   .pd-empresa .pd-hero__badge { border-color: #10b691; background: #03241d; color: #8effe6; }
   .pd-empresa .pd-plans__title em { color: #10b691; }
-  /* FREE 4px mais largo que em /para-devs; 22 + 18 da nota + 23 = os 63px de baixo do protótipo */
-  .pd-empresa .pd-plans { grid-template-columns: 324px 320px; padding-bottom: 23px; }
+  /* FREE 4px mais largo que em /para-devs; 63px embaixo, como no protótipo (antes 22 + 18 da
+     nota do plano Básico + 23; o Básico deixou de existir) */
+  .pd-empresa .pd-plans { grid-template-columns: 324px 320px; padding-bottom: 63px; }
   .pd-empresa .pd-plan { padding-bottom: 15.25px; background: #080808; } /* compensa o cabeçalho de 36px */
   /* no protótipo o card pago tem borda fina verde-água, 2px para dentro do FREE */
   .pd-empresa .pd-plan--pro {

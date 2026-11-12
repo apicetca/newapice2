@@ -1,0 +1,231 @@
+/* =============================================
+   sobre-desktop.css — "Sobre nós" no desktop (1024px+), conforme o
+   protótipo de 1440px. Celular: sobre.css; tablet: sobre-tablet.css.
+   O menu é o do site (64px, contra 131,5px no protótipo).
+   Medidas em --u (1px no frame de 1440px).
+============================================= */
+
+/* Fora do desktop a versão do protótipo de desktop não aparece */
+.layout-desktop { display: none; }
+
+@media (min-width: 1024px) {
+  .layout-padrao { display: none; }
+  .layout-desktop {
+    /* mesma escala da home (0,7 do protótipo, até 0,85 em telas largas) */
+    --u: clamp(0.7px, calc(100vw / 2057), 0.85px);
+    display: block;
+    text-align: center;
+  }
+
+  /* Como sobre.css fazia no desktop (fundo e fonte do corpo) */
+  body { background: #000; font-family: "DM Mono", ui-monospace, monospace; }
+
+  /* sobre.css (a versão do celular) continua carregado no desktop, como
+     sempre esteve, e as classes deste bloco são as mesmas (o reveal.js anima
+     por elas). Aqui se desfaz o que de lá não vale no desktop. */
+  .layout-desktop .page-hero,
+  .layout-desktop .about-section,
+  .layout-desktop .pillars-section,
+  .layout-desktop .team-section,
+  .layout-desktop .about-cta { max-width: none; margin: 0; padding-inline: 0; }
+  .layout-desktop .about-section,
+  .layout-desktop .pillars-section,
+  .layout-desktop .team-section { padding-bottom: 0; }
+  .layout-desktop .hero-title { max-width: none; }
+  .layout-desktop .pillar-card__top { margin-bottom: 0; }
+  .layout-desktop .pillar-tag { letter-spacing: 0; }
+  .layout-desktop .pillar-card h3 { margin-bottom: 0; }
+  .layout-desktop .team-card { padding-inline: 0; padding-bottom: 0; text-align: center; }
+  .layout-desktop .team-name { margin-bottom: 0; }
+  .layout-desktop .about-cta .about-cta-help { margin-bottom: 0; }
+  .layout-desktop .about-cta .btn-primary,
+  .layout-desktop .about-cta .btn-ghost-outline { padding: 0; border-width: 0; }
+
+  .layout-desktop h1,
+  .layout-desktop h2,
+  .layout-desktop h3 { font-family: var(--font-display); font-weight: 700; color: #fff; letter-spacing: 0; }
+  .layout-desktop h2 { margin: 0; font-size: calc(50 * var(--u)); line-height: calc(58.5 * var(--u)); }
+  .layout-desktop p { margin: 0; }
+
+  /* ── Hero ── */
+  .layout-desktop .page-hero {
+    padding: calc(109.1 * var(--u)) 0 calc(81 * var(--u));
+    border-bottom: calc(2.5 * var(--u)) solid #141414;
+  }
+  .layout-desktop .hero-title {
+    margin: 0;
+    font-size: calc(64 * var(--u));
+    line-height: calc(50 * var(--u));
+  }
+  .layout-desktop .hero-title em { font-style: normal; }
+  .layout-desktop .hero-title .mark-purple { color: var(--accent); }
+  .layout-desktop .hero-title .mark-green { color: var(--teal); }
+  .layout-desktop .hero-sub,
+  .layout-desktop .about-section p,
+  .layout-desktop .about-cta > p:not(.about-cta-help) {
+    font-size: calc(24 * var(--u));
+    line-height: calc(31 * var(--u));
+    color: #d9d9d9;
+  }
+  .layout-desktop .hero-sub { max-width: calc(800 * var(--u)); margin: calc(8.9 * var(--u)) auto 0; }
+
+  /* ── Por que a Ápice existe ── */
+  .layout-desktop .about-section { padding-top: calc(56 * var(--u)); }
+  .layout-desktop .about-section p { max-width: calc(825 * var(--u)); margin-inline: auto; }
+  .layout-desktop .about-section h2 + p { margin-top: calc(11 * var(--u)); }
+  .layout-desktop .about-section p.strong { font-weight: 500; }
+
+  /* ── O que a plataforma faz ── */
+  .layout-desktop .pillars-section { padding-top: calc(186 * var(--u)); }
+  .layout-desktop .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(4, calc(286.5 * var(--u)));
+    justify-content: center;
+    gap: calc(12.5 * var(--u));
+    margin-top: calc(25.5 * var(--u));
+    text-align: left;
+  }
+  .layout-desktop .pillar-card {
+    height: calc(324 * var(--u));
+    padding: calc(11 * var(--u)) calc(16 * var(--u)) 0 calc(13 * var(--u));
+    background: #000;
+    border: calc(3 * var(--u)) solid #191919;
+    border-radius: calc(18 * var(--u));
+  }
+  .layout-desktop .pillar-card__top { display: flex; align-items: center; justify-content: space-between; }
+  .layout-desktop .pillar-tag {
+    font-size: calc(23 * var(--u));
+    line-height: calc(23 * var(--u));
+    color: #2d2d2d;
+  }
+  .layout-desktop .pillar-icon {
+    flex: none;
+    width: calc(42 * var(--u));
+    height: calc(42 * var(--u));
+    margin-right: calc(-3 * var(--u));
+    fill: none;
+    stroke: #2d2d2d;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .layout-desktop .pillar-icon--largo { width: calc(50 * var(--u)); }
+  .layout-desktop .pillar-card h3 {
+    display: grid;
+    grid-template-columns: calc(29 * var(--u)) 1fr;
+    margin-top: calc(-0.8 * var(--u));
+    font-size: calc(24 * var(--u));
+    line-height: calc(29 * var(--u));
+  }
+  /* Seta longa e fina do protótipo, desenhada (o "→" do texto fica para leitores de tela ignorarem) */
+  .layout-desktop .pillar-arrow {
+    width: calc(24 * var(--u));
+    height: calc(16 * var(--u));
+    margin: calc(5.5 * var(--u)) 0 0;
+    overflow: hidden;
+    font-size: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16' fill='none' stroke='%2359e435' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 8h21.6M16 1.1 22.6 8 16 14.9'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  }
+  .layout-desktop .pillar-card p {
+    max-width: calc(245 * var(--u));
+    margin-top: calc(15.3 * var(--u));
+    font-size: calc(22 * var(--u));
+    line-height: calc(29 * var(--u));
+    color: #d9d9d9;
+  }
+
+  /* ── Time ── */
+  .layout-desktop .team-section { padding-top: calc(96.5 * var(--u)); }
+  .layout-desktop .team-grid {
+    display: grid;
+    grid-template-columns: repeat(6, calc(190 * var(--u)));
+    justify-content: center;
+    gap: calc(8.8 * var(--u));
+    margin-top: calc(23 * var(--u));
+  }
+  .layout-desktop .team-card {
+    height: calc(283 * var(--u));
+    padding-top: calc(28 * var(--u));
+    background: #000;
+    border: calc(3 * var(--u)) solid #191919;
+    border-radius: calc(18 * var(--u));
+  }
+  .layout-desktop .team-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(90 * var(--u));
+    height: calc(90 * var(--u));
+    margin: 0 auto;
+    background: #140926;
+    border: calc(1 * var(--u)) solid var(--accent);
+    border-radius: 50%;
+    font-family: var(--font-display);
+    font-size: calc(32 * var(--u));
+    font-weight: 700;
+    color: #eadffc;
+  }
+  .layout-desktop .team-name {
+    margin-top: calc(17.7 * var(--u));
+    font-family: var(--font-display);
+    font-size: calc(24 * var(--u));
+    font-weight: 700;
+    line-height: calc(29 * var(--u));
+    white-space: nowrap;
+    color: #fff;
+  }
+  .layout-desktop .team-role {
+    margin-top: calc(7.8 * var(--u));
+    padding-inline: calc(8 * var(--u));
+    font-size: calc(22 * var(--u));
+    line-height: calc(29 * var(--u));
+    color: #d9d9d9;
+  }
+
+  /* ── Pronto para começar? ── */
+  .layout-desktop .about-cta { padding: calc(108.8 * var(--u)) 0 calc(154 * var(--u)); }
+  .layout-desktop .about-cta > p:not(.about-cta-help) { max-width: calc(780 * var(--u)); margin: calc(19.7 * var(--u)) auto 0; }
+  .layout-desktop .about-cta-actions {
+    display: flex;
+    justify-content: center;
+    gap: calc(31.5 * var(--u));
+    margin-top: calc(32.5 * var(--u));
+  }
+  .layout-desktop .about-cta .btn-primary,
+  .layout-desktop .about-cta .btn-ghost-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(62 * var(--u));
+    border-radius: calc(7 * var(--u));
+    font-family: var(--font-display);
+    font-size: calc(20 * var(--u));
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .layout-desktop .about-cta .btn-primary {
+    width: calc(269.5 * var(--u));
+    background: #571eb8;
+    box-shadow: 0 calc(6 * var(--u)) calc(16 * var(--u)) rgba(124, 58, 237, .35);
+  }
+  .layout-desktop .about-cta .btn-primary:hover { background: var(--accent); transform: translateY(-1px); }
+  .layout-desktop .about-cta .btn-ghost-outline {
+    width: calc(286.5 * var(--u));
+    background: #000;
+    border: calc(1 * var(--u)) solid #252530;
+    box-shadow: 0 calc(6 * var(--u)) calc(22 * var(--u)) rgba(124, 58, 237, .18);
+  }
+  .layout-desktop .about-cta .btn-ghost-outline:hover { border-color: var(--muted); transform: translateY(-1px); }
+  .layout-desktop .about-cta .btn-primary:focus-visible,
+  .layout-desktop .about-cta .btn-ghost-outline:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 3px; }
+  .layout-desktop .about-cta-help {
+    margin-top: calc(6.5 * var(--u));
+    font-size: calc(16 * var(--u));
+    line-height: calc(20 * var(--u));
+    color: #979797;
+  }
+  .layout-desktop .about-cta-help a { color: inherit; text-decoration: none; }
+  .layout-desktop .about-cta-help a:hover { color: #fff; text-decoration: underline; }
+}

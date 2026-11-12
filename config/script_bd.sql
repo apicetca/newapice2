@@ -247,15 +247,30 @@ CREATE TABLE IF NOT EXISTS match_ia_cache (
   CONSTRAINT fk_match_ia_job FOREIGN KEY (job_id) REFERENCES jobs (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- ── mentor_conversas — chat do mentor de carreira (IA, plano PRO) ──
+-- ── mentor_chats — conversas do mentor de carreira (título = 1ª pergunta) ──
+CREATE TABLE IF NOT EXISTS mentor_chats (
+  id         INT          NOT NULL AUTO_INCREMENT,
+  user_id    INT          NOT NULL,
+  title      VARCHAR(120) NOT NULL,
+  created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_mentor_chats_user (user_id, updated_at),
+  CONSTRAINT fk_mentor_chats_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ── mentor_conversas — mensagens do mentor de carreira (IA, plano PRO) ──
 CREATE TABLE IF NOT EXISTS mentor_conversas (
-  id         INT       NOT NULL AUTO_INCREMENT,
-  user_id    INT       NOT NULL,
-  role       ENUM('user','assistant') NOT NULL,
-  content    TEXT      NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id                    INT       NOT NULL AUTO_INCREMENT,
+  user_id               INT       NOT NULL,
+  chat_id               INT       DEFAULT NULL,
+  role                  ENUM('user','assistant') NOT NULL,
+  content               TEXT      NOT NULL,
+  gemini_interaction_id VARCHAR(255) DEFAULT NULL,
+  created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_mentor_conversas_user (user_id),
+  KEY idx_mentor_conversas_chat (chat_id, created_at),
   CONSTRAINT fk_mentor_conversas_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

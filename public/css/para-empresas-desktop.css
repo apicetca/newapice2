@@ -1,0 +1,57 @@
+/* =============================================
+   para-empresas-desktop.css — "Para Empresas" no desktop (1024px+), conforme o
+   protótipo de 1440px. É o mesmo modelo da Para Devs (para-devs-desktop.css,
+   carregado antes): aqui fica só o que muda nesta página — o acento verde-água,
+   os cards com 5 itens e os ícones. Medidas em --u
+   (0,7 do protótipo). Celular: para-devs.css; tablet: para-devs-tablet.css.
+============================================= */
+
+@media (min-width: 1024px) {
+  .layout-desktop {
+    --pe-acento: #10b691;
+    --pe-acento-hv: #19cfa6;
+  }
+
+  /* ── Hero: título em 2 linhas e menor; o texto, mais largo que o da Para Devs ── */
+  .layout-desktop .pd-hero h1 { font-size: calc(60 * var(--u)); }
+  .layout-desktop .pd-hero p { max-width: calc(722 * var(--u)); }
+
+  /* ── Planos: mais longe do texto; 5 itens, botão mais alto e menos espaço embaixo ── */
+  .layout-desktop .pd-plans { padding-top: calc(139.5 * var(--u)); }
+  .layout-desktop .pd-plan {
+    height: calc(640 * var(--u));
+    padding-bottom: calc(22 * var(--u));
+  }
+  .layout-desktop .pd-plan__list { gap: calc(35.5 * var(--u)); }
+  .layout-desktop .pd-btn { height: calc(57 * var(--u)); }
+  .layout-desktop .pd-plan--pro .pd-plan__list li::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16' preserveAspectRatio='none' fill='none' stroke='%2310b691' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 8h21.6M16 1.1 22.6 8 16 14.9'/%3E%3C/svg%3E");
+  }
+  .layout-desktop .pd-periodo label:has(input:checked) { border-color: var(--pe-acento); }
+  .layout-desktop .pd-periodo label:has(input:focus-visible) { outline-color: var(--pe-acento-hv); }
+  /* para-devs.css (o do celular, que também vale aqui) deixaria o botão verde-claro no hover */
+  .layout-desktop .pd-btn--primary { background: var(--pe-acento); }
+  .layout-desktop .pd-btn--primary:hover { background: var(--pe-acento-hv); }
+
+  /* ── Por que evoluir: título mais perto dos planos e cards mais altos ── */
+  .layout-desktop .pd-why { padding-top: calc(157.5 * var(--u)); }
+  .layout-desktop .pd-why__grid { margin-top: calc(35.5 * var(--u)); }
+  .layout-desktop .pd-feature { height: calc(389 * var(--u)); }
+  .layout-desktop .pd-seta {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 16' preserveAspectRatio='none' fill='none' stroke='%2310b691' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 8h25.6M20 1.1 26.6 8 20 14.9'/%3E%3C/svg%3E");
+  }
+
+  /* ── FAQ: mais longe dos cards; o "+" fechado em verde-água (aberto, o losango verde de sempre) ── */
+  .layout-desktop .faq--pd { padding-top: calc(160.9 * var(--u)); }
+  .layout-desktop .faq .faq__icon { background: #09241e; border-color: var(--pe-acento); }
+  .layout-desktop .faq .faq__icon::before,
+  .layout-desktop .faq .faq__icon::after {
+    width: calc(26 * var(--u));
+    height: calc(4 * var(--u));
+    background: var(--pe-acento);
+  }
+  /* aberta: o × fino das outras páginas */
+  .layout-desktop .faq .faq__item[open] .faq__icon::before,
+  .layout-desktop .faq .faq__item[open] .faq__icon::after { height: calc(2 * var(--u)); }
+  .layout-desktop .faq .faq__item:not([open]):hover .faq__icon { background: #0c3329; }
+}

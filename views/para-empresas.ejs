@@ -32,6 +32,12 @@
   <%# para-devs.css é a versão de antes (celular e desktop); no tablet (768–1023px) vale para-devs-tablet.css %>
   <link rel="stylesheet" href="/css/para-devs.css" media="not all and (min-width: 768px) and (max-width: 1023.98px)" />
   <link rel="stylesheet" href="/css/para-devs-tablet.css" />
+  <%# Desktop (1024px+): protótipo de 1440px, o mesmo modelo da Para Devs
+      (para-devs-desktop.css); o que muda nesta página vem de para-empresas-desktop.css %>
+  <link rel="stylesheet" href="/css/faq-desktop.css" />
+  <link rel="stylesheet" href="/css/para-devs-desktop.css" />
+  <link rel="stylesheet" href="/css/para-empresas-desktop.css" />
+  <link rel="stylesheet" href="/css/rodape-desktop.css" />
   <link rel="stylesheet" href="/css/reveal.css" />
 </head>
 <body class="pd-empresa">
@@ -40,8 +46,8 @@
 
 <main id="main-content">
 
-  <%# Celular e desktop: a página de antes. No tablet (768–1023px) ela dá lugar
-      à versão do protótipo, mais abaixo. %>
+  <%# Celular: a página de antes. No tablet (768–1023px) e no desktop (1024px+)
+      ela dá lugar às versões dos protótipos, mais abaixo. %>
   <div class="layout-padrao">
 
   <!-- ══════════ HERO ══════════ -->
@@ -198,7 +204,6 @@
     <article class="pd-plan" aria-labelledby="plan-free-name-tablet">
       <header class="pd-plan__head">
         <h3 id="plan-free-name-tablet">Plano FREE</h3>
-        <%# "Nível básico" (do protótipo) confundiria com o plano Básico da nota abaixo %>
         <span class="pd-badge">Nível inicial</span>
       </header>
       <p class="pd-plan__desc">Ferramentas essenciais, sem IA.</p>
@@ -214,11 +219,11 @@
 
     <article class="pd-plan pd-plan--pro" aria-labelledby="plan-pro-name-tablet">
       <header class="pd-plan__head">
-        <h3 id="plan-pro-name-tablet">Premium</h3>
+        <h3 id="plan-pro-name-tablet">Plano PRO</h3>
         <span class="pd-badge">Mensal</span>
       </header>
       <p class="pd-plan__desc">Acesso a todas as ferramentas e IA.</p>
-      <p class="pd-plan__price"><strong>R$<%= planos.premium.preco %></strong><span>/mês</span></p>
+      <p class="pd-plan__price"><strong>R$<%= planos.premium.mensal %></strong><span>/mês</span></p>
       <ul class="pd-plan__list">
         <li>Vagas ativas ilimitadas</li>
         <li>Devs compatíveis com cada vaga</li>
@@ -227,10 +232,6 @@
         <li>Resumo de candidatos por IA</li>
       </ul>
     </article>
-
-    <p class="pd-plans__nota">
-      Precisa de um meio-termo? O plano <strong>Básico</strong> custa R$<%= planos.basico.preco %>/mês e permite até <%= planos.basico.vagas %> vagas ativas.
-    </p>
 
   </section>
 
@@ -262,7 +263,7 @@
       </g>
     </svg>
 
-    <h2 id="why-title-tablet">Por que evoluir para o Premium?</h2>
+    <h2 id="why-title-tablet">Por que evoluir para o PRO?</h2>
     <div class="pd-why__grid">
 
       <article class="pd-feature">
@@ -291,7 +292,7 @@
 
       <li><details class="pd-faq__item">
         <summary>O que acontece se eu atingir o limite de vagas do plano FREE?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>No FREE você tem <%= planos.free.vagas %> vaga ativa por vez. Para publicar outra, encerre a atual ou assine um plano pago: o Básico (até <%= planos.basico.vagas %> vagas ativas) ou o Premium (vagas ilimitadas).</p>
+        <p>No FREE você tem <%= planos.free.vagas %> vaga ativa por vez. Para publicar outra, encerre a atual ou assine o plano PRO, com vagas ilimitadas.</p>
       </details></li>
 
       <li><details class="pd-faq__item">
@@ -311,7 +312,7 @@
 
       <li><details class="pd-faq__item">
         <summary>Como funciona o resumo de candidatos por IA?<span class="pd-faq__icon" aria-hidden="true">+</span></summary>
-        <p>No Premium, cada candidatura ganha um resumo curto gerado por IA a partir das skills e dos projetos do candidato, destacando os pontos fortes e os projetos mais relevantes para a vaga.</p>
+        <p>No PRO, cada candidatura ganha um resumo curto gerado por IA a partir das skills e dos projetos do candidato, destacando os pontos fortes e os projetos mais relevantes para a vaga.</p>
       </details></li>
 
       <li><details class="pd-faq__item">
@@ -324,7 +325,144 @@
 
   </div>
 
+  <!-- ══════════ VERSÃO DESKTOP (1024px+, protótipo de 1440px) ══════════
+       Preços, limites e nomes dos planos do config/plans.js (Free e PRO). O que
+       o protótipo promete e não existe (dias de exposição, compatibilidade e
+       triagem por IA) deu lugar ao que o produto faz. -->
+  <div class="layout-desktop">
+
+  <section class="pd-hero" aria-labelledby="pd-title-desktop">
+    <h1 id="pd-title-desktop">
+      Qual é o <em class="mark-purple">plano ideal</em> para a<br>
+      sua empresa <em class="mark-green">contratar devs?</em>
+    </h1>
+    <p>
+      Compare as nossas opções e descubra como otimizar seus processos seletivos com resumo de candidatos por inteligência artificial, avaliação por código real e gestão simplificada de vagas.
+    </p>
+  </section>
+
+  <section class="pd-plans" aria-label="Planos para empresas">
+
+    <article class="pd-plan" aria-labelledby="plan-free-name-desktop">
+      <header class="pd-plan__head">
+        <h2 id="plan-free-name-desktop">Empresa FREE</h2>
+      </header>
+      <p class="pd-plan__desc">Ferramentas essenciais, sem IA.</p>
+      <p class="pd-plan__price"><strong>R$0</strong><span>/mês</span></p>
+      <ul class="pd-plan__list">
+        <li class="is-limitado"><%= planos.free.vagas %> vaga ativa por vez</li>
+        <li class="is-limitado">Devs compatíveis com a vaga</li>
+        <li class="is-limitado">Visualização dos candidatos inscritos</li>
+        <li class="is-limitado">Compatibilidade pelo código real</li>
+        <li class="is-off">Sem resumo de candidatos por IA</li>
+      </ul>
+      <a href="/cadastro?tipo=empresa" class="pd-btn pd-btn--ghost">Começar grátis</a>
+    </article>
+
+    <%# Seletor Mensal/Anual como o da Para Devs, com os preços do config/plans.js
+        (rota /para-empresas): o mensal é a assinatura; o anual, um pagamento único
+        do ano, mostrado pelo valor por mês. Sem JavaScript: o rádio marcado escolhe
+        o preço pelo CSS. %>
+    <article class="pd-plan pd-plan--pro" aria-labelledby="plan-pro-name-desktop">
+      <header class="pd-plan__head">
+        <h2 id="plan-pro-name-desktop">Empresa PRO</h2>
+        <div class="pd-periodo" role="radiogroup" aria-label="Período de cobrança">
+          <label><input type="radio" name="pd-periodo" value="mensal" checked>Mensal</label>
+          <label><input type="radio" name="pd-periodo" value="anual">Anual</label>
+        </div>
+      </header>
+      <p class="pd-plan__desc">Acesso a todas as ferramentas e IA.</p>
+      <p class="pd-plan__price"><strong class="pd-preco-mensal">R$<%= planos.premium.mensal %></strong><strong class="pd-preco-anual">R$<%= planos.premium.anual %></strong><span>/mês</span></p>
+      <ul class="pd-plan__list">
+        <li>Quantidade de vagas ilimitadas</li>
+        <li>Devs compatíveis com cada vaga</li>
+        <li>Visualização dos candidatos inscritos</li>
+        <li>Compatibilidade pelo código real</li>
+        <li>Resumo de candidatos por IA</li>
+      </ul>
+      <p class="pd-plan__cobranca">R$<%= planos.premium.anualTotal %> por ano, à vista ou em até <%= planos.maxParcelas %>x</p>
+      <a href="/cadastro?tipo=empresa" class="pd-btn pd-btn--primary">Fazer upgrade</a>
+    </article>
+
+  </section>
+
+  <section class="pd-why" aria-labelledby="why-title-desktop">
+    <h2 id="why-title-desktop">Por que evoluir para o Empresa PRO?</h2>
+    <div class="pd-why__grid">
+
+      <article class="pd-feature">
+        <div class="pd-feature__top">
+          <span class="pd-feature__tag">FIG 0.1</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="3.2"/><path d="M12 6.2a5.8 5.8 0 0 0-4.6 9.3M14.3 6.7a5.8 5.8 0 0 1 3.1 3.1M17.7 12.6a5.8 5.8 0 0 1-2.4 4.2M13.4 17.6a5.8 5.8 0 0 1-3.7-.3" stroke-width="2.4"/><circle cx="12" cy="12" r="2" stroke-width="2.4"/></svg>
+        </div>
+        <h3><span class="pd-seta" aria-hidden="true">→</span><span>Resumo de Candidatos por IA</span></h3>
+        <p>Cada candidatura chega com um resumo gerado por IA, com os pontos fortes e os projetos mais relevantes para a vaga, para você decidir mais rápido.</p>
+      </article>
+
+      <article class="pd-feature">
+        <div class="pd-feature__top">
+          <span class="pd-feature__tag">FIG 0.2</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.6 2.4h10.2M2.6 7.2h9.4M2.6 12h8.6M2.6 16.8h7.8M2.6 21.6h7" stroke-width="2.8"/><path d="M19.4 2.2v15.4" stroke-width="2.6"/><path d="M15.6 16.4h7.6l-3.8 5.8z" fill="currentColor" stroke-width="1.4"/></svg>
+        </div>
+        <h3><span class="pd-seta" aria-hidden="true">→</span><span>Compatibilidade em Cada Vaga</span></h3>
+        <p>Em todas as vagas abertas, veja os desenvolvedores mais compatíveis, com o percentual calculado a partir do código real do GitHub.</p>
+      </article>
+
+      <article class="pd-feature">
+        <div class="pd-feature__top">
+          <span class="pd-feature__tag">FIG 0.3</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="3.2"/><path d="M12 8v8M8 12h8" stroke-width="2.8"/></svg>
+        </div>
+        <h3><span class="pd-seta" aria-hidden="true">→</span><span>Vagas Ativas Ilimitadas</span></h3>
+        <p>Abra quantas vagas precisar ao mesmo tempo, sem precisar encerrar uma para publicar outra.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <%# FAQ comum do desktop (faq-desktop.css), na ordem do protótipo. Respostas do
+      protótipo, com o que diverge do produto ajustado: limite do FREE do
+      config/plans.js, compatibilidade calculada pela plataforma (não por IA) e o
+      anual, que é pago de uma vez e não renova sozinho. %>
+  <section class="faq faq--pd" aria-labelledby="faq-title-desktop">
+    <hgroup class="faq__header">
+      <h2 id="faq-title-desktop">FAQ</h2>
+      <p class="faq__sub">Tem dúvidas? Nós temos as respostas.</p>
+    </hgroup>
+    <ul class="faq__list">
+      <li><details class="faq__item">
+        <summary>O que acontece se eu atingir o limite de vagas do plano FREE?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>Você receberá um aviso na tela para desativar uma vaga ou fazer o upgrade para o plano PRO, que libera vagas ilimitadas simultâneas.</p>
+      </details></li>
+      <li><details class="faq__item">
+        <summary>Como é calculada a compatibilidade do candidato com a vaga?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>A plataforma analisa os requisitos técnicos da sua vaga e os compara diretamente com o perfil do desenvolvedor: as skills detectadas nos repositórios do GitHub ou declaradas no perfil, e o nível de senioridade. Com base nesses dados, geramos uma nota de compatibilidade (Match) para cada candidato.</p>
+      </details></li>
+      <li><details class="faq__item">
+        <summary>Como funciona a renovação e o cancelamento do plano pago?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>No mensal, a renovação é feita de forma automática, todo mês; o anual libera o plano por 12 meses e não renova sozinho. Você pode cancelar a sua assinatura a qualquer momento diretamente no painel da conta, sem taxas ou multas de fidelidade, mantendo o acesso até o final do período já pago.</p>
+      </details></li>
+      <li><details class="faq__item">
+        <summary>Posso cancelar ou mudar de plano a qualquer momento?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>Sim. A assinatura mensal pode ser cancelada a qualquer momento diretamente no seu painel, sem taxas extras ou cláusulas de fidelidade, e a conta volta ao Free no fim do período pago. O anual é pago de uma vez e vale por 12 meses.</p>
+      </details></li>
+      <li><details class="faq__item">
+        <summary>Como funciona a triagem automática?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>A plataforma cruza os requisitos da sua vaga com as skills dos desenvolvedores (detectadas nos repositórios do GitHub ou declaradas no perfil) e calcula uma nota de compatibilidade (Match) para ordenar automaticamente os mais compatíveis. No PRO, cada candidatura também ganha um resumo gerado por IA.</p>
+      </details></li>
+      <li><details class="faq__item">
+        <summary>Quais são as formas de pagamento aceitas?<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p>Aceitamos pagamentos via Cartão de Crédito, pelo Mercado Pago. No mensal, a cobrança é automática, todo mês; no anual, o ano é pago de uma vez, à vista ou em até <%= planos.maxParcelas %>x.</p>
+      </details></li>
+    </ul>
+  </section>
+
+  </div>
+
 </main>
+
+<%# Rodapé do protótipo de desktop; no celular e no tablet a página continua sem rodapé %>
+<%- include('partials/rodape', { soDesktop: true }) %>
 
 <script src="/js/plano-toggle.js" defer></script>
 <script src="/js/reveal.js" defer></script>

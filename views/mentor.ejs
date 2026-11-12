@@ -13,14 +13,36 @@
   <link rel="stylesheet" href="/css/design-system.css" />
   <link rel="stylesheet" href="/css/header.css" />
   <link rel="stylesheet" href="/css/mensagens.css" />
+  <link rel="stylesheet" href="/css/mentor-desktop.css" />
 </head>
 <body>
 
   <%- include('partials/header-dev', { currentPage: 'mentor' }) %>
 
-<main class="page-content msg-page" id="main-content">
+<main class="page-content msg-page mentor-page" id="main-content">
   <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Mentor de carreira</h1>
-  <div class="msg-layout" style="grid-template-columns: 1fr">
+  <div class="msg-layout mentor-layout" style="grid-template-columns: 1fr">
+
+    <!-- ══ Barra lateral (só no desktop — mentor-desktop.css) ══ -->
+    <aside class="mentor-sidebar" aria-label="Conversas com o mentor">
+      <header class="mentor-sidebar-head">
+        <span class="mentor-sidebar-icone" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 6.4h1.6V5.6a3.2 3.2 0 0 1 3.2-3.2h1.4a3.2 3.2 0 0 1 3.2 3.2v4.2a2.4 2.4 0 0 1-1.6 2.3l-1.4.5"/><path d="M3.6 12.6 7.6 8.6"/><circle cx="7.9" cy="8.3" r=".5" fill="currentColor"/></svg>
+        </span>
+        <h2 class="mentor-sidebar-titulo">Mentor</h2>
+      </header>
+      <label class="mentor-busca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        <input type="search" id="mentorBusca" placeholder="Pesquisar conversas" aria-label="Pesquisar conversas" autocomplete="off" />
+      </label>
+      <button type="button" class="mentor-nova" id="btn-mentor-nova">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.2 3.6a1.6 1.6 0 0 1 2.3 0l.9.9a1.6 1.6 0 0 1 0 2.3L9.6 17.6 6 18.6l1-3.6z"/><path d="M8.6 4.4C5.4 5.2 3.4 7 4.6 9.2c.9 1.6-.4 3.4-1.4 5.4-.7 1.5.2 3.6 1.6 4"/></svg>
+        <span>Nova conversa</span>
+      </button>
+      <h3 class="mentor-historico-titulo">Histórico de conversas</h3>
+      <ul class="mentor-historico" id="mentorHistorico"></ul>
+      <p class="mentor-historico-vazio" id="mentorHistoricoVazio" hidden></p>
+    </aside>
 
     <!-- ══ Estado: carregando ══ -->
     <section class="msg-thread" aria-label="Mentor de carreira" id="mentorLoading">
@@ -108,17 +130,78 @@
     return div.innerHTML;
   }
 
+  // Desktop (a partir de 1024px): layout do protótipo — barra lateral,
+  // estado vazio "Por onde começamos?" e campo "Pergunte ao Mentor"
+  // (public/css/mentor-desktop.css). Celular e tablet seguem como antes.
+  const DESKTOP = window.matchMedia("(min-width: 1024px)");
+  const PLACEHOLDER_PADRAO = $("mentorInput").placeholder;
+  let mensagensAtuais = [];
+  let conversas = [];         // histórico: [{ id, titulo }], a mais recente primeiro
+  let conversaAtual = null;   // id da conversa aberta; null = conversa nova
+
+  function ajustarPlaceholder() {
+    $("mentorInput").placeholder = DESKTOP.matches ? "Pergunte ao Mentor" : PLACEHOLDER_PADRAO;
+  }
+
+  // Busca sem diferenciar maiúsculas nem acentos ("tecnica" acha "técnica").
+  const normalizar = texto => texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("pt-BR");
+
+  // Histórico da barra lateral: as conversas salvas (título = primeira
+  // pergunta), a aberta em destaque. Clicar abre a conversa para continuar.
+  function atualizarHistorico() {
+    const busca = normalizar($("mentorBusca").value.trim());
+    const visiveis = conversas.filter(c => !busca || normalizar(c.titulo).includes(busca));
+    $("mentorHistorico").innerHTML = visiveis.map(c => {
+      const aberta = c.id === conversaAtual;
+      return `<li><button type="button" class="mentor-historico-item${aberta ? " ativo" : ""}" data-conversa="${c.id}"
+        title="${escapeHtml(c.titulo).replace(/"/g, "&quot;")}"${aberta ? ' aria-current="true"' : ""}><span>${escapeHtml(c.titulo)}</span></button></li>`;
+    }).join("");
+    const vazio = $("mentorHistoricoVazio");
+    vazio.hidden = visiveis.length > 0;
+    vazio.textContent = conversas.length ? "Nenhuma conversa encontrada." : "Nenhuma conversa ainda.";
+  }
+
+  // Abre uma conversa do histórico (ou a mais recente, no celular/tablet).
+  async function buscarConversa(id) {
+    const res = await fetch(`/api/ai/mentor/historico?conversa=${encodeURIComponent(id)}`);
+    if (!res.ok) throw new Error();
+    return res.json();
+  }
+
+  function mostrarConversa({ conversa, mensagens }) {
+    conversaAtual = conversa?.id ?? null;
+    mensagemComFalha = null;
+    renderMessages(mensagens);
+  }
+
+  // "Nova conversa": tela em branco; a conversa é criada na primeira pergunta.
+  function abrirConversaNova() {
+    conversaAtual = null;
+    mensagemComFalha = null;
+    renderMessages([]);
+  }
+
   function renderMessages(messages) {
+    mensagensAtuais = messages;
+    atualizarHistorico();
     const body = $("mentorBody");
+    $("mentorChat").classList.toggle("mentor-chat--vazio", !messages.length && DESKTOP.matches);
     if (!messages.length) {
-      body.innerHTML = `
+      body.innerHTML = DESKTOP.matches
+        ? `
+        <div id="mentorEmpty" class="mentor-vazio">
+          <h2 class="mentor-vazio-titulo">Por onde começamos?</h2>
+          <p class="mentor-vazio-sub">Seu assistente para impulsionar sua carreira e superar seus gaps técnicos.</p>
+        </div>`
+        : `
         <div id="mentorEmpty">
           <p class="msg-conv-empty">Diga oi pro mentor e comece a conversa! 👋</p>
           <div style="text-align:center">
             <button type="button" class="btn-primary-dev" id="btn-mentor-entrevista">Simular uma entrevista técnica</button>
           </div>
         </div>`;
-      $("btn-mentor-entrevista").addEventListener("click", () => {
+      // O atalho da entrevista só existe no modelo de celular/tablet.
+      $("btn-mentor-entrevista")?.addEventListener("click", () => {
         $("mentorInput").value = "Quero simular uma entrevista técnica.";
         $("mentorForm").requestSubmit();
       });
@@ -142,15 +225,20 @@
   async function init() {
     showMentorState("loading");
     try {
-      const res = await fetch("/api/ai/mentor/historico");
+      const res = await fetch("/api/ai/mentor/conversas");
       if (res.status === 402) {
         showMentorState("locked");
         return;
       }
       if (!res.ok) throw new Error();
-      const history = await res.json();
+      conversas = await res.json();
+      // Desktop abre numa conversa nova ("Por onde começamos?"), com o
+      // histórico ao lado; celular e tablet, sem a barra lateral, abrem a
+      // conversa mais recente para continuar.
+      const ultima = !DESKTOP.matches && conversas.length ? await buscarConversa(conversas[0].id) : null;
       showMentorState("chat");
-      renderMessages(history);
+      if (ultima) mostrarConversa(ultima);
+      else abrirConversaNova();
     } catch {
       // Erro genérico (rede, 500, etc.) — distinto do gate de plano (402),
       // pra não dizer "exclusivo PRO" pra um usuário que já é PRO mas
@@ -219,15 +307,22 @@
 
     const formData = new FormData();
     formData.append("mensagem", mensagem);
+    if (conversaAtual) formData.append("conversa", conversaAtual);
     if (anexo) formData.append("anexo", anexo);
 
     try {
       const data = await fetchIA("/api/ai/mentor/mensagem", { method: "POST", body: formData }, MENTOR_PRAZO_MS);
       mensagemComFalha = null;
 
-      const historico = await fetch("/api/ai/mentor/historico").then(r => (r.ok ? r.json() : null)).catch(() => null);
+      // A pergunta pode ter começado uma conversa nova: ela vira a aberta e
+      // sobe para o topo do histórico (a que já existia também sobe).
+      if (data.conversa) {
+        conversaAtual = data.conversa.id;
+        conversas = [data.conversa, ...conversas.filter(c => c.id !== data.conversa.id)];
+      }
+      const historico = conversaAtual ? await buscarConversa(conversaAtual).catch(() => null) : null;
       if (historico) {
-        renderMessages(historico);
+        renderMessages(historico.mensagens);
       } else {
         // O histórico não veio: mostra a resposta que já chegou.
         $("mentorTyping")?.remove();
@@ -237,6 +332,8 @@
             <span class="msg-bubble">${escapeHtml(data.resposta)}</span>
           </article>`);
         body.scrollTop = body.scrollHeight;
+        mensagensAtuais = [...mensagensAtuais, { role: "user", content: mensagem }, { role: "assistant", content: data.resposta }];
+        atualizarHistorico();
       }
     } catch (err) {
       $("mentorTyping")?.remove();
@@ -254,6 +351,7 @@
         // Erro no pedido (arquivo inválido, plano...): devolve o texto e o
         // anexo para o usuário corrigir.
         $("mentorPendente")?.remove();
+        if (!mensagensAtuais.length) renderMessages([]); // volta o estado vazio
         input.value = mensagem;
         if (anexo) setAnexo(anexo);
         showToast(err.message, true);
@@ -288,6 +386,7 @@
 
     const anexo = anexoSelecionado;
     document.getElementById("mentorEmpty")?.remove();
+    $("mentorChat").classList.remove("mentor-chat--vazio");
     $("mentorBody").insertAdjacentHTML("beforeend", `
       <article class="msg-bubble-row mine" id="mentorPendente">
         <span class="msg-bubble">${escapeHtml(mensagem)}${anexo ? `<br><em>📎 ${escapeHtml(anexo.name)}</em>` : ""}</span>
@@ -298,6 +397,48 @@
     enviarAoMentor(mensagem, anexo);
   });
 
+  // ── Barra lateral (desktop) ───────────────────────────
+  $("mentorBusca").addEventListener("input", atualizarHistorico);
+
+  // Cada abertura ganha um número: se o usuário clicar em outra conversa
+  // antes da anterior carregar, só a última clicada aparece.
+  let aberturaAtual = 0;
+
+  // Clique numa conversa do histórico: abre para continuar de onde parou.
+  // Enquanto uma pergunta está sendo respondida, a conversa não troca.
+  $("mentorHistorico").addEventListener("click", async e => {
+    const item = e.target.closest("[data-conversa]");
+    if (!item || mentorEnviando) return;
+    const id = Number(item.dataset.conversa);
+    if (id === conversaAtual) return;
+    const minha = ++aberturaAtual;
+    try {
+      const data = await buscarConversa(id);
+      if (minha !== aberturaAtual || mentorEnviando) return;
+      mostrarConversa(data);
+      $("mentorInput").focus();
+    } catch {
+      if (minha === aberturaAtual) showToast("Não foi possível abrir a conversa. Tente novamente.", true);
+    }
+  });
+
+  // "Nova conversa": tela em branco; as anteriores continuam no histórico.
+  $("btn-mentor-nova").addEventListener("click", () => {
+    if (mentorEnviando) return;
+    aberturaAtual++;
+    abrirConversaNova();
+    $("mentorInput").focus();
+  });
+
+  // Ao cruzar 1024px, troca o modelo do estado vazio e o placeholder.
+  DESKTOP.addEventListener("change", () => {
+    ajustarPlaceholder();
+    if (!$("mentorChat").hidden && !mentorEnviando && !mensagensAtuais.length && document.getElementById("mentorEmpty")) {
+      renderMessages([]);
+    }
+  });
+
+  ajustarPlaceholder();
   init();
 </script>
 

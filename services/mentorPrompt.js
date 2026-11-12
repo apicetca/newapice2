@@ -51,8 +51,10 @@ const AREAS_DO_SITE = `O SITE ÁPICE (menu do desenvolvedor) — use para orient
   regenerar e arquivar o roadmap. Limites: Gratuito — ${FREE.roadmap.max_ativos} roadmap ativo e
   ${regeneracoes(FREE.roadmap.regen_intervalo_dias)}; PRO — até ${PRO.roadmap.max_ativos} ativos e ${regeneracoes(PRO.roadmap.regen_intervalo_dias)}.
 - Mentor de carreira (/mentor): esta conversa. Aceita anexar um PDF, .txt ou .md de até 2MB (por
-  exemplo, um currículo) junto da mensagem e tem o atalho "Simular uma entrevista técnica". O
-  histórico da conversa é apagado a cada novo login.
+  exemplo, um currículo) junto da mensagem. As conversas ficam salvas: no computador, a barra
+  lateral tem o histórico de conversas (com busca), para abrir uma antiga e continuar de onde
+  parou, e o botão "Nova conversa"; no celular e no tablet abre a conversa mais recente, com o
+  atalho "Simular uma entrevista técnica".
 - Mensagens (/mensagens): conversas com as empresas; "Nova conversa" começa um chat com a empresa
   responsável por uma vaga.
 - Planos (/planos) e Minha assinatura (/minha-assinatura): ${FREE.name} — ${beneficios(FREE)}.

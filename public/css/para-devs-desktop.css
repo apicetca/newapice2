@@ -1,0 +1,312 @@
+/* =============================================
+   para-devs-desktop.css — "Para Devs" no desktop (1024px+), conforme o
+   protótipo de 1440px. Celular: para-devs.css; tablet: para-devs-tablet.css.
+   O menu é o do site (64px, contra 131,5px no protótipo). Medidas em --u
+   (0,7 do protótipo, como na home e na Sobre). O FAQ vem de faq-desktop.css.
+============================================= */
+
+/* Fora do desktop a versão do protótipo de desktop não aparece */
+.layout-desktop { display: none; }
+
+@media (min-width: 1024px) {
+  .layout-padrao { display: none; }
+  .layout-desktop {
+    /* mesma escala da home e da Sobre (0,7 do protótipo, até 0,85 em telas largas) */
+    --u: clamp(0.7px, calc(100vw / 2057), 0.85px);
+    display: block;
+  }
+
+  /* para-devs.css (a versão do celular) continua carregado no desktop, como
+     sempre esteve, e as classes deste bloco são as mesmas (o reveal.js anima
+     por elas). Aqui se desfaz o que de lá não vale no desktop. */
+  .layout-desktop .pd-hero,
+  .layout-desktop .pd-plans,
+  .layout-desktop .pd-why { max-width: none; margin: 0; padding-inline: 0; padding-bottom: 0; }
+
+  .layout-desktop h1,
+  .layout-desktop h2,
+  .layout-desktop h3 { font-family: var(--font-display); font-weight: 700; color: #fff; letter-spacing: 0; }
+
+  /* ── Hero ── */
+  .layout-desktop .pd-hero { padding-top: calc(109.1 * var(--u)); text-align: center; }
+  .layout-desktop .pd-hero h1 {
+    max-width: none;
+    margin: 0;
+    font-size: calc(64 * var(--u));
+    line-height: calc(50 * var(--u));
+  }
+  .layout-desktop .pd-hero .mark-purple { color: var(--accent); }
+  .layout-desktop .pd-hero .mark-green { color: var(--teal); }
+  .layout-desktop .pd-hero p {
+    max-width: calc(700 * var(--u));
+    margin: calc(8.9 * var(--u)) auto 0;
+    font-size: calc(24 * var(--u));
+    line-height: calc(31 * var(--u));
+    color: #d9d9d9;
+  }
+
+  /* ── Planos ── */
+  .layout-desktop .pd-plans {
+    display: grid;
+    grid-template-columns: repeat(2, calc(575 * var(--u)));
+    justify-content: center;
+    gap: calc(34 * var(--u));
+    padding-top: calc(126.5 * var(--u));
+  }
+  .layout-desktop .pd-plan {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: calc(581 * var(--u));
+    padding: calc(21.6 * var(--u)) calc(16.5 * var(--u)) calc(30.5 * var(--u)) calc(22 * var(--u));
+    background: #000;
+    border: calc(3 * var(--u)) solid #191919;
+    border-radius: calc(18 * var(--u));
+  }
+  .layout-desktop .pd-plan__head { gap: calc(12 * var(--u)); }
+  .layout-desktop .pd-plan__head h2 { font-size: calc(36 * var(--u)); line-height: calc(48 * var(--u)); }
+  .layout-desktop .pd-badge {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: calc(229 * var(--u));
+    height: calc(41 * var(--u));
+    padding: 0;
+    background: #0f0f0f;
+    border: calc(3 * var(--u)) solid #191919;
+    margin-top: calc(-3 * var(--u));
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: calc(20 * var(--u));
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  /* Seletor Mensal/Anual do PRO: dois rádios escondidos; o rótulo do marcado
+     ganha a borda roxa. As duas pílulas se sobrepõem 7 (como no protótipo), por
+     isso nada muda ao passar o mouse e a troca é imediata: uma segunda borda,
+     nem que por um instante, cruzaria com a roxa. */
+  .layout-desktop .pd-periodo {
+    display: flex;
+    flex: none;
+    box-sizing: border-box;
+    width: calc(253 * var(--u));
+    height: calc(55 * var(--u));
+    /* centrado no título sem aumentar o cabeçalho; passa 3,5 da margem do card */
+    margin: calc(-5.6 * var(--u)) calc(-3.5 * var(--u)) calc(-1.4 * var(--u)) 0;
+    padding: calc(3 * var(--u)) calc(2 * var(--u));
+    background: #0f0f0f;
+    border: calc(3 * var(--u)) solid #191919;
+    border-radius: 999px;
+  }
+  .layout-desktop .pd-periodo label {
+    position: relative;
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: calc(125 * var(--u));
+    height: calc(43 * var(--u));
+    border: calc(3 * var(--u)) solid transparent;
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: calc(20 * var(--u));
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    /* clique duplo não seleciona o texto; no toque, sem o realce do navegador */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .layout-desktop .pd-periodo label + label { margin-left: calc(-7 * var(--u)); }
+  .layout-desktop .pd-periodo label:has(input:checked) { border-color: var(--accent); }
+  .layout-desktop .pd-periodo label:has(input:focus-visible) { outline: 2px solid var(--accent-hv); outline-offset: 2px; }
+  .layout-desktop .pd-periodo input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* o preço (e a nota da cobrança anual) segue o período marcado */
+  .layout-desktop .pd-preco-anual,
+  .layout-desktop .pd-plan__cobranca { display: none; }
+  .layout-desktop .pd-plan--pro:has(input[value="anual"]:checked) .pd-preco-mensal { display: none; }
+  .layout-desktop .pd-plan--pro:has(input[value="anual"]:checked) .pd-preco-anual,
+  .layout-desktop .pd-plan--pro:has(input[value="anual"]:checked) .pd-plan__cobranca { display: block; }
+  .layout-desktop .pd-plan__desc {
+    margin-top: calc(13.9 * var(--u));
+    font-size: calc(24 * var(--u));
+    line-height: calc(31 * var(--u));
+    color: #979797;
+  }
+  .layout-desktop .pd-plan__price { gap: calc(2 * var(--u)); margin-top: calc(8.9 * var(--u)); }
+  .layout-desktop .pd-plan__price strong {
+    font-size: calc(62 * var(--u));
+    font-weight: 700;
+    line-height: calc(62 * var(--u));
+    color: #fff;
+  }
+  .layout-desktop .pd-plan__price span { font-size: calc(24 * var(--u)); color: #979797; }
+  /* nota do anual: no vão entre a lista e o botão, sem mover nada do card */
+  .layout-desktop .pd-plan__cobranca {
+    margin: auto 0 calc(16 * var(--u));
+    font-size: calc(20 * var(--u));
+    line-height: calc(26 * var(--u));
+    color: #979797;
+  }
+  .layout-desktop .pd-plan--pro:has(input[value="anual"]:checked) .pd-btn { margin-top: 0; }
+  .layout-desktop .pd-plan__list {
+    flex: none;
+    gap: calc(38 * var(--u));
+    margin: calc(16.5 * var(--u)) 0 0;
+  }
+  .layout-desktop .pd-plan__list li,
+  .layout-desktop .pd-plan__list li.is-off {
+    position: relative;
+    padding-left: calc(24 * var(--u));
+    font-size: calc(22 * var(--u));
+    line-height: calc(29 * var(--u));
+    color: #d9d9d9;
+  }
+  /* FREE: ○ no que é limitado, × no que não tem; PRO: seta roxa longa */
+  .layout-desktop .pd-plan__list li::before {
+    content: "";
+    position: absolute;
+    box-sizing: border-box;
+  }
+  .layout-desktop .pd-plan__list li.is-limitado::before {
+    left: 0;
+    top: calc(9.5 * var(--u));
+    width: calc(11 * var(--u));
+    height: calc(11 * var(--u));
+    border: calc(2 * var(--u)) solid #191919;
+    border-radius: 50%;
+  }
+  .layout-desktop .pd-plan__list li.is-off::before {
+    left: calc(-1 * var(--u));
+    top: calc(8 * var(--u));
+    width: calc(14 * var(--u));
+    height: calc(14 * var(--u));
+    background:
+      linear-gradient(45deg, transparent calc(50% - 1px), #191919 calc(50% - 1px), #191919 calc(50% + 1px), transparent calc(50% + 1px)),
+      linear-gradient(-45deg, transparent calc(50% - 1px), #191919 calc(50% - 1px), #191919 calc(50% + 1px), transparent calc(50% + 1px));
+  }
+  .layout-desktop .pd-plan--pro .pd-plan__list li { padding-left: calc(30 * var(--u)); }
+  .layout-desktop .pd-plan--pro .pd-plan__list li::before {
+    left: calc(-5 * var(--u));
+    top: calc(5.5 * var(--u));
+    width: calc(24 * var(--u));
+    height: calc(15 * var(--u));
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16' preserveAspectRatio='none' fill='none' stroke='%237c3aed' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 8h21.6M16 1.1 22.6 8 16 14.9'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  }
+  .layout-desktop .pd-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100% + 5.5 * var(--u));
+    height: calc(50.5 * var(--u));
+    margin: auto 0 0 calc(-5.5 * var(--u));
+    padding: 0;
+    border-radius: calc(8 * var(--u));
+    font-family: var(--font-display);
+    font-size: calc(20 * var(--u));
+    font-weight: 700;
+    color: #fff;
+  }
+  .layout-desktop .pd-btn--ghost { background: #0f0f0f; border: calc(3 * var(--u)) solid #191919; }
+  .layout-desktop .pd-btn--ghost:hover { border-color: var(--border-lite); }
+  .layout-desktop .pd-btn--primary { background: var(--accent); border: 0; }
+
+  /* ── Por que evoluir ── */
+  .layout-desktop .pd-why { padding-top: calc(194.5 * var(--u)); }
+  .layout-desktop .pd-why h2 {
+    margin: 0;
+    text-align: center;
+    font-size: calc(50 * var(--u));
+    line-height: calc(58.5 * var(--u));
+  }
+  .layout-desktop .pd-why__grid {
+    display: grid;
+    grid-template-columns: repeat(3, calc(383 * var(--u)));
+    justify-content: center;
+    gap: calc(17 * var(--u));
+    margin-top: calc(37 * var(--u));
+  }
+  .layout-desktop .pd-feature {
+    min-height: 0;
+    height: calc(373 * var(--u));
+    padding: calc(17 * var(--u)) calc(15 * var(--u)) 0 calc(10 * var(--u));
+    background: #000;
+    border: calc(3 * var(--u)) solid #191919;
+    border-radius: calc(18 * var(--u));
+  }
+  .layout-desktop .pd-feature__top { margin-bottom: 0; color: #2d2d2d; }
+  .layout-desktop .pd-feature__top svg {
+    flex: none;
+    width: calc(36 * var(--u));
+    height: calc(36 * var(--u));
+    margin-right: calc(8 * var(--u));
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .layout-desktop .pd-feature__top svg text {
+    fill: currentColor;
+    stroke: none;
+    font-family: var(--font-display);
+    font-size: 7.5px;
+    font-weight: 800;
+  }
+  .layout-desktop .pd-feature__top .pd-feature__icone-largo { width: calc(49 * var(--u)); height: calc(40 * var(--u)); margin-right: calc(-2.7 * var(--u)); }
+  .layout-desktop .pd-feature__tag {
+    font-size: calc(22 * var(--u));
+    line-height: calc(22 * var(--u));
+    letter-spacing: 0;
+  }
+  .layout-desktop .pd-feature h3 {
+    display: grid;
+    grid-template-columns: calc(34 * var(--u)) 1fr;
+    margin: calc(7.2 * var(--u)) 0 0;
+    font-size: calc(24 * var(--u));
+    line-height: calc(30 * var(--u));
+  }
+  /* Seta longa e fina do protótipo, desenhada (o "→" do texto fica oculto) */
+  .layout-desktop .pd-seta {
+    width: calc(28 * var(--u));
+    height: calc(15 * var(--u));
+    margin: calc(6.8 * var(--u)) 0 0 calc(-2 * var(--u));
+    overflow: hidden;
+    font-size: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 16' preserveAspectRatio='none' fill='none' stroke='%237c3aed' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 8h25.6M20 1.1 26.6 8 20 14.9'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  }
+  .layout-desktop .pd-feature p {
+    max-width: calc(350 * var(--u));
+    margin-top: calc(11.8 * var(--u));
+    font-size: calc(22 * var(--u));
+    line-height: calc(29 * var(--u));
+    color: #d9d9d9;
+  }
+
+  /* ── FAQ (o comum vem de faq-desktop.css) ── */
+  .layout-desktop .faq--pd { padding: calc(127.4 * var(--u)) 0 calc(214 * var(--u)); }
+  .layout-desktop .faq--pd .faq__sub {
+    margin-top: calc(-2 * var(--u));
+    font-size: calc(24 * var(--u));
+    line-height: calc(31 * var(--u));
+    color: #d9d9d9;
+  }
+  .layout-desktop .faq--pd .faq__list { margin-top: calc(33.5 * var(--u)); }
+  /* o link "FAQ" do rodapé rola até aqui: para por baixo do menu fixo (64px) */
+  .layout-desktop .faq--pd h2 { scroll-margin-top: calc(64px + 28 * var(--u)); }
+  .layout-desktop .faq--pd .faq__item p { max-width: calc(970 * var(--u)); }
+  /* a pergunta mais longa vai em 23 para caber numa linha, como no protótipo */
+  .layout-desktop .faq--pd .faq__item--longa summary { font-size: calc(23 * var(--u)); }
+}
