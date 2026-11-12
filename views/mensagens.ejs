@@ -14,12 +14,13 @@
   <link rel="stylesheet" href="/css/header.css" />
   <link rel="stylesheet" href="/css/empresa-dashboard.css" />
   <link rel="stylesheet" href="/css/mensagens.css" />
+  <link rel="stylesheet" href="/css/mensagens-desktop.css" />
 </head>
 <body>
 
   <%- include('partials/header-dev', { currentPage: 'mensagens' }) %>
 
-<main class="page-content msg-page" id="main-content">
+<main class="page-content msg-page msg-page--dev" id="main-content">
   <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Mensagens</h1>
   <div class="msg-layout">
 
@@ -64,7 +65,12 @@
           <span class="msg-thread-header-clickable" id="threadHeaderInfo" role="button" tabindex="0" aria-label="Ver informações da empresa">
             <!-- preenchido via JS -->
           </span>
-          <button class="msg-thread-details-btn" id="threadDetailsBtn" type="button">Ver vaga</button>
+          <!-- Desktop (mensagens-desktop.css): "›" abre a empresa e "Mostrar vaga" abre a vaga da conversa -->
+          <button class="msg-thread-empresa-btn" id="threadEmpresaBtn" type="button" aria-label="Ver informações da empresa">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 5 16 12 9 19"/></svg>
+          </button>
+          <button class="msg-thread-vaga-btn" id="threadVagaBtn" type="button" hidden>Mostrar vaga</button>
+          <button class="msg-thread-details-btn" id="threadDetailsBtn" type="button">Detalhes</button>
         </header>
 
         <div class="msg-thread-body" id="threadBody" aria-live="polite"></div>
@@ -79,14 +85,11 @@
     </section>
 
     <!-- ══ Coluna 3: painel da empresa (toggle) ══ -->
-    <aside class="msg-info-panel" id="infoPanel" hidden aria-label="Detalhes da conversa">
+    <aside class="msg-info-panel" id="infoPanel" hidden aria-label="Sobre a empresa">
+      <header class="msg-info-head"><h2 class="msg-info-titulo" id="infoPanelTitle">Empresa</h2></header>
       <button class="msg-info-close" id="infoPanelClose" type="button" aria-label="Fechar painel">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <div class="msg-info-tabs" id="infoTabs" role="group" aria-label="Ver detalhes de" hidden>
-        <button type="button" class="msg-info-tab" id="tabVaga" data-tab="vaga" aria-pressed="false">Vaga</button>
-        <button type="button" class="msg-info-tab" id="tabEmpresa" data-tab="empresa" aria-pressed="false">Empresa</button>
-      </div>
       <div id="infoPanelBody">
         <p class="msg-conv-loading">Carregando...</p>
       </div>
@@ -123,6 +126,48 @@
   let activeConversationId = null;
   let activeConversation = null;
   let allJobsCache = null;
+
+  // Desktop (a partir de 1024px): layout do protótipo — prévia de duas linhas
+  // na lista, mensagens agrupadas por remetente com a data do dia e o painel
+  // "Vaga" (public/css/mensagens-desktop.css). Celular e tablet seguem como antes.
+  const DESKTOP = window.matchMedia("(min-width: 1024px)");
+  const BUSCA_PADRAO = $("convSearch").placeholder;
+  let mensagensAtivas = [];
+  let painelAtual = null; // "empresa" | "vaga" | null
+
+  function ajustarTextos() {
+    $("convSearch").placeholder = DESKTOP.matches ? "Buscar por mensagens..." : BUSCA_PADRAO;
+  }
+
+  const hora = iso => new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+  // Data da lista no desktop: a hora, se for de hoje; senão dd/mm.
+  function dataCurta(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return d.toDateString() === new Date().toDateString()
+      ? hora(iso)
+      : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  }
+
+  // Separador de dia na conversa ("20 de out."; com o ano, se não for o atual).
+  function dataDoDia(iso) {
+    const d = new Date(iso);
+    const opcoes = { day: "numeric", month: "short" };
+    if (d.getFullYear() !== new Date().getFullYear()) opcoes.year = "numeric";
+    return d.toLocaleDateString("pt-BR", opcoes);
+  }
+
+  // "Mostrar vaga" só existe quando a conversa é sobre uma vaga, e some com o painel da vaga aberto.
+  function ajustarBotaoDaVaga() {
+    $("threadVagaBtn").hidden = !activeConversation?.job_id || painelAtual === "vaga";
+  }
+
+  function fecharPainel() {
+    $("infoPanel").hidden = true;
+    painelAtual = null;
+    ajustarBotaoDaVaga();
+  }
 
   // ── Toast ──────────────────────────────────────────────
   let toastTimer = null;
@@ -161,11 +206,31 @@
     }
   }
 
+  // Item da lista no desktop: prévia inteira (o CSS corta em duas linhas),
+  // data curta e, no lugar do contador, o ponto de não lida.
+  function itemDesktop(c) {
+    const previa = c.last_message
+      ? escapeHtml(c.last_message)
+      : (c.job_title ? `Sobre: ${escapeHtml(c.job_title)}` : "Nova conversa");
+    return `
+      <button class="msg-conv-item ${c.id === activeConversationId ? "active" : ""} ${c.unread > 0 ? "unread" : ""}" data-id="${c.id}">
+        <span class="msg-conv-avatar" aria-hidden="true">${escapeHtml(initials(c.company_name))}</span>
+        <span class="msg-conv-main">
+          <span class="msg-conv-top">
+            <strong class="msg-conv-name">${escapeHtml(c.company_name ?? "Empresa")}</strong>
+            <span class="msg-conv-time">${dataCurta(c.last_message_at ?? c.created_at)}</span>
+          </span>
+          <span class="msg-conv-preview">${previa}</span>
+        </span>
+        ${c.unread > 0 ? `<span class="msg-sr">${c.unread} não lida(s)</span>` : ""}
+      </button>`;
+  }
+
   function renderConvList() {
     const q = $("convSearch").value.trim().toLowerCase();
     let list = allConversations.filter(c => {
       if (activeFilter === "nao-lidas" && !c.unread) return false;
-      if (q && !(c.company_name || "").toLowerCase().includes(q) && !(c.job_title || "").toLowerCase().includes(q)) return false;
+      if (q && ![c.company_name, c.job_title, c.last_message].some(t => (t || "").toLowerCase().includes(q))) return false;
       return true;
     });
 
@@ -179,7 +244,7 @@
       return;
     }
 
-    container.innerHTML = list.map(c => `
+    container.innerHTML = list.map(c => DESKTOP.matches ? itemDesktop(c) : `
       <button class="msg-conv-item ${c.id === activeConversationId ? "active" : ""} ${c.unread > 0 ? "unread" : ""}" data-id="${c.id}">
         <span class="msg-conv-avatar" aria-hidden="true">${escapeHtml(initials(c.company_name))}</span>
         <span class="msg-conv-main">
@@ -218,11 +283,11 @@
     $("threadEmpty").hidden = true;
     $("threadActive").hidden = false;
     $("infoPanel").hidden = true;
+    painelAtual = null;
     document.querySelector(".msg-layout").classList.add("show-thread");
 
     renderThreadHeader();
-    // Em tela larga a vaga da conversa já aparece ao lado, como na prototipação
-    if (activeConversation?.job_id && window.matchMedia("(min-width: 981px)").matches) openInfoPanel("vaga");
+    ajustarBotaoDaVaga();
     $("threadBody").innerHTML = `<p class="msg-conv-loading">Carregando mensagens...</p>`;
 
     try {
@@ -251,16 +316,59 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:auto;color:var(--muted)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
   }
 
-  $("threadHeaderInfo").addEventListener("click", () => openInfoPanel("vaga"));
-  $("threadHeaderInfo").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") openInfoPanel("vaga"); });
+  $("threadHeaderInfo").addEventListener("click", openInfoPanel);
+  $("threadHeaderInfo").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") openInfoPanel(); });
   $("threadBackBtn").addEventListener("click", () => {
     document.querySelector(".msg-layout").classList.remove("show-thread");
   });
 
+  // Desktop: mensagens seguidas do mesmo lado (até 5 min entre elas) formam
+  // um grupo com o nome e a hora em cima e, na empresa, o avatar ao lado;
+  // um separador marca cada dia.
+  function grupoHtml(grupo, nome) {
+    const baloes = grupo.itens.map(m => `
+          <article class="msg-bubble-row ${grupo.mine ? "mine" : ""}"><span class="msg-bubble">${escapeHtml(m.body)}</span></article>`).join("");
+    return `
+      <section class="msg-grupo ${grupo.mine ? "msg-grupo--eu" : ""}">
+        ${grupo.mine ? "" : `<span class="msg-conv-avatar msg-grupo-avatar" aria-hidden="true">${escapeHtml(initials(nome))}</span>`}
+        <div class="msg-grupo-corpo">
+          <p class="msg-grupo-autor">${grupo.mine ? "" : `${escapeHtml(nome)} `}<time datetime="${escapeHtml(grupo.inicio)}">${hora(grupo.inicio)}</time></p>${baloes}
+        </div>
+      </section>`;
+  }
+
+  function mensagensDesktop(messages) {
+    const nome = activeConversation?.company_name ?? "Empresa";
+    let html = "";
+    let dia = null;
+    let grupo = null;
+    const fecharGrupo = () => { if (grupo) html += grupoHtml(grupo, nome); grupo = null; };
+    messages.forEach((m, i) => {
+      const diaDaMensagem = new Date(m.created_at).toDateString();
+      if (diaDaMensagem !== dia) {
+        fecharGrupo();
+        html += `<p class="msg-dia">${dataDoDia(m.created_at)}</p>`;
+        dia = diaDaMensagem;
+      }
+      const prev = messages[i - 1];
+      const junto = grupo && prev.mine === m.mine && (new Date(m.created_at) - new Date(prev.created_at)) < 5 * 60 * 1000;
+      if (!junto) {
+        fecharGrupo();
+        grupo = { mine: m.mine, inicio: m.created_at, itens: [] };
+      }
+      grupo.itens.push(m);
+    });
+    fecharGrupo();
+    return html;
+  }
+
   function renderThreadMessages(messages) {
+    mensagensAtivas = messages;
     const body = $("threadBody");
     if (!messages.length) {
       body.innerHTML = `<p class="msg-conv-empty">Nenhuma mensagem ainda. Diga oi! 👋</p>`;
+    } else if (DESKTOP.matches) {
+      body.innerHTML = mensagensDesktop(messages);
     } else {
       body.innerHTML = messages.map((m, i) => {
         const prev = messages[i - 1];
@@ -322,88 +430,22 @@
     }
   });
 
-  // ── Painel de detalhes: vaga da conversa e empresa ─────────
-  const LEVEL_LABEL    = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
-  const MODALITY_LABEL = { presencial: "Presencial", remoto: "Remoto", hibrido: "Híbrido" };
-  const CONTRACT_LABEL = { clt: "CLT", pj: "PJ", estagio: "Estágio", temporario: "Temporário", freelancer: "Freelancer" };
-  const ENGLISH_LABEL  = { nenhum: "Não exigido", basico: "Básico", intermediario: "Intermediário", avancado: "Avançado", fluente: "Fluente" };
-  const fmtMoney = n => Number(n).toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
-  const fmtDay = iso => iso ? new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }) : "";
-  let infoTab = "empresa";
-
-  function setInfoTab(tab) {
-    infoTab = tab;
-    document.querySelectorAll("#infoTabs .msg-info-tab").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tab === tab)));
-  }
-
-  // tab: "vaga" (quando a conversa tem vaga) ou "empresa"
-  function openInfoPanel(tab) {
+  // ── Painel de info da empresa ──────────────────────────────
+  async function openInfoPanel() {
     if (!activeConversation) return;
-    const temVaga = Boolean(activeConversation.job_id);
-    const alvo = tab === "vaga" && temVaga ? "vaga" : "empresa";
-    $("infoTabs").hidden = !temVaga;
-    $("infoPanel").hidden = false;
-    setInfoTab(alvo);
+    const panel = $("infoPanel");
+    painelAtual = "empresa";
+    $("infoPanelTitle").textContent = "Empresa";
+    panel.setAttribute("aria-label", "Sobre a empresa");
+    panel.hidden = false;
+    ajustarBotaoDaVaga();
     $("infoPanelBody").innerHTML = `<p class="msg-conv-loading">Carregando...</p>`;
-    return alvo === "vaga" ? renderVagaInfo() : renderEmpresaInfo();
-  }
 
-  async function renderVagaInfo() {
-    const conv = activeConversation;
-    try {
-      const res = await fetch(`/api/vagas/${conv.job_id}`);
-      if (!res.ok) throw new Error();
-      const job = await res.json();
-      if (infoTab !== "vaga" || conv !== activeConversation) return; // usuário já trocou de aba/conversa
-
-      const chips = [
-        job.location, MODALITY_LABEL[job.modality] ?? job.modality, LEVEL_LABEL[job.level] ?? job.level,
-        CONTRACT_LABEL[job.contract_type] ?? job.contract_type,
-      ].filter((c, i, a) => c && a.indexOf(c) === i).map(c => `<li class="msg-vaga-chip">${escapeHtml(c)}</li>`).join("");
-
-      const salario = (job.salary_min || job.salary_max)
-        ? [job.salary_min && fmtMoney(job.salary_min), job.salary_max && fmtMoney(job.salary_max)].filter(Boolean).join(" – ")
-        : "";
-      const info = [
-        salario && ["Faixa salarial", salario, true],
-        job.english_level && job.english_level !== "nenhum" && ["Inglês", ENGLISH_LABEL[job.english_level] ?? job.english_level],
-        job.location && ["Local", job.location],
-        job.years_experience != null && job.years_experience > 0 && ["Experiência", `${job.years_experience} ano(s)`],
-      ].filter(Boolean);
-      const skills = (job.skills || []).map(k => `<li class="msg-vaga-chip">${escapeHtml(k.name)}</li>`).join("");
-
-      $("infoPanelBody").innerHTML = `
-        <h2 class="msg-vaga-title">${escapeHtml(job.title)}</h2>
-        <p class="msg-vaga-company">${escapeHtml(job.company || conv.company_name || "")}${job.created_at ? ` · Publicada em ${escapeHtml(fmtDay(job.created_at))}` : ""}</p>
-        ${chips ? `<ul class="msg-vaga-chips" aria-label="Resumo da vaga">${chips}</ul>` : ""}
-        <section class="msg-info-block">
-          <h3>Descrição da vaga</h3>
-          <p class="msg-vaga-desc is-clamped" id="vagaDesc">${escapeHtml(job.description || "Sem descrição.")}</p>
-          <button type="button" class="msg-vaga-more" id="vagaMore" aria-expanded="false" aria-controls="vagaDesc" hidden>Ver mais</button>
-        </section>
-        ${skills ? `<section class="msg-info-block"><h3>Skills</h3><ul class="msg-vaga-chips">${skills}</ul></section>` : ""}
-        ${info.length ? `<section class="msg-info-block"><h3>Outras informações</h3>
-          <dl class="msg-vaga-info">${info.map(([k, v, destaque]) => `<dt>${k}</dt><dd class="${destaque ? "is-destaque" : ""}">${escapeHtml(v)}</dd>`).join("")}</dl></section>` : ""}
-        <a class="msg-vaga-link" href="/vagas/${encodeURIComponent(job.id)}" target="_blank" rel="noopener">Abrir página da vaga</a>`;
-
-      const desc = $("vagaDesc"), more = $("vagaMore");
-      if (desc.scrollHeight > desc.clientHeight + 2) more.hidden = false;
-      more.addEventListener("click", () => {
-        const aberto = more.getAttribute("aria-expanded") === "true";
-        desc.classList.toggle("is-clamped", aberto);
-        more.setAttribute("aria-expanded", String(!aberto));
-        more.textContent = aberto ? "Ver mais" : "Ver menos";
-      });
-    } catch {
-      $("infoPanelBody").innerHTML = `<p class="msg-conv-empty" role="alert">Erro ao carregar a vaga.</p>`;
-    }
-  }
-
-  async function renderEmpresaInfo() {
     try {
       const res = await fetch(`/api/empresas/${activeConversation.company_id}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
+      if (painelAtual !== "empresa") return; // trocou para a vaga enquanto carregava
 
       const jobsHtml = data.jobs.length
         ? data.jobs.map(j => `
@@ -418,14 +460,14 @@
 
       $("infoPanelBody").innerHTML = `
         <span class="msg-info-avatar" aria-hidden="true">${escapeHtml(initials(data.name))}</span>
-        <h2 class="msg-info-name">${escapeHtml(data.name)}</h2>
-        ${data.descricao ? `<section class="msg-info-block"><h3>Sobre a empresa</h3><p>${escapeHtml(data.descricao)}</p></section>` : ""}
+        <h3 class="msg-info-name">${escapeHtml(data.name)}</h3>
+        ${data.descricao ? `<section class="msg-info-block"><h4>Sobre a empresa</h4><p>${escapeHtml(data.descricao)}</p></section>` : ""}
         <div class="msg-info-meta">
           ${data.site ? `<a href="${escapeHtml(data.site)}" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> ${escapeHtml(data.site.replace(/^https?:\/\//, ""))}</a>` : ""}
           ${data.cidade ? `<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${escapeHtml(data.cidade)}${data.estado ? ", " + escapeHtml(data.estado) : ""}</span>` : ""}
         </div>
         <section class="msg-info-block">
-          <h3>Vagas em aberto (${data.jobs.length})</h3>
+          <h4>Vagas em aberto (${data.jobs.length})</h4>
           <div class="msg-info-jobs">${jobsHtml}</div>
         </section>`;
     } catch {
@@ -433,9 +475,96 @@
     }
   }
 
-  $("infoPanelClose").addEventListener("click", () => { $("infoPanel").hidden = true; });
-  $("threadDetailsBtn").addEventListener("click", () => openInfoPanel("vaga"));
-  document.querySelectorAll("#infoTabs .msg-info-tab").forEach(b => b.addEventListener("click", () => openInfoPanel(b.dataset.tab)));
+  $("infoPanelClose").addEventListener("click", fecharPainel);
+  $("threadDetailsBtn").addEventListener("click", openInfoPanel);
+  $("threadEmpresaBtn").addEventListener("click", openInfoPanel);
+
+  // ── Painel da vaga (desktop: "Mostrar vaga") ───────────────
+  const NIVEL      = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
+  const MODALIDADE = { presencial: "Presencial", remoto: "Remoto", hibrido: "Híbrido" };
+  const INGLES     = { nenhum: "Não exigido", basico: "Básico", intermediario: "Intermediário", avancado: "Avançado", fluente: "Fluente" };
+  const reais = n => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(n);
+
+  function faixaSalarial(job) {
+    if (job.salary_min && job.salary_max) return `${reais(job.salary_min)} – ${reais(job.salary_max)}`;
+    if (job.salary_min) return `a partir de ${reais(job.salary_min)}`;
+    if (job.salary_max) return `até ${reais(job.salary_max)}`;
+    return null;
+  }
+
+  // Etiqueta só com a cidade, como no protótipo ("São Paulo, SP" → "São Paulo");
+  // o local completo continua em "Outras informações".
+  const cidade = local => local.replace(/\s*[-–,/]\s*[A-Z]{2}$/, "") || local;
+
+  function painelDaVaga(job, empresa) {
+    const etiquetas = [
+      job.location && cidade(job.location),
+      MODALIDADE[job.modality],
+      ...(job.tags ? job.tags.split(",").map(t => t.trim()).filter(Boolean) : []),
+      NIVEL[job.level],
+    ].filter(Boolean);
+    const salario = faixaSalarial(job);
+    const outras = [
+      salario && `<dt>Faixa salarial</dt><dd class="msg-vaga-salario">${escapeHtml(salario)}</dd>`,
+      job.english_level && job.english_level !== "nenhum" && `<dt>Inglês</dt><dd>${escapeHtml(INGLES[job.english_level] ?? job.english_level)}</dd>`,
+      job.location && `<dt>Local</dt><dd>${escapeHtml(job.location)}</dd>`,
+    ].filter(Boolean).join("");
+    return `
+      <div class="msg-vaga-topo">
+        <span class="msg-vaga-empresa">
+          <span class="msg-conv-avatar" aria-hidden="true">${escapeHtml(initials(empresa))}</span>
+          <span>${escapeHtml(empresa)}</span>
+        </span>
+        <div class="msg-vaga-cabeca">
+          <h3 class="msg-vaga-titulo">${escapeHtml(job.title)}</h3>
+          ${job.created_at ? `<p class="msg-vaga-data">Publicação: ${new Date(job.created_at).toLocaleDateString("pt-BR")}</p>` : ""}
+        </div>
+      </div>
+      ${etiquetas.length ? `<ul class="msg-vaga-tags" aria-label="Detalhes da vaga">${etiquetas.map(t => `<li><span>${escapeHtml(t)}</span></li>`).join("")}</ul>` : ""}
+      <section class="msg-vaga-cartao">
+        ${job.description ? `<h4>Descrição da vaga</h4><p class="msg-vaga-texto">${escapeHtml(job.description)}</p>` : ""}
+        ${job.responsibilities ? `<h4>Responsabilidades</h4><p class="msg-vaga-texto msg-vaga-resp">${escapeHtml(job.responsibilities)}</p>` : ""}
+        <a class="msg-vaga-mais" href="/vagas/${encodeURIComponent(job.id)}" target="_blank" rel="noopener">Ver mais</a>
+        ${outras ? `<h4>Outras informações</h4><dl class="msg-vaga-info">${outras}</dl>` : ""}
+      </section>`;
+  }
+
+  async function abrirPainelDaVaga() {
+    const conversa = activeConversation;
+    if (!conversa?.job_id) return;
+    painelAtual = "vaga";
+    $("infoPanelTitle").textContent = "Vaga";
+    $("infoPanel").setAttribute("aria-label", "Vaga da conversa");
+    $("infoPanel").hidden = false;
+    ajustarBotaoDaVaga();
+    $("infoPanelBody").innerHTML = `<p class="msg-conv-loading">Carregando...</p>`;
+    try {
+      const res = await fetch(`/api/vagas/${encodeURIComponent(conversa.job_id)}`);
+      if (conversa !== activeConversation || painelAtual !== "vaga") return;
+      if (res.status === 404) {
+        $("infoPanelBody").innerHTML = `<p class="msg-conv-empty">Esta vaga não está mais disponível.</p>`;
+        return;
+      }
+      if (!res.ok) throw new Error();
+      const job = await res.json();
+      if (conversa !== activeConversation || painelAtual !== "vaga") return;
+      $("infoPanelBody").innerHTML = painelDaVaga(job, conversa.company_name ?? job.company ?? "Empresa");
+    } catch {
+      if (painelAtual === "vaga") $("infoPanelBody").innerHTML = `<p class="msg-conv-empty">Erro ao carregar a vaga.</p>`;
+    }
+  }
+
+  $("threadVagaBtn").addEventListener("click", abrirPainelDaVaga);
+
+  // Ao cruzar 1024px, troca os modelos (lista e mensagens) e os textos; o
+  // painel da vaga, que só existe no desktop, fecha.
+  DESKTOP.addEventListener("change", () => {
+    ajustarTextos();
+    renderConvList();
+    if (activeConversationId && mensagensAtivas.length) renderThreadMessages(mensagensAtivas);
+    if (!DESKTOP.matches && painelAtual === "vaga") fecharPainel();
+  });
+  ajustarTextos();
 
   // ── Nova conversa (busca por vaga) ─────────────────────────
   function openNewConvModal() {

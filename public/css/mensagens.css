@@ -265,7 +265,7 @@
 .msg-info-name { text-align: center; font-size: 1.02rem; margin-bottom: 16px; }
 
 .msg-info-block { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
-.msg-info-block h3 { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 8px; }
+.msg-info-block h4 { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 8px; }
 .msg-info-block p { font-size: .82rem; color: var(--text); line-height: 1.6; }
 
 .msg-info-meta { display: flex; flex-direction: column; gap: 8px; font-size: .8rem; }
@@ -501,38 +501,3 @@
 /* Cabeçalho da conversa: avatar e nome maiores */
 .msg-page--company .msg-thread-header-clickable .msg-conv-avatar { width: 46px; height: 46px; }
 .msg-page--company .msg-thread-header-info strong { font-size: 1.15rem; }
-
-/* ── Painel: vaga da conversa (abas Vaga | Empresa) ── */
-.msg-info-tabs { display: flex; gap: 6px; margin: 0 40px 16px 0; }
-.msg-info-tabs[hidden] { display: none; }
-.msg-info-tab {
-  min-height: 32px; padding: 0 16px; border-radius: 999px; cursor: pointer;
-  background: transparent; border: 1px solid var(--border-lite); color: var(--muted);
-  font-family: var(--font-display); font-size: .8rem; font-weight: 700;
-}
-.msg-info-tab[aria-pressed="true"] { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-text); }
-.msg-info-tab:focus-visible, .msg-vaga-more:focus-visible, .msg-vaga-link:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 2px; }
-
-.msg-vaga-title { font-family: var(--font-display); font-size: 1.1rem; line-height: 1.25; overflow-wrap: anywhere; }
-.msg-vaga-company { margin-top: 4px; font-size: .75rem; color: var(--muted); overflow-wrap: anywhere; }
-.msg-vaga-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
-.msg-vaga-chip {
-  padding: 2px 10px; border: 1px solid var(--border-lite); border-radius: 999px;
-  font-size: .7rem; color: var(--text); overflow-wrap: anywhere;
-}
-.msg-vaga-desc { white-space: pre-line; overflow-wrap: anywhere; }
-.msg-vaga-desc.is-clamped { display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; }
-.msg-vaga-more {
-  display: block; width: 100%; min-height: 32px; margin-top: 10px; cursor: pointer;
-  background: var(--bg-3); border: 1px solid var(--border-lite); border-radius: var(--radius-sm);
-  color: var(--text); font-size: .78rem;
-}
-.msg-vaga-more[hidden] { display: none; }
-.msg-vaga-info { display: grid; gap: 2px; margin: 0; }
-.msg-vaga-info dt { margin-top: 10px; font-size: .72rem; font-weight: 700; color: var(--text); }
-.msg-vaga-info dd { margin: 0; font-size: .78rem; color: var(--muted); overflow-wrap: anywhere; }
-.msg-vaga-info dd.is-destaque { color: var(--accent-text); font-weight: 700; }
-.msg-vaga-link {
-  display: inline-flex; align-items: center; min-height: 32px; margin-top: 18px;
-  color: var(--accent-text); font-size: .8rem; font-weight: 600; text-decoration: underline; text-underline-offset: 2px;
-}
