@@ -29,7 +29,8 @@
   align-items: start;
 }
 
-.sub-summary { display: flex; flex-direction: column; gap: 1rem; }
+.sub-summary { display: flex; flex-direction: column; gap: 1rem; min-width: 0; overflow-wrap: anywhere; }
+.sub-layout > * { min-width: 0; }
 .sub-plan-name { font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; letter-spacing: -.02em; }
 /* Seletor Mensal/Anual do checkout */
 .sub-periodo { display: inline-flex; gap: 6px; padding: 4px; margin: 0 0 1.25rem; border: 1px solid var(--border-lite); border-radius: 12px; background: var(--bg-2); }
@@ -191,7 +192,7 @@
 
 /* ── Responsivo ──────────────────────────────────────── */
 @media (max-width: 860px) {
-  .sub-layout { grid-template-columns: 1fr; }
+  .sub-layout { grid-template-columns: minmax(0, 1fr); } /* 1fr sozinho cresce com o conteúdo (cartão do Mercado Pago) e estoura a tela */
 }
 
 @media (max-width: 640px) {
@@ -213,3 +214,5 @@
 
 /* Alvo de toque com no mínimo 24px (WCAG 2.5.8) */
 .sub-back { min-height: 24px; }
+/* Selo "Plano PRO" do resumo: --accent sobre --accent-dim não chega a 4,5:1 */
+.sub-summary .chip-accent { color: var(--accent-text); }
