@@ -1,0 +1,225 @@
+/* =============================================
+   empresa-dashboard.css
+   Dashboard da empresa: saudação, acesso rápido, vagas postadas,
+   devs visualizados recentemente e painel "Matches Destaque".
+============================================= */
+
+/* ── Layout: coluna principal + painel de matches ── */
+.empresa-dash {
+  position: relative; z-index: 1;
+  padding-bottom: 32px; /* largura e respiro laterais vêm de .page-content (header.css) */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(200px, 30%, 340px);
+  gap: 24px;
+  align-items: stretch;
+}
+.dash-main { min-width: 0; }
+.dash-side { min-width: 0; }
+
+/* ── Loading ── */
+.loading-screen {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 60vh; gap: 16px; color: var(--muted); font-size: .9rem;
+}
+/* [hidden] tem a mesma especificidade de uma classe — sem isto, o JS
+   marca a tela de carregamento como hidden, mas ela continua com
+   display:flex e fica "presa" na tela por cima do conteúdo já carregado. */
+.loading-screen[hidden] { display: none; }
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid var(--border-lite); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Cartão base ── */
+.dash-card {
+  background: #0a0a0a;
+  border: 1px solid var(--border-lite);
+  border-radius: 12px;
+}
+
+/* ── Saudação ── */
+.dash-welcome { padding: 24px 28px; animation: fadeUp .4s ease both; }
+.dash-welcome h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2.4vw, 1.4rem); font-weight: 700; letter-spacing: -.01em;
+  line-height: 1.25; margin-bottom: 10px; overflow-wrap: anywhere;
+}
+.dash-welcome p {
+  font-family: var(--font-body); font-size: .76rem; color: var(--muted);
+  line-height: 1.65; max-width: 56ch;
+}
+
+/* ── Títulos de seção ── */
+.dash-section { margin-top: 30px; animation: fadeUp .45s .06s ease both; }
+.dash-section > h2 {
+  font-family: var(--font-display); font-size: 1.2rem; font-weight: 700;
+  letter-spacing: -.01em; margin-bottom: 14px;
+}
+
+/* ── Acesso rápido ── */
+.quick-grid {
+  list-style: none; margin: 0; padding: 0 0 4px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(190px, 1fr); gap: 12px;
+  overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--border-lite) transparent;
+}
+.quick-card {
+  display: flex; align-items: center; gap: 12px; min-width: 0;
+  padding: 12px 14px; text-decoration: none; color: var(--text);
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.quick-card:hover { border-color: var(--muted); background: #0f0f0f; transform: translateY(-1px); }
+.quick-card:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 2px; }
+.quick-icon {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #161616; border: 1px solid var(--border-lite); color: var(--text);
+}
+.quick-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.quick-text strong {
+  font-family: var(--font-display); font-size: .86rem; font-weight: 700; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.quick-text small {
+  font-family: var(--font-body); font-size: .64rem; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── Carrosséis horizontais (vagas e devs) ── */
+.dash-row {
+  list-style: none; margin: 0; padding: 2px 2px 12px;
+  display: flex; gap: 14px;
+  overflow-x: auto; scroll-snap-type: x proximity;
+  scrollbar-width: thin; scrollbar-color: var(--border-lite) transparent;
+}
+.dash-row > li { flex: 0 0 auto; scroll-snap-align: start; }
+
+/* ── Cartão de vaga ── */
+.vaga-card {
+  width: 214px; height: 100%;
+  display: flex; flex-direction: column; gap: 8px; padding: 14px 16px 16px;
+}
+.vaga-card h3 {
+  font-family: var(--font-display); font-size: .98rem; font-weight: 700; line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.vaga-status {
+  align-self: flex-start;
+  font-family: var(--font-display); font-size: .56rem; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 99px;
+}
+.vaga-status--ativa   { color: var(--teal); background: var(--teal-dim); border: 1px solid var(--teal-border); }
+.vaga-status--inativa { color: var(--muted); background: #161616; border: 1px solid var(--border-lite); }
+.vaga-dados {
+  margin: 0; display: flex; flex-direction: column; gap: 5px;
+  font-family: var(--font-body); font-size: .64rem; color: var(--text); line-height: 1.4;
+}
+.vaga-dados div { display: block; }
+.vaga-dados dt, .vaga-dados dd { display: inline; margin: 0; }
+.vaga-dados dt { font-weight: 700; }
+.vaga-dados dt::after { content: ": "; }
+.vaga-card .btn-gerenciar { margin-top: auto; }
+
+.btn-gerenciar {
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px 12px; border-radius: 8px; text-decoration: none; text-transform: uppercase;
+  font-family: var(--font-body); font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+  color: #e5e7eb; background: #3f3f3f; border: 1px solid transparent;
+  transition: background .15s;
+}
+.btn-gerenciar:hover { background: #525252; }
+.btn-gerenciar:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 2px; }
+
+/* ── Cartão de dev visualizado ── */
+.dev-card { width: 214px; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; }
+.dev-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.dev-card h3 {
+  font-family: var(--font-display); font-size: .98rem; font-weight: 700; line-height: 1.25;
+  overflow-wrap: anywhere; min-width: 0;
+}
+.dev-pro { font-family: var(--font-display); font-size: .85rem; font-weight: 700; color: var(--text); flex-shrink: 0; }
+.dev-meta { font-family: var(--font-body); font-size: .64rem; color: var(--muted); overflow-wrap: anywhere; }
+.dev-link {
+  margin-top: 4px; align-self: flex-start;
+  font-family: var(--font-body); font-size: .64rem; color: var(--accent-text); text-decoration: none;
+}
+.dev-link:hover { text-decoration: underline; }
+.dev-link:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 2px; border-radius: 3px; }
+
+/* ── Painel "Matches Destaque" ── */
+.matches-panel {
+  height: 100%; min-height: 360px; padding: 24px 22px;
+  display: flex; flex-direction: column; gap: 16px;
+  animation: fadeUp .4s .08s ease both;
+}
+.matches-panel h2 {
+  font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; letter-spacing: -.01em;
+}
+.match-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.match-item {
+  display: flex; flex-direction: column; gap: 6px; padding: 12px 14px;
+  text-decoration: none; color: var(--text);
+  background: #0f0f0f; border: 1px solid var(--border-lite); border-radius: 10px;
+  transition: border-color .15s;
+}
+.match-item:hover { border-color: var(--muted); }
+.match-item:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 2px; }
+.match-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.match-top strong {
+  font-family: var(--font-display); font-size: .88rem; font-weight: 700;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.match-score { font-family: var(--font-display); font-size: .86rem; font-weight: 700; flex-shrink: 0; }
+.match-score--alto  { color: var(--teal); }
+.match-score--medio { color: var(--yellow); }
+.match-score--baixo { color: var(--muted); }
+.match-job {
+  font-family: var(--font-body); font-size: .62rem; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.match-bar { height: 4px; border-radius: 99px; background: #1e1e1e; overflow: hidden; }
+.match-bar > span { display: block; height: 100%; border-radius: 99px; background: var(--teal); }
+.match-bar--medio > span { background: var(--yellow); }
+.match-bar--baixo > span { background: var(--muted); }
+.matches-ver-todos {
+  margin-top: auto; align-self: flex-start;
+  font-family: var(--font-body); font-size: .68rem; color: var(--accent-text); text-decoration: none;
+}
+.matches-ver-todos:hover { text-decoration: underline; }
+.matches-ver-todos:focus-visible { outline: 2px solid var(--accent-hv); outline-offset: 2px; border-radius: 3px; }
+
+/* ── Estados vazios ── */
+.dash-empty {
+  padding: 22px 20px; text-align: center;
+  font-family: var(--font-body); font-size: .74rem; color: var(--muted); line-height: 1.6;
+}
+.dash-empty strong { display: block; font-family: var(--font-display); font-size: .92rem; color: var(--text); margin-bottom: 4px; }
+.dash-empty .btn-gerenciar { display: inline-flex; margin-top: 12px; }
+
+/* ── Rodapé ── */
+.site-footer {
+  position: relative; z-index: 1; text-align: center;
+  padding: 24px 16px 96px; font-size: .74rem; color: var(--muted);
+}
+
+/* ── Responsivo ── */
+@media (max-width: 700px) {
+  .empresa-dash { grid-template-columns: minmax(0, 1fr); }
+  .matches-panel { min-height: 0; }
+}
+@media (max-width: 640px) {
+  .quick-grid { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: minmax(0, 1fr); overflow: visible; }
+  .dash-welcome { padding: 20px; }
+  .vaga-card, .dev-card { width: min(78vw, 260px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-welcome, .dash-section, .matches-panel { animation: none; }
+  .quick-card { transition: none; }
+  .spinner { animation-duration: 1.6s; }
+}
+
+/* Alvo de toque com no mínimo 24px (WCAG 2.5.8) */
+.matches-ver-todos { display: inline-flex; align-items: center; min-height: 24px; }

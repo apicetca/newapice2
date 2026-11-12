@@ -18,15 +18,25 @@ describe("planos.ejs — empresa", () => {
     const html = await render("empresa");
     expect(html).toMatch(/<h1>\s*Escolha o <span class="plans-h1-accent">plano certo<\/span>(?:<br[^>]*>)? para você\s*<\/h1>/);
     expect((html.match(/<h1\b/g) || []).length).toBe(1);
-    expect(html).toMatch(/<main class="page-content plans--empresa" id="main-content">/);
+    expect(html).toMatch(/<main class="page-content plans--pro plans--empresa" id="main-content">/);
     expect(html).toContain("Assinatura mensal no cartão de crédito, com cobrança automática. Cancele ou troque quando quiser.");
     expect(html).toContain("Pagamentos processados pelo Mercado Pago. Os dados do cartão não passam pelos servidores do Ápice.");
   });
 
-  test("dev continua com o layout e o título de antes", async () => {
+  test("dev usa o mesmo layout de cards PRO, em roxo (plans--dev), com o mesmo título e um único h1", async () => {
     const html = await render("dev");
-    expect(html).toMatch(/<h1>Escolha o plano certo para você<\/h1>/);
-    expect(html).not.toMatch(/<main class="page-content plans--empresa"/); // (o CSS cita a classe, o <main> não)
+    expect(html).toMatch(/<h1>\s*Escolha o <span class="plans-h1-accent">plano certo<\/span>(?:<br[^>]*>)? para você\s*<\/h1>/);
+    expect((html.match(/<h1\b/g) || []).length).toBe(1);
+    expect(html).toMatch(/<main class="page-content plans--pro plans--dev" id="main-content">/);
+    expect(FONTE).toMatch(/\.plans--dev\s*\{\s*--plan-cor: var\(--accent\)/);
+  });
+
+  test("dev: benefícios do PRO vêm da config (roadmap + features), sem o ramo antigo de cards", () => {
+    expect(FONTE).toMatch(/function beneficiosDev\(plan\)/);
+    expect(FONTE).toContain("r.max_ativos");
+    expect(FONTE).toContain("f.verificacao_projetos");
+    expect(FONTE).not.toContain("renderPlansLegado");
+    expect(FONTE).not.toContain("IS_EMPRESA");
   });
 
   test("um card por período: mensal sempre; anual só se o plano tem annual_price_cents", () => {

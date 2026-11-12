@@ -73,7 +73,7 @@
 
     <div id="state-content" <%= insights ? "" : "hidden" %>>
       <div class="dev-card" style="margin-bottom:20px">
-        <p id="resumo-text" style="font-size:.95rem;line-height:1.7"><%= insights ? insights.resumo : "" %></p>
+        <p id="resumo-text" style="font-size:.95rem;line-height:1.7;overflow-wrap:anywhere"><%= insights ? insights.resumo : "" %></p>
         <p id="gerado-em" style="font-size:.75rem;color:var(--muted);margin-top:12px"><%
           if (insights && insights.gerado_em) { %>Atualizado em <%= new Date(insights.gerado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) %><% } %></p>
       </div>

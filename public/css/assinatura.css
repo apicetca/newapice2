@@ -210,3 +210,6 @@
   .sub-history td::before { content: attr(data-label); color: var(--muted); font-size: .76rem; }
   .sub-history td > div { text-align: right; }
 }
+
+/* Alvo de toque com no mínimo 24px (WCAG 2.5.8) */
+.sub-back { min-height: 24px; }

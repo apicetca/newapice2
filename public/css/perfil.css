@@ -681,3 +681,9 @@
   .reanalyze-bar { flex-direction: column; align-items: flex-start; }
   .toast { right: 1rem; left: 1rem; min-width: unset; max-width: unset; }
 }
+
+/* Alvo de toque com no mínimo 24px (WCAG 2.5.8) */
+.skill-why-btn { min-height: 24px; padding-block: 3px; }
+
+/* Palavra ou URL longa quebra em vez de estourar a caixa/tela */
+.profile-hero-card { overflow-wrap: anywhere; }

@@ -305,3 +305,6 @@
 @media (max-width: 400px) {
   .summary-bar { grid-template-columns: 1fr; }
 }
+
+/* Alvo de toque com no mínimo 24px (WCAG 2.5.8) */
+.section-link { display: inline-flex; align-items: center; min-height: 24px; }

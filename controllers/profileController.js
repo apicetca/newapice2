@@ -7,11 +7,19 @@ const db    = require("../database/db");
 const { analisarGitHub } = require("../services/githubAnalyzer");
 const { MENSAGEM_GITHUB_INDISPONIVEL, ehFalhaDeLeitura, registrarFalha } = require("../services/githubErrors");
 const { getUserPlan } = require("../services/subscriptionService");
+const { plansForType } = require("../config/plans");
 const {
   CONFIANCA_POR_NIVEL, NIVEIS_DECLARADOS, combinar, detectadaDe,
 } = require("../services/skillOrigem");
 
 // ── Avatar upload (multer) ────────────────────────────────
+// Plano pago que o dev gratuito pode assinar (preço vem de config/plans.js); null se já é pago.
+function planoDeUpgrade(planoAtual) {
+  if (planoAtual.price_cents > 0) return null;
+  const pago = plansForType("dev").find(p => p.price_cents > 0);
+  return pago ? { code: pago.code, name: pago.name, price_cents: pago.price_cents } : null;
+}
+
 const UPLOAD_DIR = path.join(__dirname, "../public/uploads/avatars");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
@@ -128,7 +136,10 @@ const profileController = {
         nivel:        profile.nivel         ?? "iniciante",
         avatar:       profile.avatar_url   ?? req.session.user.avatar ?? null,
         skills,
-        plan: { code: plan.code, name: plan.name, price_cents: plan.price_cents, features: plan.features },
+        plan: {
+          code: plan.code, name: plan.name, price_cents: plan.price_cents, features: plan.features,
+          upgrade: planoDeUpgrade(plan),
+        },
       });
     } catch (err) {
       console.error("Erro ao buscar perfil:", err.message);

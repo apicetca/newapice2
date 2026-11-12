@@ -631,3 +631,6 @@
 @media (prefers-reduced-motion: reduce) {
   .modal, .modal-backdrop { animation: none; }
 }
+
+/* Palavra ou URL longa quebra em vez de estourar a caixa/tela */
+.repo-card { overflow-wrap: anywhere; }

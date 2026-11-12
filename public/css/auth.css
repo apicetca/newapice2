@@ -827,3 +827,6 @@ body.login-page { --login-glow: 124,58,237; background: var(--bg); }
 .login-page .lp-eyebrow-dot {
   transition: background-color .35s ease, border-color .35s ease, color .35s ease, box-shadow .35s ease, transform .15s ease;
 }
+
+/* Alvo de toque com no mínimo 24px (WCAG 2.5.8) */
+.forgot-link { display: inline-block; padding: 4px 0; min-height: 24px; }

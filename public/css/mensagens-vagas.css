@@ -83,3 +83,7 @@
   .chatv-card-actions { flex-direction: row; align-items: center; justify-content: space-between; min-width: 0; }
   .chatv-btn { width: auto; flex: 1; }
 }
+
+/* Alvo de toque com no mínimo 24px (WCAG 2.5.8) */
+.chatv-back { display: inline-flex; align-items: center; min-height: 24px; }
+#vagaSearch { min-height: 24px; }
