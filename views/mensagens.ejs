@@ -64,7 +64,7 @@
           <span class="msg-thread-header-clickable" id="threadHeaderInfo" role="button" tabindex="0" aria-label="Ver informações da empresa">
             <!-- preenchido via JS -->
           </span>
-          <button class="msg-thread-details-btn" id="threadDetailsBtn" type="button">Detalhes</button>
+          <button class="msg-thread-details-btn" id="threadDetailsBtn" type="button">Ver vaga</button>
         </header>
 
         <div class="msg-thread-body" id="threadBody" aria-live="polite"></div>
@@ -79,10 +79,14 @@
     </section>
 
     <!-- ══ Coluna 3: painel da empresa (toggle) ══ -->
-    <aside class="msg-info-panel" id="infoPanel" hidden aria-label="Sobre a empresa">
+    <aside class="msg-info-panel" id="infoPanel" hidden aria-label="Detalhes da conversa">
       <button class="msg-info-close" id="infoPanelClose" type="button" aria-label="Fechar painel">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
+      <div class="msg-info-tabs" id="infoTabs" role="group" aria-label="Ver detalhes de" hidden>
+        <button type="button" class="msg-info-tab" id="tabVaga" data-tab="vaga" aria-pressed="false">Vaga</button>
+        <button type="button" class="msg-info-tab" id="tabEmpresa" data-tab="empresa" aria-pressed="false">Empresa</button>
+      </div>
       <div id="infoPanelBody">
         <p class="msg-conv-loading">Carregando...</p>
       </div>
@@ -217,6 +221,8 @@
     document.querySelector(".msg-layout").classList.add("show-thread");
 
     renderThreadHeader();
+    // Em tela larga a vaga da conversa já aparece ao lado, como na prototipação
+    if (activeConversation?.job_id && window.matchMedia("(min-width: 981px)").matches) openInfoPanel("vaga");
     $("threadBody").innerHTML = `<p class="msg-conv-loading">Carregando mensagens...</p>`;
 
     try {
@@ -245,8 +251,8 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:auto;color:var(--muted)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
   }
 
-  $("threadHeaderInfo").addEventListener("click", openInfoPanel);
-  $("threadHeaderInfo").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") openInfoPanel(); });
+  $("threadHeaderInfo").addEventListener("click", () => openInfoPanel("vaga"));
+  $("threadHeaderInfo").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") openInfoPanel("vaga"); });
   $("threadBackBtn").addEventListener("click", () => {
     document.querySelector(".msg-layout").classList.remove("show-thread");
   });
@@ -316,13 +322,84 @@
     }
   });
 
-  // ── Painel de info da empresa ──────────────────────────────
-  async function openInfoPanel() {
-    if (!activeConversation) return;
-    const panel = $("infoPanel");
-    panel.hidden = false;
-    $("infoPanelBody").innerHTML = `<p class="msg-conv-loading">Carregando...</p>`;
+  // ── Painel de detalhes: vaga da conversa e empresa ─────────
+  const LEVEL_LABEL    = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
+  const MODALITY_LABEL = { presencial: "Presencial", remoto: "Remoto", hibrido: "Híbrido" };
+  const CONTRACT_LABEL = { clt: "CLT", pj: "PJ", estagio: "Estágio", temporario: "Temporário", freelancer: "Freelancer" };
+  const ENGLISH_LABEL  = { nenhum: "Não exigido", basico: "Básico", intermediario: "Intermediário", avancado: "Avançado", fluente: "Fluente" };
+  const fmtMoney = n => Number(n).toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  const fmtDay = iso => iso ? new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }) : "";
+  let infoTab = "empresa";
 
+  function setInfoTab(tab) {
+    infoTab = tab;
+    document.querySelectorAll("#infoTabs .msg-info-tab").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tab === tab)));
+  }
+
+  // tab: "vaga" (quando a conversa tem vaga) ou "empresa"
+  function openInfoPanel(tab) {
+    if (!activeConversation) return;
+    const temVaga = Boolean(activeConversation.job_id);
+    const alvo = tab === "vaga" && temVaga ? "vaga" : "empresa";
+    $("infoTabs").hidden = !temVaga;
+    $("infoPanel").hidden = false;
+    setInfoTab(alvo);
+    $("infoPanelBody").innerHTML = `<p class="msg-conv-loading">Carregando...</p>`;
+    return alvo === "vaga" ? renderVagaInfo() : renderEmpresaInfo();
+  }
+
+  async function renderVagaInfo() {
+    const conv = activeConversation;
+    try {
+      const res = await fetch(`/api/vagas/${conv.job_id}`);
+      if (!res.ok) throw new Error();
+      const job = await res.json();
+      if (infoTab !== "vaga" || conv !== activeConversation) return; // usuário já trocou de aba/conversa
+
+      const chips = [
+        job.location, MODALITY_LABEL[job.modality] ?? job.modality, LEVEL_LABEL[job.level] ?? job.level,
+        CONTRACT_LABEL[job.contract_type] ?? job.contract_type,
+      ].filter((c, i, a) => c && a.indexOf(c) === i).map(c => `<li class="msg-vaga-chip">${escapeHtml(c)}</li>`).join("");
+
+      const salario = (job.salary_min || job.salary_max)
+        ? [job.salary_min && fmtMoney(job.salary_min), job.salary_max && fmtMoney(job.salary_max)].filter(Boolean).join(" – ")
+        : "";
+      const info = [
+        salario && ["Faixa salarial", salario, true],
+        job.english_level && job.english_level !== "nenhum" && ["Inglês", ENGLISH_LABEL[job.english_level] ?? job.english_level],
+        job.location && ["Local", job.location],
+        job.years_experience != null && job.years_experience > 0 && ["Experiência", `${job.years_experience} ano(s)`],
+      ].filter(Boolean);
+      const skills = (job.skills || []).map(k => `<li class="msg-vaga-chip">${escapeHtml(k.name)}</li>`).join("");
+
+      $("infoPanelBody").innerHTML = `
+        <h2 class="msg-vaga-title">${escapeHtml(job.title)}</h2>
+        <p class="msg-vaga-company">${escapeHtml(job.company || conv.company_name || "")}${job.created_at ? ` · Publicada em ${escapeHtml(fmtDay(job.created_at))}` : ""}</p>
+        ${chips ? `<ul class="msg-vaga-chips" aria-label="Resumo da vaga">${chips}</ul>` : ""}
+        <section class="msg-info-block">
+          <h3>Descrição da vaga</h3>
+          <p class="msg-vaga-desc is-clamped" id="vagaDesc">${escapeHtml(job.description || "Sem descrição.")}</p>
+          <button type="button" class="msg-vaga-more" id="vagaMore" aria-expanded="false" aria-controls="vagaDesc" hidden>Ver mais</button>
+        </section>
+        ${skills ? `<section class="msg-info-block"><h3>Skills</h3><ul class="msg-vaga-chips">${skills}</ul></section>` : ""}
+        ${info.length ? `<section class="msg-info-block"><h3>Outras informações</h3>
+          <dl class="msg-vaga-info">${info.map(([k, v, destaque]) => `<dt>${k}</dt><dd class="${destaque ? "is-destaque" : ""}">${escapeHtml(v)}</dd>`).join("")}</dl></section>` : ""}
+        <a class="msg-vaga-link" href="/vagas/${encodeURIComponent(job.id)}" target="_blank" rel="noopener">Abrir página da vaga</a>`;
+
+      const desc = $("vagaDesc"), more = $("vagaMore");
+      if (desc.scrollHeight > desc.clientHeight + 2) more.hidden = false;
+      more.addEventListener("click", () => {
+        const aberto = more.getAttribute("aria-expanded") === "true";
+        desc.classList.toggle("is-clamped", aberto);
+        more.setAttribute("aria-expanded", String(!aberto));
+        more.textContent = aberto ? "Ver mais" : "Ver menos";
+      });
+    } catch {
+      $("infoPanelBody").innerHTML = `<p class="msg-conv-empty" role="alert">Erro ao carregar a vaga.</p>`;
+    }
+  }
+
+  async function renderEmpresaInfo() {
     try {
       const res = await fetch(`/api/empresas/${activeConversation.company_id}`);
       if (!res.ok) throw new Error();
@@ -341,14 +418,14 @@
 
       $("infoPanelBody").innerHTML = `
         <span class="msg-info-avatar" aria-hidden="true">${escapeHtml(initials(data.name))}</span>
-        <h3 class="msg-info-name">${escapeHtml(data.name)}</h3>
-        ${data.descricao ? `<section class="msg-info-block"><h4>Sobre a empresa</h4><p>${escapeHtml(data.descricao)}</p></section>` : ""}
+        <h2 class="msg-info-name">${escapeHtml(data.name)}</h2>
+        ${data.descricao ? `<section class="msg-info-block"><h3>Sobre a empresa</h3><p>${escapeHtml(data.descricao)}</p></section>` : ""}
         <div class="msg-info-meta">
           ${data.site ? `<a href="${escapeHtml(data.site)}" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> ${escapeHtml(data.site.replace(/^https?:\/\//, ""))}</a>` : ""}
           ${data.cidade ? `<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${escapeHtml(data.cidade)}${data.estado ? ", " + escapeHtml(data.estado) : ""}</span>` : ""}
         </div>
         <section class="msg-info-block">
-          <h4>Vagas em aberto (${data.jobs.length})</h4>
+          <h3>Vagas em aberto (${data.jobs.length})</h3>
           <div class="msg-info-jobs">${jobsHtml}</div>
         </section>`;
     } catch {
@@ -357,7 +434,8 @@
   }
 
   $("infoPanelClose").addEventListener("click", () => { $("infoPanel").hidden = true; });
-  $("threadDetailsBtn").addEventListener("click", openInfoPanel);
+  $("threadDetailsBtn").addEventListener("click", () => openInfoPanel("vaga"));
+  document.querySelectorAll("#infoTabs .msg-info-tab").forEach(b => b.addEventListener("click", () => openInfoPanel(b.dataset.tab)));
 
   // ── Nova conversa (busca por vaga) ─────────────────────────
   function openNewConvModal() {
