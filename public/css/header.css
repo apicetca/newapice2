@@ -1091,3 +1091,35 @@
 @media (max-width: 860px) {
   body:has(.bottom-nav--empresa) { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
 }
+
+/* ═══════════════════════════════════════════
+   VISITANTE NO MOBILE (QA-044)
+   Sem menu inferior: Entrar / Cadastrar-se ficam no topo.
+═══════════════════════════════════════════ */
+@media (max-width: 860px) {
+  .site-header--visitante .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .site-header--visitante .site-logo { flex-shrink: 0; }
+  .site-header--visitante .header-link--login,
+  .site-header--visitante .header-link--cta {
+    padding: 8px 14px !important; /* o padding base usa !important */
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  /* Sem .bottom-nav na página, não há pílula para desviar. */
+  body:not(:has(.bottom-nav)) { padding-bottom: 0; }
+}
+
+@media (max-width: 400px) {
+  .site-header--visitante { gap: 12px; }
+  .site-header--visitante .header-actions { gap: 6px; }
+  .site-header--visitante .header-link--login,
+  .site-header--visitante .header-link--cta {
+    padding: 8px 10px !important;
+    font-size: 0.8rem;
+  }
+}
