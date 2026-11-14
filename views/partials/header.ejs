@@ -6,7 +6,7 @@
 
 <a href="#main-content" class="skip-link">Pular para o conteúdo</a>
 
-<header class="site-header" id="site-header" role="banner">
+<header class="site-header site-header--visitante" id="site-header" role="banner">
 
   <%# ── Logo ─────────────────────────────────────────── %>
   <a href="/" class="site-logo" aria-label="Ápice — página inicial">
@@ -29,44 +29,14 @@
 
 </header>
 
-<%# ── Bottom Nav (mobile only) ────────────────────────── %>
-<nav class="bottom-nav" aria-label="Navegação principal">
-
-  <a href="#como-funciona" class="bottom-nav-item">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="9"/>
-      <line x1="12" y1="8" x2="12" y2="12"/>
-      <circle cx="12" cy="16" r=".5" fill="currentColor"/>
-    </svg>
-    <span>Como funciona</span>
-  </a>
-
-  <a href="/login" class="bottom-nav-item" data-path="/login">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-      <polyline points="10 17 15 12 10 7"/>
-      <line x1="15" y1="12" x2="3" y2="12"/>
-    </svg>
-    <span>Entrar</span>
-  </a>
-
-  <a href="/cadastro" class="bottom-nav-item bottom-nav-item--cta" data-path="/cadastro">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-      <circle cx="9" cy="7" r="4"/>
-      <line x1="19" y1="8" x2="19" y2="14"/>
-      <line x1="16" y1="11" x2="22" y2="11"/>
-    </svg>
-    <span>Criar conta</span>
-  </a>
-
-</nav>
+<%# Sem menu inferior (pílula) para visitante: no mobile, Entrar e Cadastrar-se
+    ficam no próprio topo (.site-header--visitante .header-actions, header.css). %>
 
 <script>
 (function () {
   /* Marca item ativo pelo pathname */
   const path = window.location.pathname;
-  document.querySelectorAll('.bottom-nav-item[data-path], .header-link[data-path]').forEach(link => {
+  document.querySelectorAll('.header-link[data-path]').forEach(link => {
     if (link.dataset.path === path) {
       link.classList.add('is-active');
       link.setAttribute('aria-current', 'page');
