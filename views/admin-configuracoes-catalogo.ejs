@@ -16,6 +16,12 @@
   <style>
     .inline-form { display: grid; grid-template-columns: 1fr 140px 1fr 1fr auto; gap: 10px; padding: 18px 20px; align-items: end; }
     .inline-form .form-field { gap: 4px; }
+    /* <fieldset> traz borda e padding do navegador (os "quadrados brancos"): zera, é só agrupador de rótulo+campo */
+    .inline-form fieldset.form-field { border: 0; padding: 0; margin: 0; min-width: 0; }
+    .inline-form .form-input:focus, .inline-form .form-select:focus { border-color: var(--admin); outline: 0; box-shadow: 0 0 0 2px var(--admin-dim); }
+    .inline-form .btn-save { background: var(--admin); color: #14140a; font-weight: 700; }
+    .inline-form .btn-save:hover:not(:disabled) { background: #f1f45a; }
+    .inline-form .btn-save:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
     @media (max-width: 900px) { .inline-form { grid-template-columns: 1fr; } }
     .resources-panel { padding: 16px 20px; border-top: 1px solid var(--border); }
     #resources-list { margin: 0; padding: 0; list-style: none; } /* é um <ul>: neutraliza o estilo padrão de lista */
