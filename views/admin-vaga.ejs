@@ -1,0 +1,194 @@
+<%
+  const LEVEL    = { estagio: 'Estágio', junior: 'Júnior', pleno: 'Pleno' };
+  const MODALITY = { presencial: 'Presencial', remoto: 'Remoto', hibrido: 'Híbrido' };
+  const CONTRACT = { clt: 'CLT', pj: 'PJ', estagio: 'Estágio', freelancer: 'Freelancer' };
+  const ENGLISH  = { nenhum: 'Não exigido', basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado', fluente: 'Fluente' };
+  const IDIOMA   = { ingles: 'Inglês', espanhol: 'Espanhol', frances: 'Francês', alemao: 'Alemão', italiano: 'Italiano', mandarim: 'Mandarim' };
+
+  const fmtLong = (d) => d ? new Date(d).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' }) : null;
+  const fmtDay = (iso) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
+  };
+  const brl = (n) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(n);
+
+  const publicada = fmtLong(job.created_at);
+  const expira = fmtDay(job.expires_day);
+  const empresa = job.company || 'Empresa';
+  const iniciais = empresa.trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0)).join('').toUpperCase() || '?';
+
+  const chips = [job.location, MODALITY[job.modality], ...(job.tags ? job.tags.split(',').map(t => t.trim()).filter(Boolean) : []), CONTRACT[job.contract_type] || LEVEL[job.level]]
+    .filter(Boolean);
+
+  const salario = job.salary_min && job.salary_max ? `${brl(job.salary_min)} – ${brl(job.salary_max)}`
+    : job.salary_min ? `a partir de ${brl(job.salary_min)}` : job.salary_max ? `até ${brl(job.salary_max)}` : null;
+  const idioma = job.foreign_language && IDIOMA[job.foreign_language]
+    ? { label: IDIOMA[job.foreign_language], val: ENGLISH[job.foreign_level] || ENGLISH.basico }
+    : (job.english_level && job.english_level !== 'nenhum' ? { label: 'Inglês', val: ENGLISH[job.english_level] } : null);
+
+  const meta = [];
+  if (salario) meta.push({ label: 'Faixa salarial', val: salario, accent: true });
+  if (idioma) meta.push({ label: idioma.label, val: idioma.val });
+  if (job.years_experience > 0) meta.push({ label: 'Experiência', val: job.years_experience + (job.years_experience > 1 ? ' anos' : ' ano') });
+  if (job.location) meta.push({ label: 'Local', val: job.location });
+  if (job.max_candidates && job.max_candidates < 9999) meta.push({ label: 'Limite', val: 'Até ' + job.max_candidates + ' candidatos' });
+
+  const obrig = skills.filter(s => s.importance === 'obrigatoria');
+  const desej = skills.filter(s => s.importance === 'desejavel');
+  const ativa = Boolean(job.active);
+%>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <meta name="description" content="Detalhes da vaga — painel do administrador." />
+  <title>Ápice — Admin · <%= job.title %></title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-vagas.css" />
+  <link rel="stylesheet" href="/css/admin-vaga.css" />
+</head>
+<body>
+
+  <%- include('partials/header-admin', { currentPage: 'admin-vagas' }) %>
+
+<main class="adm-main" id="main-content">
+  <div class="adj-wrap">
+
+    <a href="/admin/vagas" class="adj-back">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Voltar
+    </a>
+
+    <article class="adj-card adj-hero" aria-labelledby="vaga-titulo">
+      <div class="adj-logo">
+        <span class="adj-logo-mark" aria-hidden="true"><%= iniciais %></span>
+        <span class="adj-logo-name"><%= empresa %></span>
+      </div>
+      <div class="adj-hero-info">
+        <h1 class="adj-title" id="vaga-titulo"><%= job.title %></h1>
+        <dl class="adj-dates">
+          <% if (publicada) { %><div><dt class="visually-hidden">Publicada em</dt><dd>Publicada em <%= publicada %></dd></div><% } %>
+          <% if (expira) { %><div><dt class="visually-hidden">Inscrições até</dt><dd>Inscrições até <%= expira %></dd></div><% } %>
+        </dl>
+      </div>
+      <% if (chips.length) { %>
+      <ul class="adj-chips" aria-label="Características da vaga">
+        <% chips.forEach(c => { %><li><%= c %></li><% }) %>
+      </ul>
+      <% } %>
+    </article>
+
+    <section class="adj-card adj-status" aria-label="Situação da vaga">
+      <dl class="adj-stats">
+        <div>
+          <dt>Status</dt>
+          <dd><span class="adj-pill <%= ativa ? 'is-on' : 'is-off' %>" id="status-pill"><%= ativa ? 'Ativa' : 'Pausada' %></span></dd>
+        </div>
+        <div><dt>Candidatos</dt><dd><%= Number(job.total_candidaturas) %></dd></div>
+        <div><dt>Nível</dt><dd><%= LEVEL[job.level] || job.level %></dd></div>
+        <div><dt>Contrato</dt><dd><%= CONTRACT[job.contract_type] || '—' %></dd></div>
+      </dl>
+      <% if (skills.length) { %>
+      <div class="adj-skills">
+        <% if (obrig.length) { %>
+        <div>
+          <h2 class="adj-sub">Skills obrigatórias</h2>
+          <ul class="adj-skill-list"><% obrig.forEach(s => { %><li><%= s.name %></li><% }) %></ul>
+        </div>
+        <% } %>
+        <% if (desej.length) { %>
+        <div>
+          <h2 class="adj-sub">Skills desejáveis</h2>
+          <ul class="adj-skill-list is-soft"><% desej.forEach(s => { %><li><%= s.name %></li><% }) %></ul>
+        </div>
+        <% } %>
+      </div>
+      <% } %>
+    </section>
+
+    <div class="adj-grid">
+      <article class="adj-card adj-main">
+        <section aria-labelledby="h-desc">
+          <h2 class="adj-h2" id="h-desc">Descrição da vaga</h2>
+          <p class="adj-body"><%= job.description || 'Sem descrição cadastrada.' %></p>
+        </section>
+        <% if (job.responsibilities) { %>
+        <section aria-labelledby="h-resp">
+          <h2 class="adj-h2" id="h-resp">Responsabilidades</h2>
+          <p class="adj-body"><%= job.responsibilities %></p>
+        </section>
+        <% } %>
+      </article>
+
+      <aside class="adj-side">
+        <section class="adj-card" aria-label="Ações do administrador">
+          <button type="button" class="adj-btn adj-btn--primary" id="toggle-btn" data-active="<%= ativa ? 1 : 0 %>">
+            <%= ativa ? 'Pausar vaga' : 'Reativar vaga' %>
+          </button>
+          <a class="adj-btn" href="/admin/vagas">Voltar para a lista</a>
+          <p class="adj-error" id="toggle-error" role="alert"></p>
+          <% if (meta.length) { %>
+          <dl class="adj-meta">
+            <% meta.forEach(m => { %>
+            <div><dt><%= m.label %></dt><dd<%- m.accent ? ' class="is-accent"' : '' %>><%= m.val %></dd></div>
+            <% }) %>
+          </dl>
+          <% } %>
+        </section>
+
+        <% if (job.benefits) { %>
+        <section class="adj-card" aria-labelledby="h-ben">
+          <h2 class="adj-h2" id="h-ben">Benefícios</h2>
+          <p class="adj-body"><%= job.benefits %></p>
+        </section>
+        <% } %>
+      </aside>
+    </div>
+
+  </div>
+</main>
+
+<output class="adv-toast" id="toast" role="status" aria-live="polite"></output>
+
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
+</footer>
+
+<script>
+(function () {
+  const btn = document.getElementById("toggle-btn");
+  const err = document.getElementById("toggle-error");
+  const JOB_ID = <%- Number(job.id) %>;
+  btn.addEventListener("click", async () => {
+    const next = btn.dataset.active !== "1";
+    btn.disabled = true; err.textContent = "";
+    try {
+      const res = await fetch(`/api/admin/jobs/${JOB_ID}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active: next }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Erro ao atualizar. Tente novamente.");
+      btn.dataset.active = next ? "1" : "0";
+      btn.textContent = next ? "Pausar vaga" : "Reativar vaga";
+      const pill = document.getElementById("status-pill");
+      pill.textContent = next ? "Ativa" : "Pausada";
+      pill.className = "adj-pill " + (next ? "is-on" : "is-off");
+      const t = document.getElementById("toast");
+      t.textContent = next ? "Vaga reativada." : "Vaga pausada.";
+      t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2800);
+    } catch (e) { err.textContent = e.message; }
+    finally { btn.disabled = false; }
+  });
+})();
+</script>
+
+</body>
+</html>

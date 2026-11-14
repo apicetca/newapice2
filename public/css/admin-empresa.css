@@ -1,0 +1,24 @@
+/* =============================================
+   admin-empresa.css — Admin · perfil da empresa (desktop)
+   Carrega depois de admin-usuario.css (cabeçalho, cards, contador, plano, conta).
+============================================= */
+
+.ade-logo { color: #0a0a0a; border: 0; font-size: 1.6rem; }
+
+.ade-textarea {
+  width: 100%; min-height: 120px; padding: 12px; resize: vertical; font: inherit; font-size: .74rem; line-height: 1.7;
+  color: var(--text); background: var(--bg-3); border: 1px solid var(--border-lite); border-radius: var(--radius-md);
+}
+.ade-textarea:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+
+.ade-jobs { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+.ade-job {
+  display: flex; align-items: center; justify-content: space-between; gap: 18px;
+  padding: 14px 16px; background: var(--bg-3); border: 1px solid var(--border-lite); border-radius: var(--radius-lg);
+}
+.ade-job.is-paused .ade-job-title { color: var(--muted); }
+.ade-job-info { min-width: 0; font-size: .68rem; line-height: 1.7; }
+.ade-job-title { font-family: var(--font-display); font-size: .8rem; font-weight: 600; margin-bottom: 2px; overflow-wrap: anywhere; }
+.ade-job-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
+.ade-job-side .adj-pill { font-size: .66rem; }
+.ade-job-side .adv-btn { min-height: 32px; font-size: .68rem; padding: 0 22px; }

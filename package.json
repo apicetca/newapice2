@@ -22,6 +22,7 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^17.3.1",
     "ejs": "^5.0.2",
+    "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "express-mysql-session": "^3.0.3",
     "express-rate-limit": "^8.5.2",
@@ -33,7 +34,8 @@
     "mysql2": "^3.20.0",
     "nodemailer": "^9.0.5",
     "openai": "^7.22.0",
-    "pdf-parse": "^2.4.5"
+    "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.17.2"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

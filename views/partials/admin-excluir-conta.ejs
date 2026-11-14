@@ -1,0 +1,22 @@
+<%# Zona de perigo + confirmação de "Excluir conta" (admin → perfil de dev/empresa).
+    Locals: rotulo ('desenvolvedor' | 'empresa'). Script: /js/admin-excluir-conta.js %>
+<section class="adj-card adx-danger" aria-labelledby="h-perigo">
+  <h2 class="adj-h2" id="h-perigo">Excluir conta</h2>
+  <p class="adx-text">Apaga a conta <%= rotulo === 'empresa' ? 'da empresa e todas as vagas dela' : 'do desenvolvedor e os dados ligados a ela (habilidades, candidaturas, conversas)' %>. Não dá para desfazer. Para só impedir o acesso, use "Suspender".</p>
+  <button type="button" class="adx-btn" id="btn-excluir-conta">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>
+    Excluir conta
+  </button>
+</section>
+
+<dialog class="adv-dialog" id="del-dialog" aria-labelledby="del-title" aria-describedby="del-text">
+  <header class="adv-dialog-head">
+    <h2 class="adv-dialog-title" id="del-title">Excluir conta?</h2>
+  </header>
+  <p class="adv-dialog-text" id="del-text"></p>
+  <p class="adv-form-error" id="del-error" role="alert"></p>
+  <div class="adx-actions">
+    <button type="button" class="adv-btn" id="del-cancel">Cancelar</button>
+    <button type="button" class="adx-btn adx-btn--solid" id="del-confirm">Excluir definitivamente</button>
+  </div>
+</dialog>

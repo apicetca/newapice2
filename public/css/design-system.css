@@ -33,6 +33,12 @@
   --teal-border:   rgba(89,228,53,.28);
   --teal-glow:     rgba(89,228,53,.20);
 
+  /* Admin — amarelo-limão (área do administrador) */
+  --admin:         #E2E52B;
+  --admin-dim:     rgba(226,229,43,.10);
+  --admin-border:  rgba(226,229,43,.32);
+  --admin-glow:    rgba(226,229,43,.20);
+
   /* Semânticas */
   --blue:          #60a5fa;
   --blue-dim:      rgba(96,165,250,.12);

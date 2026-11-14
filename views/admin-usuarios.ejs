@@ -12,162 +12,303 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
   <link rel="stylesheet" href="/css/header.css" />
-  <link rel="stylesheet" href="/css/empresa-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-vagas.css" />
+  <link rel="stylesheet" href="/css/admin-usuarios.css" />
 </head>
 <body>
 
   <%- include('partials/header-admin', { currentPage: 'admin-usuarios' }) %>
 
-<main class="page-content" id="main-content">
+<main class="adm-main" id="main-content">
+  <h1 class="visually-hidden">Usuários</h1>
 
-  <section class="loading-screen" id="loading" role="status" aria-live="polite">
-    <span class="spinner" aria-hidden="true"></span>
+  <section class="adm-loading" id="loading" role="status" aria-live="polite">
+    <span class="adm-spinner" aria-hidden="true"></span>
     <p>Carregando desenvolvedores...</p>
   </section>
 
-  <article id="content" hidden>
-    <section class="section" aria-label="Desenvolvedores cadastrados">
-      <header class="section-header">
-        <h1 class="section-title">Desenvolvedores <span class="section-count" id="users-count"></span></h1>
-        <fieldset class="filter-row" role="group" aria-label="Filtrar por status">
-          <button class="filter-chip active" data-f="todos"     aria-pressed="true">Todos</button>
-          <button class="filter-chip"        data-f="ativos"    aria-pressed="false">Ativos</button>
-          <button class="filter-chip"        data-f="suspensos" aria-pressed="false">Suspensos</button>
-        </fieldset>
-      </header>
+  <div class="adv-wrap" id="content" hidden>
 
-      <figure class="jobs-table-wrap">
-        <table class="jobs-table" id="users-table" aria-label="Lista de desenvolvedores">
+    <section class="adv-filters" aria-label="Filtros de desenvolvedores">
+      <div class="adv-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="search" placeholder="Buscar por nome, e-mail ou github..." aria-label="Buscar desenvolvedores por nome, e-mail ou GitHub" autocomplete="off" />
+      </div>
+
+      <fieldset class="adv-group" id="plan-group" aria-label="Filtrar por plano">
+        <button type="button" class="adv-chip" data-v="todos"    aria-pressed="true">Todos</button>
+        <button type="button" class="adv-chip" data-v="dev_free" aria-pressed="false">FREE</button>
+        <button type="button" class="adv-chip" data-v="dev_pro"  aria-pressed="false">PRO</button>
+      </fieldset>
+
+      <fieldset class="adv-group" id="level-group" aria-label="Filtrar por nível">
+        <button type="button" class="adv-chip" data-v="todos"         aria-pressed="true">Todos</button>
+        <button type="button" class="adv-chip" data-v="iniciante"     aria-pressed="false">Iniciante</button>
+        <button type="button" class="adv-chip" data-v="intermediario" aria-pressed="false">Intermediário</button>
+        <button type="button" class="adv-chip" data-v="avancado"      aria-pressed="false">Avançado</button>
+        <button type="button" class="adv-chip adv-chip--ghost" id="clear-filters">Limpar</button>
+      </fieldset>
+    </section>
+
+    <div class="adv-bar">
+      <p class="adv-count" id="count" role="status" aria-live="polite"></p>
+
+      <div class="adv-sort">
+        <button type="button" class="adv-sort-btn" id="sort-btn" aria-haspopup="listbox"
+                aria-expanded="false" aria-controls="sort-list" aria-label="Ordenar desenvolvedores">
+          <span id="sort-label">Todos</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <ul class="adv-listbox" id="sort-list" role="listbox" aria-label="Ordenar por" hidden>
+          <li class="adv-option" role="option" tabindex="-1" data-v="az" aria-selected="false">A-Z</li>
+          <li class="adv-option" role="option" tabindex="-1" data-v="recentes" aria-selected="false">Mais recentes</li>
+          <li class="adv-option" role="option" tabindex="-1" data-v="todos" aria-selected="true">Todos</li>
+        </ul>
+      </div>
+    </div>
+
+    <section aria-label="Lista de desenvolvedores">
+      <figure class="adv-panel">
+        <table class="adv-table" id="users-table">
+          <caption class="visually-hidden">Desenvolvedores cadastrados na plataforma</caption>
           <thead>
             <tr>
               <th scope="col">Nome</th>
               <th scope="col">E-mail</th>
               <th scope="col">Nível</th>
-              <th scope="col">GitHub</th>
               <th scope="col">Plano</th>
-              <th scope="col">Cadastro</th>
-              <th scope="col">Status</th>
+              <th scope="col">Atividade</th>
               <th scope="col">Ações</th>
             </tr>
           </thead>
           <tbody id="users-tbody"></tbody>
         </table>
-        <section class="table-empty" id="users-empty" hidden>
-          <p class="table-empty-title">Nenhum desenvolvedor encontrado</p>
-        </section>
+        <p class="adm-empty" id="users-empty" hidden>Nenhum desenvolvedor encontrado</p>
       </figure>
     </section>
-  </article>
+
+  </div>
 </main>
 
-<output class="toast" id="toast" role="status" aria-live="polite"></output>
+<%# ── Editar desenvolvedor ── %>
+<dialog class="adv-dialog" id="edit-dialog" aria-labelledby="edit-title">
+  <header class="adv-dialog-head">
+    <h2 class="adv-dialog-title" id="edit-title">Editar desenvolvedor</h2>
+    <button type="button" class="adv-dialog-close" id="edit-close" aria-label="Fechar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </header>
+  <form id="edit-form" novalidate>
+    <div class="adv-form-grid">
+      <div class="adv-field">
+        <label for="f-nome">Nome</label>
+        <input type="text" id="f-nome" name="nome" maxlength="100" required autocomplete="off" />
+      </div>
+      <div class="adv-field">
+        <label for="f-sobrenome">Sobrenome<span class="adv-field-opt">(Opcional)</span></label>
+        <input type="text" id="f-sobrenome" name="sobrenome" maxlength="100" placeholder="Sobrenome" autocomplete="off" />
+      </div>
+      <div class="adv-field">
+        <label for="f-nivel">Nível atual</label>
+        <select id="f-nivel" name="nivel">
+          <option value="iniciante">Iniciante</option>
+          <option value="intermediario">Intermediário</option>
+          <option value="avancado">Avançado</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label for="f-github">Github<span class="adv-field-opt">(Opcional)</span></label>
+        <input type="text" id="f-github" name="github_login" maxlength="39" autocomplete="off" />
+      </div>
+    </div>
+    <p class="adv-form-error" id="edit-error" role="alert"></p>
+    <footer class="adv-dialog-foot">
+      <a class="adv-icon-btn adv-mail" id="edit-mail" href="#" aria-label="Enviar e-mail ao desenvolvedor" hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      </a>
+      <button type="button" class="adv-btn" id="edit-cancel">Cancelar</button>
+      <button type="submit" class="adv-btn adv-btn--primary" id="edit-save">Salvar</button>
+    </footer>
+  </form>
+</dialog>
 
-<footer class="site-footer">
-  <p>&copy; <script>document.write(new Date().getFullYear())</script> Ápice. Painel do administrador.</p>
+<output class="adv-toast" id="toast" role="status" aria-live="polite"></output>
+
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
 </footer>
 
 <script src="/js/escape-html.js"></script>
 <script>
 const NIVEL_LABEL = { iniciante: "Iniciante", intermediario: "Intermediário", avancado: "Avançado" };
-const PLAN_LABEL  = { dev_free: "Gratuito", dev_pro: "PRO" };
+const PLAN_LABEL  = { dev_free: "FREE", dev_pro: "PRO" };
+const $ = (id) => document.getElementById(id);
+
 let allUsers = [];
+const state = { q: "", plan: "todos", level: "todos", sort: "todos" };
+
+const norm = (s) => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const fullName = (u) => `${u.nome ?? ""} ${u.sobrenome ?? ""}`.trim();
+const initials = (s) => String(s || "?").trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0)).join("").toUpperCase() || "?";
+const safeUrl = (u) => /^https?:\/\//i.test(u || "") ? u : "";
 
 // A mesma pessoa pode ter uma conta do login com GitHub e outra de e-mail e
 // senha; o plano vale por conta, então o admin precisa saber por qual ela entra.
 function loginLabel(u) {
-  if (u.login_github && u.login_email) return "entra pelo GitHub ou com e-mail e senha";
-  return u.login_github ? "entra pelo GitHub" : "entra com e-mail e senha";
+  if (u.login_github && u.login_email) return "GitHub ou e-mail e senha";
+  return u.login_github ? "login pelo GitHub" : "e-mail e senha";
+}
+const contaLabel = (o) => `${o.email} (${o.login_github ? "entra pelo GitHub" : "e-mail e senha"})`;
+
+function activityLabel(s) {
+  if (s == null) return "—";
+  const min = Math.floor(s / 60), h = Math.floor(min / 60), d = Math.floor(h / 24);
+  if (min < 5)  return "Online";
+  if (min < 60) return `Há ${min} min`;
+  if (h < 24)   return `Há ${h} ${h === 1 ? "hora" : "horas"}`;
+  if (d < 2)    return "Ontem";
+  return `${d} dias atrás`;
 }
 
-function contaLabel(o) {
-  return `${o.email} (${o.login_github ? "entra pelo GitHub" : "e-mail e senha"})`;
-}
-let activeFilter = "todos";
-
-function formatDate(raw) {
-  if (!raw) return "—";
-  return new Date(raw).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-}
-
-function applyFilter() {
-  const filtered = allUsers.filter(u => {
-    if (activeFilter === "ativos")    return u.active;
-    if (activeFilter === "suspensos") return !u.active;
-    return true;
+function visibleUsers() {
+  const q = norm(state.q.trim());
+  const list = allUsers.filter(u => {
+    if (state.plan !== "todos" && u.plan_code !== state.plan) return false;
+    if (state.level !== "todos" && u.nivel !== state.level) return false;
+    return !q || [fullName(u), u.email, u.github_login].some(v => norm(v).includes(q));
   });
-  document.getElementById("users-count").textContent = `(${filtered.length})`;
-  renderTable(filtered);
+  const by = {
+    az: (a, b) => (fullName(a) || a.email).localeCompare(fullName(b) || b.email, "pt-BR"),
+    recentes: (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  }[state.sort];
+  return by ? list.sort(by) : list;
 }
 
-function renderTable(users) {
-  const tbody = document.getElementById("users-tbody");
-  const empty = document.getElementById("users-empty");
-  const table = document.getElementById("users-table");
-  tbody.innerHTML = "";
+const ICON_EYE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const ICON_EDIT = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+const ICON_BAN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg>';
+const ICON_OK = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 9.5"/></svg>';
 
-  if (!users.length) { table.style.display = "none"; empty.hidden = false; return; }
-  table.style.display = ""; empty.hidden = true;
+function render() {
+  const users = visibleUsers();
+  const tbody = $("users-tbody");
+  const f = document.activeElement?.closest?.("[data-act]");
+  const keep = f ? { act: f.dataset.act, id: f.dataset.id } : null;
+  tbody.innerHTML = "";
+  $("count").textContent = `${users.length} ${users.length === 1 ? "desenvolvedor" : "desenvolvedores"}`;
+  $("users-table").hidden = users.length === 0;
+  $("users-empty").hidden = users.length > 0;
 
   users.forEach(u => {
+    const nome = fullName(u);
+    const label = escapeHtml(nome || u.email);
+    const avatar = safeUrl(u.avatar_url)
+      ? `<img class="adm-avatar" src="${escapeHtml(u.avatar_url)}" alt="" width="36" height="36" loading="lazy" />`
+      : `<span class="adm-avatar" aria-hidden="true">${escapeHtml(initials(nome || u.email))}</span>`;
+    const gh = u.github_login
+      ? `<a class="adu-gh" href="https://github.com/${encodeURIComponent(u.github_login)}" target="_blank" rel="noopener">@${escapeHtml(u.github_login)}</a>`
+      : '<span class="adu-dash" aria-label="sem GitHub">-</span>';
+    const warn = u.outras_contas.length
+      ? `<span class="adu-warn">⚠ mesmo GitHub de: ${u.outras_contas.map(o => escapeHtml(contaLabel(o))).join(", ")}</span>` : "";
+    const eye = `<a class="adv-icon-btn" href="/admin/usuarios/${Number(u.id)}" aria-label="Ver perfil de ${label}">${ICON_EYE}</a>`;
+
     const tr = document.createElement("tr");
+    if (!u.active) tr.className = "adu-suspended";
     tr.innerHTML = `
-      <td data-label="Nome">${u.nome ? escapeHtml(`${u.nome} ${u.sobrenome ?? ""}`.trim()) : "—"}</td>
-      <td data-label="E-mail">${escapeHtml(u.email)}<br><small style="color:var(--muted)">${loginLabel(u)}</small></td>
-      <td data-label="Nível"><span class="badge badge-muted">${NIVEL_LABEL[u.nivel] ?? "—"}</span></td>
-      <td data-label="GitHub">${u.github_login ? `<a href="https://github.com/${u.github_login}" target="_blank" rel="noopener" style="color:var(--blue)">@${u.github_login}</a>` : "—"}${u.outras_contas.length
-        ? `<br><small style="color:var(--yellow)">⚠ mesmo GitHub de: ${u.outras_contas.map(o => escapeHtml(contaLabel(o))).join(", ")}</small>`
-        : ""}</td>
-      <td data-label="Plano">
-        <select class="form-select" style="padding:4px 24px 4px 8px;font-size:.78rem" onchange="changePlan(${u.id}, this.value)">
-          <option value="dev_free" ${u.plan_code === "dev_free" ? "selected" : ""}>Gratuito</option>
-          <option value="dev_pro"  ${u.plan_code === "dev_pro"  ? "selected" : ""}>PRO</option>
-        </select>
-      </td>
-      <td data-label="Cadastro">${formatDate(u.created_at)}</td>
-      <td data-label="Status"><span class="badge ${u.active ? "badge-green" : "badge-red"}">${u.active ? "Ativo" : "Suspenso"}</span></td>
-      <td data-label="Ações">
-        <button class="btn-icon ${u.active ? "" : "btn-toggle-on"}" title="${u.active ? "Suspender" : "Reativar"}"
-          onclick="toggleStatus(${u.id}, ${!u.active})">
-          ${u.active
-            ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`
-            : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`}
-        </button>
-      </td>`;
+      <td><div class="adu-person">${avatar}<span class="adu-person-txt">
+        <span class="adu-name">${nome ? escapeHtml(nome) : "—"}</span>${gh}${u.active ? "" : '<span class="adu-tag">Suspenso</span>'}${warn}
+      </span></div></td>
+      <td class="adu-email">${escapeHtml(u.email)}<span class="adu-login">${loginLabel(u)}</span></td>
+      <td><span class="adm-badge">${NIVEL_LABEL[u.nivel] ?? "—"}</span></td>
+      <td><select class="adu-plan" data-id="${Number(u.id)}" aria-label="Plano de ${label}">
+        <option value="dev_free"${u.plan_code === "dev_free" ? " selected" : ""}>FREE</option>
+        <option value="dev_pro"${u.plan_code === "dev_pro" ? " selected" : ""}>PRO</option>
+      </select></td>
+      <td>${activityLabel(u.visto_ha_segundos)}</td>
+      <td><span class="adv-actions">${eye}
+        <button type="button" class="adv-icon-btn" data-act="edit" data-id="${Number(u.id)}" aria-label="Editar ${label}">${ICON_EDIT}</button>
+        <button type="button" class="adv-icon-btn ${u.active ? "adv-icon-btn--danger" : "adv-icon-btn--ok"}" data-act="status" data-id="${Number(u.id)}"
+          aria-label="${u.active ? "Suspender" : "Reativar"} ${label}">${u.active ? ICON_BAN : ICON_OK}</button>
+      </span></td>`;
     tbody.appendChild(tr);
   });
+  if (keep) tbody.querySelector(`[data-act="${keep.act}"][data-id="${keep.id}"]`)?.focus();
 }
 
-document.querySelectorAll(".filter-chip").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".filter-chip").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed", "false"); });
-    btn.classList.add("active"); btn.setAttribute("aria-pressed", "true");
-    activeFilter = btn.dataset.f;
-    applyFilter();
-  });
+// ── Filtros ──
+function syncChips() {
+  [["plan-group", "plan"], ["level-group", "level"]].forEach(([g, k]) =>
+    $(g).querySelectorAll("[data-v]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === state[k]))));
+}
+[["plan-group", "plan"], ["level-group", "level"]].forEach(([g, k]) =>
+  $(g).querySelectorAll("[data-v]").forEach(btn => btn.addEventListener("click", () => {
+    state[k] = btn.dataset.v; syncChips(); render();
+  })));
+$("search").addEventListener("input", e => { state.q = e.target.value; render(); });
+$("clear-filters").addEventListener("click", () => {
+  Object.assign(state, { q: "", plan: "todos", level: "todos", sort: "todos" });
+  $("search").value = "";
+  syncChips(); syncSort(); render();
 });
 
-async function toggleStatus(id, newActive) {
-  try {
-    const res = await fetch(`/api/admin/users/${id}`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ active: newActive }),
-    });
-    if (!res.ok) throw new Error();
-    showToast(newActive ? "Desenvolvedor reativado." : "Desenvolvedor suspenso.");
-    await reload();
-  } catch {
-    showToast("Erro ao atualizar. Tente novamente.", true);
-  }
+// ── Ordenação (listbox acessível por teclado) ──
+const sortBtn = $("sort-btn"), sortList = $("sort-list");
+const options = () => [...sortList.querySelectorAll("[role=option]")];
+function syncSort() {
+  options().forEach(o => o.setAttribute("aria-selected", String(o.dataset.v === state.sort)));
+  $("sort-label").textContent = options().find(o => o.dataset.v === state.sort).textContent;
 }
+function openSort() {
+  sortList.hidden = false; sortBtn.setAttribute("aria-expanded", "true");
+  (options().find(o => o.getAttribute("aria-selected") === "true") ?? options()[0]).focus();
+}
+function closeSort(refocus) {
+  sortList.hidden = true; sortBtn.setAttribute("aria-expanded", "false");
+  if (refocus) sortBtn.focus();
+}
+function pick(opt) { state.sort = opt.dataset.v; syncSort(); closeSort(true); render(); }
+sortBtn.addEventListener("click", () => sortList.hidden ? openSort() : closeSort(false));
+sortBtn.addEventListener("keydown", e => { if (e.key === "ArrowDown") { e.preventDefault(); openSort(); } });
+sortList.addEventListener("click", e => { const o = e.target.closest("[role=option]"); if (o) pick(o); });
+sortList.addEventListener("keydown", e => {
+  const opts = options(), i = opts.indexOf(document.activeElement);
+  if (e.key === "ArrowDown") { e.preventDefault(); opts[Math.min(i + 1, opts.length - 1)].focus(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); opts[Math.max(i - 1, 0)].focus(); }
+  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (i >= 0) pick(opts[i]); }
+  else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeSort(true); }
+  else if (e.key === "Tab") closeSort(false);
+});
+document.addEventListener("click", e => { if (!e.target.closest(".adv-sort")) closeSort(false); });
 
+// ── Toast / API ──
+let toastTimer;
+function toast(msg, isErr = false) {
+  const el = $("toast");
+  el.textContent = msg; el.classList.toggle("is-error", isErr); el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+async function api(path, body) {
+  const res = await fetch(`/api/admin/users/${path}`, {
+    method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Erro ao atualizar. Tente novamente.");
+  return data;
+}
 async function reload() {
   const res = await fetch("/api/admin/users");
-  if (!res.ok) return;
+  if (!res.ok) throw new Error("Falha ao carregar");
   allUsers = await res.json();
-  applyFilter();
+  render();
 }
 
-async function changePlan(id, planCode) {
+// ── Plano ──
+$("users-tbody").addEventListener("change", async e => {
+  const sel = e.target.closest("select.adu-plan");
+  if (!sel) return;
+  const id = Number(sel.dataset.id), planCode = sel.value;
   // Se a pessoa tem outra conta com o mesmo GitHub, o plano trocado só nesta
   // não vale quando ela entra pela outra — oferece aplicar em todas.
   const user   = allUsers.find(u => u.id === id);
@@ -178,52 +319,86 @@ async function changePlan(id, planCode) {
     outras.map(o => `• ${contaLabel(o)}`).join("\n") +
     `\n\nAplicar o plano ${PLAN_LABEL[planCode]} nelas também? ` +
     `Se não, ela continua no plano antigo quando entrar por essa(s) conta(s).`
-  )) {
-    ids.push(...outras.map(o => o.id));
-  }
+  )) ids.push(...outras.map(o => o.id));
 
+  sel.disabled = true;
   try {
-    for (const target of ids) {
-      const res = await fetch(`/api/admin/users/${target}/plan`, {
-        method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan_code: planCode }),
-      });
-      if (!res.ok) throw new Error();
-    }
-    showToast(ids.length > 1 ? `Plano atualizado em ${ids.length} contas.` : "Plano atualizado.");
-  } catch {
-    showToast("Erro ao atualizar o plano.", true);
-  }
+    for (const target of ids) await api(`${target}/plan`, { plan_code: planCode });
+    toast(ids.length > 1 ? `Plano atualizado em ${ids.length} contas.` : "Plano atualizado.");
+  } catch { toast("Erro ao atualizar o plano.", true); }
   // Recarrega mesmo no erro, pra o seletor não ficar mostrando um plano que não foi salvo.
   await reload();
-}
+});
 
-let toastTimer = null;
-function showToast(msg, isErr = false) {
-  const el = document.getElementById("toast");
-  el.textContent = msg;
-  el.style.borderColor = isErr ? "rgba(248,81,73,.35)" : "var(--border-lite)";
-  el.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
-}
+// ── Ações da tabela ──
+let opener = null, current = null;
+$("users-tbody").addEventListener("click", async e => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const user = allUsers.find(u => u.id === Number(btn.dataset.id));
+  if (!user) return;
+  opener = btn; current = user;
 
-async function init() {
+  if (btn.dataset.act === "edit") return openEdit(user);
+  btn.disabled = true;
+  try {
+    await api(String(user.id), { active: !user.active });
+    toast(user.active ? "Desenvolvedor suspenso." : "Desenvolvedor reativado.");
+    await reload();
+  } catch (err) { toast(err.message, true); btn.disabled = false; }
+});
+
+// ── Editar ──
+const editDlg = $("edit-dialog");
+function openEdit(u) {
+  $("edit-title").textContent = `Editar desenvolvedor: ${fullName(u) || u.email}`;
+  $("f-nome").value = u.nome ?? "";
+  $("f-sobrenome").value = u.sobrenome ?? "";
+  $("f-nivel").value = u.nivel ?? "iniciante";
+  $("f-github").value = u.github_login ?? "";
+  $("edit-error").textContent = "";
+  const mail = $("edit-mail");
+  mail.hidden = !u.email;
+  mail.href = `mailto:${u.email}`;
+  editDlg.showModal();
+  $("f-nome").focus();
+}
+$("edit-close").addEventListener("click", () => editDlg.close());
+$("edit-cancel").addEventListener("click", () => editDlg.close());
+editDlg.addEventListener("close", () => {
+  (opener && document.contains(opener) ? opener : $("search")).focus();
+});
+$("edit-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const save = $("edit-save");
+  save.disabled = true; $("edit-error").textContent = "";
+  try {
+    await api(String(current.id), {
+      nome: $("f-nome").value, sobrenome: $("f-sobrenome").value,
+      nivel: $("f-nivel").value, github_login: $("f-github").value,
+    });
+    editDlg.close();
+    toast("Desenvolvedor atualizado.");
+    await reload();
+  } catch (err) {
+    $("edit-error").textContent = err.message;
+  } finally { save.disabled = false; }
+});
+
+(async function init() {
   try {
     await reload();
-    document.getElementById("loading").hidden = true;
-    document.getElementById("content").hidden = false;
+    $("loading").hidden = true;
+    $("content").hidden = false;
   } catch (err) {
     console.error(err);
-    document.getElementById("loading").innerHTML = `
-      <section style="text-align:center">
-        <p style="color:var(--red);margin-bottom:10px">Erro ao carregar os desenvolvedores.</p>
-        <a href="/admin/dashboard" style="color:var(--blue);font-size:.9rem">← Voltar ao painel</a>
-      </section>`;
+    $("loading").innerHTML = `
+      <div role="alert">
+        <p class="adm-error">Erro ao carregar os desenvolvedores.</p>
+        <a class="adm-error-link" href="/admin/dashboard">← Voltar ao painel</a>
+      </div>`;
   }
-}
-
-init();
+})();
 </script>
 
 </body>

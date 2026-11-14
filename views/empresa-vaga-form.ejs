@@ -81,6 +81,16 @@
             </select>
           </div>
 
+          <% const categorias = locals.categories || []; if (categorias.length) { %>
+          <div class="form-field">
+            <label class="form-label" for="f-category">Categoria <span class="form-hint">(opcional)</span></label>
+            <select class="form-select" id="f-category">
+              <option value="" <%= !J.category_id ? 'selected' : '' %>>Selecione...</option>
+              <% categorias.forEach(c => { %><option value="<%= c.id %>" <%= sel(J.category_id === c.id) %>><%= c.nome %></option><% }) %>
+            </select>
+          </div>
+          <% } %>
+
           <div class="form-field">
             <label class="form-label" for="f-desc">Descrição Vaga</label>
             <textarea class="form-textarea" id="f-desc" rows="4" maxlength="2000"
@@ -545,6 +555,7 @@
         title,
         level,
         area:             document.getElementById("f-area").value || null,
+        category_id:      document.getElementById("f-category")?.value || null,
         modality:         modality || "remoto",
         contract_type:    contract || "estagio",
         location:         lists.location.join("; ").slice(0, 255) || null,

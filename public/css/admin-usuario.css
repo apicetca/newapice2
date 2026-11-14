@@ -1,0 +1,85 @@
+/* =============================================
+   admin-usuario.css — Admin · perfil do dev (desktop)
+   Carrega depois de admin-vaga.css (cards, botões, voltar).
+============================================= */
+
+.adj-wrap .adj-card[aria-labelledby], .adu-head { border-radius: var(--radius-xl); }
+
+/* ── Cabeçalho ── */
+.adu-head { display: flex; flex-direction: column; gap: 16px; }
+.adu-head-main { display: flex; align-items: center; gap: 20px; }
+.adu-avatar {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+  background: var(--bg-3); border: 1px solid var(--border-lite);
+  font-family: var(--font-display); font-size: 1.4rem; font-weight: 700;
+}
+.adu-head-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.adu-h1 { font-family: var(--font-display); font-size: clamp(1.4rem, 2.4vw, 1.9rem); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.adu-head-email { font-size: .72rem; color: var(--muted); overflow-wrap: anywhere; }
+.adu-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.adu-badge { padding: 1px 12px; border-radius: 99px; font-size: .66rem; border: 1px solid var(--border-lite); background: var(--bg-3); }
+.adu-badge--level { color: var(--blue); border-color: rgba(96,165,250,.4); background: var(--blue-dim); }
+.adu-badge--gh { color: var(--admin); border-color: var(--admin-border); background: var(--admin-dim); }
+.adu-badge a:hover { text-decoration: underline; }
+.adu-badge a:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+.adu-since { font-size: .66rem; color: var(--muted); }
+
+.adu-counters { display: flex; gap: 12px; flex-shrink: 0; }
+.adu-counters li {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 92px; padding: 10px 14px; border: 1px solid var(--border-lite); border-radius: var(--radius-lg); background: var(--bg-3);
+}
+.adu-counters strong { font-family: var(--font-display); font-size: 1.9rem; line-height: 1.1; }
+.adu-counters span { font-size: .66rem; color: var(--muted); }
+
+.adu-head-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.adu-status { font-size: .74rem; line-height: 1.6; }
+.adu-status span { display: block; font-size: .66rem; color: var(--muted); }
+
+/* ── Formulários ── */
+.adu-form-foot { display: flex; justify-content: flex-end; margin-top: 16px; }
+.adj-card .adj-h2 { display: flex; align-items: center; gap: 8px; }
+.adj-wrap > .adj-error { margin-top: -6px; }
+
+/* ── Habilidades ── */
+.adu-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; margin-bottom: 18px; }
+.adu-skill {
+  position: relative; display: flex; flex-direction: column; gap: 3px; padding: 9px 36px 9px 12px;
+  border: 1px solid var(--border-lite); border-radius: var(--radius-md); background: var(--bg-3);
+}
+.adu-skill-top { display: flex; justify-content: space-between; gap: 10px; font-size: .74rem; }
+.adu-skill-name { overflow-wrap: anywhere; }
+.adu-skill-pct { color: var(--muted); }
+.adu-skill-origin { align-self: flex-start; font-size: .6rem; color: var(--teal); border: 1px solid var(--teal-border); background: var(--teal-dim); border-radius: 99px; padding: 0 8px; }
+.adu-skill-origin.is-manual { color: var(--admin); border-color: var(--admin-border); background: var(--admin-dim); }
+.adu-skill-x {
+  position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--border-lite); background: transparent; color: var(--muted); font-size: 1rem; line-height: 1;
+}
+.adu-skill-x:hover { color: var(--red); border-color: var(--red); }
+.adu-skill-x:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+.adu-skill-x:disabled { opacity: .5; }
+.adu-empty { font-size: .74rem; color: var(--muted); margin-bottom: 14px; }
+.adu-empty[hidden] { display: none; }
+
+.adu-add { display: grid; grid-template-columns: 1fr 200px auto; gap: 12px; align-items: end; padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* ── Repositórios ── */
+.adu-count { font-size: .72rem; color: var(--muted); font-weight: 400; }
+.adu-repos { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 12px; }
+.adu-repos li { display: inline-flex; align-items: center; gap: 8px; font-size: .74rem; overflow-wrap: anywhere; }
+
+/* ── Plano ── */
+.adu-plan-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.adu-next { font-size: .72rem; color: var(--admin); }
+.adu-plan-name { font-size: .78rem; font-weight: 600; margin-bottom: 8px; }
+.adu-benefits { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; font-size: .74rem; line-height: 1.6; list-style: disc; padding-left: 18px; }
+.adu-plan-change { max-width: 200px; }
+
+/* ── Conta ── */
+.adu-account { display: flex; flex-direction: column; }
+.adu-account > div { display: grid; grid-template-columns: 160px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: .74rem; }
+.adu-account > div:last-child { border-bottom: none; }
+.adu-account dt { color: var(--muted); }
+.adu-account dd { overflow-wrap: anywhere; }

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <meta name="description" content="Relatório de planos e assinaturas — Ápice." />
+  <title>Ápice — Admin · <%= categoria.titulo %></title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-vagas.css" />
+  <link rel="stylesheet" href="/css/admin-usuarios.css" />
+  <link rel="stylesheet" href="/css/admin-relatorios.css" />
+  <link rel="stylesheet" href="/css/admin-crescimento.css" />
+  <link rel="stylesheet" href="/css/admin-desempenho.css" />
+  <link rel="stylesheet" href="/css/admin-matchs-relatorio.css" />
+</head>
+<body>
+
+  <%- include('partials/header-admin', { currentPage: 'admin-relatorios' }) %>
+
+<main class="adm-main" id="main-content">
+  <div class="adc-wrap">
+
+    <a href="/admin/relatorios" class="adr-back">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Voltar
+    </a>
+
+    <header class="adr-head">
+      <h1 class="adr-title"><%= categoria.titulo %></h1>
+      <p class="adr-sub"><%= categoria.descricao %></p>
+    </header>
+
+    <section class="adm-loading" id="loading" role="status" aria-live="polite">
+      <span class="adm-spinner" aria-hidden="true"></span>
+      <p>Carregando relatório...</p>
+    </section>
+
+    <div id="content" hidden>
+
+      <%# ── Indicadores ── %>
+      <section aria-labelledby="h-kpis">
+        <h2 class="visually-hidden" id="h-kpis">Indicadores</h2>
+        <ul class="adc-kpis">
+          <li class="adc-card">
+            <p class="adc-kpi-title">Receita mensal recorrente</p>
+            <p class="adc-kpi-row"><strong class="adc-kpi-value adp-money" id="k-mrr"></strong><span class="adc-badge" id="k-mrr-badge"></span></p>
+            <span class="adc-split" aria-hidden="true"><span id="k-mrr-bar"></span></span>
+            <p class="adc-kpi-sub" id="k-mrr-sub"></p>
+          </li>
+          <li class="adc-card">
+            <p class="adc-kpi-title">Assinantes PRO ativos</p>
+            <p class="adc-kpi-row"><strong class="adc-kpi-value" id="k-pro"></strong><span class="adc-badge" id="k-pro-badge"></span></p>
+            <span class="adc-split" aria-hidden="true"><span id="k-pro-bar"></span></span>
+            <p class="adc-kpi-sub" id="k-pro-sub"></p>
+          </li>
+          <li class="adc-card">
+            <p class="adc-kpi-title">Taxa de conversão de FREE para PRO</p>
+            <p class="adc-kpi-row"><strong class="adc-kpi-value" id="k-conv"></strong><span class="adc-badge" id="k-conv-badge"></span></p>
+            <p class="adc-kpi-sub">Contas PRO sobre o total de contas ativas</p>
+          </li>
+          <li class="adc-card">
+            <p class="adc-kpi-title">Taxa de cancelamentos</p>
+            <p class="adc-kpi-row"><strong class="adc-kpi-value" id="k-canc"></strong><span class="adc-badge" id="k-canc-badge"></span></p>
+            <p class="adc-kpi-sub" id="k-canc-sub"></p>
+          </li>
+        </ul>
+      </section>
+
+      <%# ── Distribuição e evolução ── %>
+      <section class="adc-section" aria-labelledby="h-dist" aria-busy="false" id="evo">
+        <div class="adc-evo-head">
+          <h2 class="adc-h2" id="h-dist">Distribuição e evolução</h2>
+          <fieldset class="adv-group adc-seg" id="seg" aria-label="Período do relatório">
+            <button type="button" class="adv-chip" data-p="7"      aria-pressed="false">7 dias</button>
+            <button type="button" class="adv-chip" data-p="30"     aria-pressed="false">30 dias</button>
+            <button type="button" class="adv-chip" data-p="90"     aria-pressed="true">90 dias</button>
+            <button type="button" class="adv-chip" data-p="custom" aria-pressed="false">Personalizado</button>
+          </fieldset>
+        </div>
+
+        <form class="adc-range" id="range-form" hidden novalidate>
+          <div class="adv-field"><label for="r-from">De</label><input type="date" id="r-from" required /></div>
+          <div class="adv-field"><label for="r-to">Até</label><input type="date" id="r-to" required /></div>
+          <button type="submit" class="adv-btn adv-btn--primary">Aplicar</button>
+          <p class="adv-form-error" id="range-error" role="alert"></p>
+        </form>
+
+        <figure class="adc-card adc-chart">
+          <figcaption class="adc-chart-head">
+            <h3 class="adc-h3">Evolução do faturamento</h3>
+            <button type="button" class="adc-tbl-btn" data-target="fat" aria-pressed="false">Ver como tabela</button>
+          </figcaption>
+          <ul class="adc-legend" aria-label="Legenda">
+            <li><span class="adc-sw" style="background:#8B5CF6"></span>Devs</li>
+            <li><span class="adc-sw" style="background:#0FA391"></span>Empresas</li>
+          </ul>
+          <div class="adc-plot" id="plot-fat" role="group" aria-label="Gráfico de linhas: receita mensal recorrente ao longo do período, devs e empresas, em reais"></div>
+          <div class="adc-table-wrap" id="table-fat" hidden></div>
+          <p class="adc-note">Receita mensal recorrente ao fim de cada ponto: mensalidades pagas ativas mais planos anuais vigentes ÷ 12. Planos liberados pelo admin não geram receita.</p>
+        </figure>
+      </section>
+
+      <%# ── Gestão de assinaturas ── %>
+      <section class="adc-section" aria-labelledby="h-gest">
+        <div class="adc-evo-head">
+          <h2 class="adc-h2" id="h-gest">Gestão de assinaturas</h2>
+          <p class="add-period" id="rank-period"></p>
+        </div>
+        <section class="adc-card add-rank" aria-labelledby="h-ult">
+          <h3 class="adc-h3" id="h-ult">Últimas assinaturas e upgrades</h3>
+          <div class="adc-table-wrap">
+            <table class="adr-table add-table">
+              <caption class="visually-hidden">Planos PRO contratados ou liberados no período</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Dev/Empresa</th>
+                  <th scope="col" class="num">Plano</th>
+                  <th scope="col" class="num">Ciclo</th>
+                  <th scope="col" class="num">Valor</th>
+                  <th scope="col" class="num">Data</th>
+                </tr>
+              </thead>
+              <tbody id="ass-tbody"></tbody>
+            </table>
+          </div>
+          <p class="adm-empty" id="ass-empty" hidden>Nenhuma assinatura ou upgrade no período.</p>
+        </section>
+      </section>
+
+      <%- include('partials/admin-gerar-relatorio', { comTipo: true }) %>
+
+    </div>
+  </div>
+</main>
+
+<output class="adv-toast" id="toast" role="status" aria-live="polite"></output>
+
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
+</footer>
+
+<script src="/js/escape-html.js"></script>
+<script src="/js/admin-relatorio.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const API = "/api/admin/reports/planos-e-assinaturas";
+const { COR, SURFACE, INK, fmt, fmt1, hojeIso, diasAtras, qs, el, scaleFor, frame, tooltip } = AR;
+
+const page = { p: "90", from: diasAtras(89), to: hojeIso() };
+const dataBr = (iso) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
+const brl = (centavos) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(centavos / 100);
+const brlReais = (v) => brl(Math.round(v * 100));
+const initials = (s) => String(s || "?").trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0)).join("").toUpperCase() || "?";
+const safeUrl = (u) => /^https?:\/\//i.test(u || "") ? u : "";
+const formatCnpj = (c) => { const d = String(c ?? "").replace(/\D/g, ""); return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") : (c || ""); };
+const CICLO = { mensal: "Mensal", anual: "Anual", manual: "Manual" };
+
+// ── Gráfico de linhas: faturamento (R$) ──
+function renderLine(data) {
+  const plot = $("plot-fat");
+  plot.querySelectorAll("svg").forEach(n => n.remove());
+  const W = 960, H = 280, m = { l: 64, r: 150, t: 16, b: 32 };
+  const n = data.length, iw = W - m.l - m.r;
+  const xAt = (i) => m.l + (n === 1 ? iw / 2 : (i * iw) / (n - 1));
+  const maxV = Math.max(...data.map(d => Math.max(d.devs, d.empresas)), 0);
+  const { svg, y } = frame(W, H, m, scaleFor(maxV), data.map(d => d.label), xAt);
+
+  const series = [["devs", "Devs"], ["empresas", "Empresas"]];
+  series.forEach(([k]) => svg.appendChild(el("path", { d: data.map((d, i) => `${i ? "L" : "M"}${xAt(i)},${y(d[k])}`).join(""),
+    fill: "none", stroke: COR[k], "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" })));
+  const marks = {};
+  series.forEach(([k]) => { if (n <= 31) marks[k] = data.map((d, i) => svg.appendChild(el("circle", { cx: xAt(i), cy: y(d[k]), r: 4, fill: COR[k], stroke: SURFACE, "stroke-width": 2 }))); });
+
+  const last = data[n - 1];
+  const ly = series.map(([k, nome]) => ({ k, nome, y: y(last[k]) })).sort((a, b) => a.y - b.y);
+  if (ly[1].y - ly[0].y < 16) { const mid = (ly[0].y + ly[1].y) / 2; ly[0].y = mid - 8; ly[1].y = mid + 8; }
+  ly.forEach(l => svg.appendChild(el("text", { x: xAt(n - 1) + 12, y: l.y + 4, fill: INK, "font-size": 12, "font-weight": 600 }, `${l.nome} ${brlReais(last[l.k])}`)));
+
+  const guide = el("line", { y1: m.t, y2: H - m.b, stroke: AR.MUTED, "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" });
+  svg.insertBefore(guide, svg.children[1]);
+  const hit = el("rect", { x: m.l, y: m.t, width: iw, height: H - m.t - m.b, fill: "transparent" });
+  svg.appendChild(hit);
+  plot.prepend(svg);
+
+  const tip = tooltip(plot);
+  hit.addEventListener("mousemove", ev => {
+    const box = svg.getBoundingClientRect();
+    const px = ((ev.clientX - box.left) / box.width) * W;
+    const i = n === 1 ? 0 : Math.min(n - 1, Math.max(0, Math.round(((px - m.l) / iw) * (n - 1))));
+    guide.setAttribute("x1", xAt(i)); guide.setAttribute("x2", xAt(i)); guide.setAttribute("visibility", "visible");
+    Object.values(marks).forEach(a => a.forEach((c, j) => c.setAttribute("r", j === i ? 6 : 4)));
+    const d = data[i];
+    tip.show((xAt(i) / W) * 100, `${d.label} · receita mensal`, [[COR.devs, "Devs", brlReais(d.devs)], [COR.empresas, "Empresas", brlReais(d.empresas)]]);
+  });
+  hit.addEventListener("mouseleave", () => {
+    guide.setAttribute("visibility", "hidden");
+    Object.values(marks).forEach(a => a.forEach(c => c.setAttribute("r", 4)));
+    tip.hide();
+  });
+}
+
+function tableFat(rows) {
+  return `<table class="adr-table"><caption class="visually-hidden">Receita mensal recorrente por ponto do período</caption>
+    <thead><tr><th scope="col">Ponto</th><th scope="col" class="num">Devs</th><th scope="col" class="num">Empresas</th></tr></thead>
+    <tbody>${rows.map(r => `<tr><th scope="row">${escapeHtml(r.label)}</th><td class="num">${brlReais(r.devs)}</td><td class="num">${brlReais(r.empresas)}</td></tr>`).join("")}</tbody></table>`;
+}
+
+function badge(node, valor, sufixo, rotulo, inverso = false) {
+  node.className = "adc-badge";
+  if (valor == null) { node.textContent = "—"; node.title = "Sem base de comparação no período"; return; }
+  const bom = inverso ? valor < 0 : valor > 0, ruim = inverso ? valor > 0 : valor < 0;
+  node.classList.add(bom ? "is-up" : ruim ? "is-down" : "is-flat");
+  const num = Number.isInteger(valor) ? String(Math.abs(valor)) : fmt1(Math.abs(valor));
+  node.textContent = `${valor > 0 ? "+" : valor < 0 ? "−" : ""}${num}${sufixo}`;
+  node.title = rotulo;
+}
+
+function renderKpis(k) {
+  $("k-mrr").textContent = brl(k.mrr.centavos);
+  badge($("k-mrr-badge"), k.mrr.variacao_pct, "%", "Variação da receita mensal recorrente no período");
+  $("k-mrr-bar").style.width = `${k.mrr.centavos ? (k.mrr.devs / k.mrr.centavos) * 100 : 0}%`;
+  $("k-mrr-sub").textContent = `Devs ${brl(k.mrr.devs)} / empresas ${brl(k.mrr.empresas)}`;
+  $("k-pro").textContent = fmt(k.pro.total);
+  badge($("k-pro-badge"), k.pro.variacao_pct, "%", "Variação dos assinantes PRO no período");
+  $("k-pro-bar").style.width = `${k.pro.total ? (k.pro.devs / k.pro.total) * 100 : 0}%`;
+  $("k-pro-sub").textContent = `${fmt(k.pro.devs)} devs PRO / ${fmt(k.pro.empresas)} empresas PRO`;
+  $("k-conv").textContent = `${fmt1(k.conversao.taxa)}%`;
+  badge($("k-conv-badge"), k.conversao.variacao_pp, " p.p.", "Variação da taxa de conversão em pontos percentuais");
+  $("k-canc").textContent = k.cancelamentos.taxa == null ? "—" : `${fmt1(k.cancelamentos.taxa)}%`;
+  badge($("k-canc-badge"), k.cancelamentos.variacao_pp, " p.p.", "Variação da taxa de cancelamentos em pontos percentuais", true);
+  $("k-canc-sub").textContent = `${fmt(k.cancelamentos.cancelados)} cancelamento(s) no período`;
+}
+
+function renderAssinaturas(rows) {
+  $("ass-empty").hidden = rows.length > 0;
+  $("ass-tbody").innerHTML = rows.map(a => {
+    const avatar = safeUrl(a.avatar_url)
+      ? `<img class="adm-avatar" src="${escapeHtml(a.avatar_url)}" alt="" width="36" height="36" loading="lazy" />`
+      : `<span class="adm-avatar" aria-hidden="true">${escapeHtml(initials(a.nome))}</span>`;
+    const doc = a.doc ? (a.tipo === "empresa" ? formatCnpj(a.doc) : a.doc) : "";
+    const valor = a.ciclo === "manual" ? "—" : `${brl(a.centavos)}${a.ciclo === "anual" ? "/ano" : "/mês"}`;
+    return `
+    <tr>
+      <th scope="row"><div class="adu-person">${avatar}<span class="adu-person-txt"><span class="adu-name">${escapeHtml(a.nome)}</span>${doc ? `<span class="adu-gh">${escapeHtml(doc)}</span>` : ""}</span></div></th>
+      <td class="num">${escapeHtml(a.plano)}</td>
+      <td class="num">${escapeHtml(CICLO[a.ciclo] ?? a.ciclo)}</td>
+      <td class="num">${escapeHtml(valor)}</td>
+      <td class="num">${dataBr(a.data)}</td>
+    </tr>`;
+  }).join("");
+}
+
+function renderAll(r) {
+  renderKpis(r.kpis);
+  renderLine(r.faturamento);
+  $("table-fat").innerHTML = tableFat(r.faturamento);
+  renderAssinaturas(r.assinaturas);
+  $("rank-period").textContent = `Período: ${dataBr(r.periodo.from)} a ${dataBr(r.periodo.to)}`;
+}
+
+async function fetchReport(sel) {
+  const res = await fetch(`${API}?${qs(sel)}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Erro ao carregar o relatório.");
+  return data;
+}
+
+let toastTimer;
+function toast(msg, isErr = false) {
+  const t = $("toast"); t.textContent = msg; t.classList.toggle("is-error", isErr); t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+// ── Período ──
+async function aplicarPagina() {
+  const evo = $("evo"); evo.setAttribute("aria-busy", "true");
+  try { renderAll(await fetchReport(page)); }
+  catch (err) { toast(err.message, true); }
+  finally { evo.setAttribute("aria-busy", "false"); }
+}
+$("seg").querySelectorAll("[data-p]").forEach(btn => btn.addEventListener("click", () => {
+  page.p = btn.dataset.p;
+  $("seg").querySelectorAll("[data-p]").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+  $("range-form").hidden = page.p !== "custom";
+  if (page.p === "custom") { $("r-from").value = page.from; $("r-to").value = page.to; $("r-from").focus(); return; }
+  aplicarPagina();
+}));
+$("range-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const from = $("r-from").value, to = $("r-to").value;
+  $("range-error").textContent = "";
+  if (!from || !to) { $("range-error").textContent = "Informe as duas datas."; return; }
+  page.from = from; page.to = to;
+  try { renderAll(await fetchReport(page)); } catch (err) { $("range-error").textContent = err.message; }
+});
+$("r-to").max = hojeIso();
+
+document.querySelectorAll(".adc-tbl-btn").forEach(btn => btn.addEventListener("click", () => {
+  const alvo = btn.dataset.target, ativo = btn.getAttribute("aria-pressed") !== "true";
+  btn.setAttribute("aria-pressed", String(ativo));
+  btn.textContent = ativo ? "Ver gráfico" : "Ver como tabela";
+  $(`plot-${alvo}`).hidden = ativo; $(`table-${alvo}`).hidden = !ativo;
+}));
+
+// ── Gerar relatório (pop-up) ──
+AR.initGerar({ api: API, comTipo: true, toast });
+
+(async function init() {
+  try {
+    const r = await fetchReport(page);
+    $("loading").hidden = true; $("content").hidden = false;
+    renderAll(r);
+  } catch (err) {
+    console.error(err);
+    $("loading").innerHTML = `
+      <div role="alert">
+        <p class="adm-error">Erro ao carregar o relatório.</p>
+        <a class="adm-error-link" href="/admin/relatorios">← Voltar às categorias</a>
+      </div>`;
+  }
+})();
+</script>
+
+</body>
+</html>

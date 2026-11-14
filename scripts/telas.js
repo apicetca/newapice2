@@ -67,7 +67,6 @@ const CATALOGO = [
   { pagina: "admin-usuarios",          papeis: ["admin"], rota: "/admin/usuarios" },
   { pagina: "admin-empresas",          papeis: ["admin"], rota: "/admin/empresas" },
   { pagina: "admin-vagas",             papeis: ["admin"], rota: "/admin/vagas" },
-  { pagina: "admin-matchs",            papeis: ["admin"], rota: "/admin/matchs" },
   { pagina: "admin-relatorios",        papeis: ["admin"], rota: "/admin/relatorios" },
   { pagina: "admin-configuracoes",     papeis: ["admin"], rota: "/admin/configuracoes" },
 ];

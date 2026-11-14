@@ -157,6 +157,12 @@ app.use(async (req, res, next) => {
 // Expõe `user` para todos os templates, sem o accessToken do GitHub (QA-004)
 app.use(exposeUser);
 
+// Última atividade (coluna "Atividade" do Admin → Usuários)
+app.use(require("./middlewares/lastSeen").trackLastSeen);
+
+// Uso da plataforma (relatório Admin → Relatórios → Uso da plataforma)
+app.use(require("./middlewares/usageTracker").trackUsage);
+
 // ── Páginas públicas ──────────────────────────────────────
 app.get("/", async (req, res) => {
   let stats = { devs: 0, jobs: 0, skills: 0 };
@@ -366,12 +372,25 @@ app.get("/empresa/dev/:id", requireCompany, (req, res) => {
   res.render("perfil-dev-empresa", { currentPage: "empresa-devs", devId });
 });
 
+// Categorias ativas para o seletor do formulário de vaga (a atual da vaga entra mesmo desativada).
+async function categoriasParaForm(atualId) {
+  try {
+    const [rows] = await db.query(
+      "SELECT id, nome FROM job_categories WHERE active = 1 OR id = ? ORDER BY nome", [atualId ?? 0]);
+    return rows;
+  } catch (err) {
+    console.error("[categorias do formulário]", err.message);
+    return [];
+  }
+}
+
 app.get("/empresa/vagas/nova", requireCompany, async (req, res) => {
   const [allSkills] = await db.query(
     "SELECT id, name, type, category FROM skills ORDER BY type, category, name"
   );
   res.render("empresa-vaga-form", {
     currentPage: "empresa-vagas", job: null, jobSkills: [], allSkills, isEdit: false,
+    categories: await categoriasParaForm(null),
   });
 });
 
@@ -395,6 +414,7 @@ app.get("/empresa/vagas/:id/editar", requireCompany, async (req, res) => {
 
     res.render("empresa-vaga-form", {
       currentPage: "empresa-vagas", job: jobs[0], jobSkills, allSkills, isEdit: true,
+      categories: await categoriasParaForm(jobs[0].category_id),
     });
   } catch (err) {
     console.error(err.message);
@@ -431,11 +451,52 @@ app.get("/vagas/:id", async (req, res) => {
 // ── Área do administrador ─────────────────────────────────
 app.get("/admin/dashboard",      requireAdmin, (req, res) => res.render("admin-dashboard",      { currentPage: "admin-dashboard" }));
 app.get("/admin/usuarios",       requireAdmin, (req, res) => res.render("admin-usuarios",        { currentPage: "admin-usuarios" }));
-app.get("/admin/empresas",       requireAdmin, (req, res) => res.render("admin-empresas",        { currentPage: "admin-empresas" }));
-app.get("/admin/vagas",          requireAdmin, (req, res) => res.render("admin-vagas",           { currentPage: "admin-vagas" }));
-app.get("/admin/matchs",         requireAdmin, (req, res) => res.render("admin-matchs",          { currentPage: "admin-matchs" }));
-app.get("/admin/relatorios",     requireAdmin, (req, res) => res.render("admin-relatorios",      { currentPage: "admin-relatorios" }));
-app.get("/admin/configuracoes",  requireAdmin, (req, res) => res.render("admin-configuracoes",   { currentPage: "admin-configuracoes" }));
+app.get("/admin/usuarios/:id", requireAdmin, (req, res) => {
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId) || userId <= 0) return res.redirect("/admin/usuarios");
+  res.render("admin-usuario", { currentPage: "admin-usuarios", userId });
+});
+app.get("/admin/empresas",      requireAdmin, (req, res) => res.render("admin-empresas",        { currentPage: "admin-empresas" }));
+app.get("/admin/empresas/:id", requireAdmin, (req, res) => {
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId) || userId <= 0) return res.redirect("/admin/empresas");
+  res.render("admin-empresa", { currentPage: "admin-empresas", userId });
+});
+app.get("/admin/vagas",        requireAdmin, (req, res) => res.render("admin-vagas",           { currentPage: "admin-vagas" }));
+// Detalhe de uma vaga na visão do admin (renderizado no servidor).
+app.get("/admin/vagas/:id", requireAdmin, async (req, res) => {
+  const jobId = Number(req.params.id);
+  if (!Number.isInteger(jobId) || jobId <= 0) return res.redirect("/admin/vagas");
+  try {
+    const [rows] = await db.query(`
+      SELECT j.*, DATE_FORMAT(j.expires_at, '%Y-%m-%d') AS expires_day,
+             (SELECT COUNT(*) FROM job_applications ja WHERE ja.job_id = j.id) AS total_candidaturas
+      FROM jobs j WHERE j.id = ?`, [jobId]);
+    if (!rows.length) return res.redirect("/admin/vagas");
+    const [skills] = await db.query(`
+      SELECT s.name, js.importance FROM job_skills js JOIN skills s ON s.id = js.skill_id
+      WHERE js.job_id = ? ORDER BY js.importance DESC, js.learn_order`, [jobId]);
+    res.render("admin-vaga", { currentPage: "admin-vagas", job: rows[0], skills });
+  } catch (err) {
+    console.error("[GET /admin/vagas/:id]", err.message);
+    res.redirect("/admin/vagas");
+  }
+});
+app.get("/admin/relatorios",     requireAdmin, (req, res) => res.render("admin-relatorios",      { currentPage: "admin-relatorios", categorias: require("./config/relatorios").CATEGORIAS }));
+app.get("/admin/relatorios/:categoria", requireAdmin, (req, res) => {
+  const categoria = require("./config/relatorios").porSlug(req.params.categoria);
+  if (!categoria) return res.redirect("/admin/relatorios");
+  res.render(categoria.view || "admin-relatorio", { currentPage: "admin-relatorios", categoria });
+});
+app.get("/admin/configuracoes",  requireAdmin, (req, res) => res.render("admin-configuracoes", { currentPage: "admin-configuracoes", categorias: require("./config/configuracoes").CATEGORIAS }));
+// Catálogo de habilidades (a aba "Habilidades" de Categorias e vagas leva até aqui)
+app.get("/admin/configuracoes/categorias-e-vagas/habilidades", requireAdmin, (req, res) =>
+  res.render("admin-configuracoes-catalogo", { currentPage: "admin-configuracoes" }));
+app.get("/admin/configuracoes/:categoria", requireAdmin, (req, res) => {
+  const categoria = require("./config/configuracoes").porSlug(req.params.categoria);
+  if (!categoria) return res.redirect("/admin/configuracoes");
+  res.render(categoria.view, { currentPage: "admin-configuracoes", categoria });
+});
 
 // ── API ───────────────────────────────────────────────────
 app.get("/api/user", (req, res) => {

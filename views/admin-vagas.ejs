@@ -12,168 +12,402 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
   <link rel="stylesheet" href="/css/header.css" />
-  <link rel="stylesheet" href="/css/empresa-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-vagas.css" />
 </head>
 <body>
 
   <%- include('partials/header-admin', { currentPage: 'admin-vagas' }) %>
 
-<main class="page-content" id="main-content">
+<main class="adm-main" id="main-content">
+  <h1 class="visually-hidden">Vagas</h1>
 
-  <section class="loading-screen" id="loading" role="status" aria-live="polite">
-    <span class="spinner" aria-hidden="true"></span>
+  <section class="adm-loading" id="loading" role="status" aria-live="polite">
+    <span class="adm-spinner" aria-hidden="true"></span>
     <p>Carregando vagas...</p>
   </section>
 
-  <article id="content" hidden>
-    <section class="section" aria-label="Vagas publicadas na plataforma">
-      <header class="section-header">
-        <h1 class="section-title">Todas as vagas <span class="section-count" id="jobs-count"></span></h1>
-        <fieldset class="filter-row" role="group" aria-label="Filtrar por status">
-          <button class="filter-chip active" data-f="todas"    aria-pressed="true">Todas</button>
-          <button class="filter-chip"        data-f="ativas"   aria-pressed="false">Ativas</button>
-          <button class="filter-chip"        data-f="pausadas" aria-pressed="false">Pausadas</button>
-        </fieldset>
-      </header>
+  <div class="adv-wrap" id="content" hidden>
 
-      <figure class="jobs-table-wrap">
-        <table class="jobs-table" id="jobs-table" aria-label="Lista de vagas">
+    <section class="adv-filters" aria-label="Filtros de vagas">
+      <div class="adv-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="search" placeholder="Buscar por título, empresa ou local..." aria-label="Buscar vagas por título, empresa ou local" autocomplete="off" />
+      </div>
+
+      <fieldset class="adv-group" id="status-group" aria-label="Filtrar por status">
+        <button type="button" class="adv-chip" data-v="todas"    aria-pressed="true">Todas</button>
+        <button type="button" class="adv-chip" data-v="ativas"   aria-pressed="false">Ativas</button>
+        <button type="button" class="adv-chip" data-v="pausadas" aria-pressed="false">Pausadas</button>
+      </fieldset>
+
+      <fieldset class="adv-group" id="level-group" aria-label="Filtrar por nível">
+        <button type="button" class="adv-chip" data-v="todas"    aria-pressed="true">Todas</button>
+        <button type="button" class="adv-chip" data-v="estagio"  aria-pressed="false">Estágio</button>
+        <button type="button" class="adv-chip" data-v="junior"   aria-pressed="false">Júnior</button>
+        <button type="button" class="adv-chip" data-v="pleno"    aria-pressed="false">Pleno</button>
+        <button type="button" class="adv-chip adv-chip--ghost" id="clear-filters">Limpar</button>
+      </fieldset>
+    </section>
+
+    <div class="adv-bar">
+      <p class="adv-count" id="count" role="status" aria-live="polite"></p>
+
+      <div class="adv-sort">
+        <button type="button" class="adv-sort-btn" id="sort-btn" aria-haspopup="listbox"
+                aria-expanded="false" aria-controls="sort-list" aria-label="Ordenar vagas">
+          <span id="sort-label">Todas</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <ul class="adv-listbox" id="sort-list" role="listbox" aria-label="Ordenar por" hidden>
+          <li class="adv-option" role="option" tabindex="-1" data-v="todas" aria-selected="true">Todas</li>
+          <li class="adv-option" role="option" tabindex="-1" data-v="recentes" aria-selected="false">Mais recentes</li>
+          <li class="adv-option" role="option" tabindex="-1" data-v="empresa" aria-selected="false">Por empresa</li>
+          <li class="adv-option" role="option" tabindex="-1" data-v="az" aria-selected="false">A-Z</li>
+        </ul>
+      </div>
+    </div>
+
+    <section aria-label="Lista de vagas">
+      <figure class="adv-panel">
+        <table class="adv-table" id="jobs-table">
+          <caption class="visually-hidden">Vagas publicadas na plataforma</caption>
           <thead>
             <tr>
-              <th scope="col">Vaga</th>
+              <th scope="col">Título</th>
               <th scope="col">Empresa</th>
               <th scope="col">Nível</th>
-              <th scope="col">Candidaturas</th>
-              <th scope="col">Status</th>
+              <th scope="col">Local</th>
+              <th scope="col">Candidatos</th>
+              <th scope="col">Expiração</th>
               <th scope="col">Ações</th>
             </tr>
           </thead>
           <tbody id="jobs-tbody"></tbody>
         </table>
-        <section class="table-empty" id="jobs-empty" hidden>
-          <p class="table-empty-title">Nenhuma vaga encontrada</p>
-        </section>
+        <p class="adm-empty" id="jobs-empty" hidden>Nenhuma vaga encontrada</p>
       </figure>
     </section>
-  </article>
+
+  </div>
 </main>
 
-<output class="toast" id="toast" role="status" aria-live="polite"></output>
+<%# ── Editar vaga ── %>
+<dialog class="adv-dialog" id="edit-dialog" aria-labelledby="edit-title">
+  <header class="adv-dialog-head">
+    <h2 class="adv-dialog-title" id="edit-title">Editar vaga</h2>
+    <button type="button" class="adv-dialog-close" id="edit-close" aria-label="Fechar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </header>
+  <form id="edit-form" novalidate>
+    <div class="adv-form-grid">
+      <div class="adv-field">
+        <label for="f-title">Título</label>
+        <input type="text" id="f-title" name="title" maxlength="200" required />
+      </div>
+      <div class="adv-field">
+        <label for="f-company">Empresa</label>
+        <input type="text" id="f-company" name="company" maxlength="100" />
+      </div>
+      <div class="adv-field">
+        <label for="f-level">Nível</label>
+        <select id="f-level" name="level">
+          <option value="estagio">Estágio</option>
+          <option value="junior">Júnior</option>
+          <option value="pleno">Pleno</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label for="f-location">Local</label>
+        <input type="text" id="f-location" name="location" maxlength="255" />
+      </div>
+      <div class="adv-field">
+        <label for="f-expires">Expiração</label>
+        <input type="date" id="f-expires" name="expires_at" />
+      </div>
+    </div>
+    <p class="adv-form-error" id="edit-error" role="alert"></p>
+    <footer class="adv-dialog-foot">
+      <a class="adv-icon-btn adv-mail" id="edit-mail" href="#" aria-label="Enviar e-mail para a empresa" hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      </a>
+      <button type="button" class="adv-btn" id="edit-cancel">Cancelar</button>
+      <button type="submit" class="adv-btn adv-btn--primary" id="edit-save">Salvar</button>
+    </footer>
+  </form>
+</dialog>
 
-<footer class="site-footer">
-  <p>&copy; <script>document.write(new Date().getFullYear())</script> Ápice. Painel do administrador.</p>
+<%# ── Excluir vaga ── %>
+<dialog class="adv-dialog" id="delete-dialog" aria-labelledby="delete-title">
+  <header class="adv-dialog-head">
+    <h2 class="adv-dialog-title" id="delete-title">Excluir vaga?</h2>
+  </header>
+  <p class="adv-dialog-text" id="delete-text"></p>
+  <p class="adv-form-error" id="delete-error" role="alert"></p>
+  <footer class="adv-dialog-foot">
+    <button type="button" class="adv-btn" id="delete-cancel">Cancelar</button>
+    <button type="button" class="adv-btn adv-btn--danger" id="delete-confirm">Excluir</button>
+  </footer>
+</dialog>
+
+<output class="adv-toast" id="toast" role="status" aria-live="polite"></output>
+
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
 </footer>
 
 <script src="/js/escape-html.js"></script>
 <script>
 const LEVEL_LABEL = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
-const LEVEL_BADGE = { estagio: "badge-green", junior: "badge-blue", pleno: "badge-yellow" };
+const $ = (id) => document.getElementById(id);
+
 let allJobs = [];
-let activeFilter = "todas";
+const state = { q: "", status: "todas", level: "todas", sort: "todas" };
 
-function formatDate(raw) {
-  if (!raw) return "—";
-  return new Date(raw).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+const norm = (s) => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+function parseDay(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+  return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+}
+function formatExpiry(iso) {
+  const d = parseDay(iso);
+  return d ? d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" }) : "—";
+}
+// "São Paulo, SP" / "Rio - RJ" → "SP"/"RJ"; qualquer outro texto aparece como está.
+function shortLocation(loc) {
+  const first = String(loc ?? "").split(/;|\n/)[0].trim();
+  if (!first) return "—";
+  const m = /(?:,|-|\/)\s*([A-Za-z]{2})$/.exec(first);
+  return m ? m[1].toUpperCase() : first;
 }
 
-function applyFilter() {
-  const filtered = allJobs.filter(j => {
-    if (activeFilter === "ativas")   return j.active;
-    if (activeFilter === "pausadas") return !j.active;
-    return true;
+function visibleJobs() {
+  const q = norm(state.q.trim());
+  const list = allJobs.filter(j => {
+    if (state.status === "ativas" && !j.active) return false;
+    if (state.status === "pausadas" && j.active) return false;
+    if (state.level !== "todas" && j.level !== state.level) return false;
+    return !q || [j.title, j.company, j.location].some(v => norm(v).includes(q));
   });
-  document.getElementById("jobs-count").textContent = `(${filtered.length})`;
-  renderTable(filtered);
+  const by = {
+    recentes: (a, b) => new Date(b.created_at) - new Date(a.created_at),
+    empresa:  (a, b) => String(a.company ?? "").localeCompare(String(b.company ?? ""), "pt-BR"),
+    az:       (a, b) => String(a.title).localeCompare(String(b.title), "pt-BR"),
+  }[state.sort];
+  return by ? list.sort(by) : list;
 }
 
-function renderTable(jobs) {
-  const tbody = document.getElementById("jobs-tbody");
-  const empty = document.getElementById("jobs-empty");
-  const table = document.getElementById("jobs-table");
-  tbody.innerHTML = "";
+const ICON_EYE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const ICON_EDIT = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+const ICON_TRASH = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>';
 
-  if (!jobs.length) { table.style.display = "none"; empty.hidden = false; return; }
-  table.style.display = ""; empty.hidden = true;
+function render() {
+  const jobs = visibleJobs();
+  const tbody = $("jobs-tbody");
+  // Re-renderizar recria os botões: devolve o foco ao mesmo botão, se ele ainda existir.
+  const f = document.activeElement?.closest?.("[data-act]");
+  const keep = f ? { act: f.dataset.act, id: f.dataset.id } : null;
+  tbody.innerHTML = "";
+  $("count").textContent = `${jobs.length} ${jobs.length === 1 ? "vaga" : "vagas"}`;
+  $("jobs-table").hidden = jobs.length === 0;
+  $("jobs-empty").hidden = jobs.length > 0;
 
   jobs.forEach(j => {
+    const t = escapeHtml(j.title);
     const tr = document.createElement("tr");
+    if (!j.active) tr.className = "is-paused";
     tr.innerHTML = `
-      <td data-label="Vaga">
-        <a href="/vagas/${j.id}" target="_blank" class="job-title-cell" style="color:var(--text)">${escapeHtml(j.title)}</a>
-        <span class="job-company-level">Criada em ${formatDate(j.created_at)}</span>
-      </td>
-      <td data-label="Empresa">${escapeHtml(j.company ?? "—")}</td>
-      <td data-label="Nível"><span class="badge ${LEVEL_BADGE[j.level] ?? "badge-muted"}">${LEVEL_LABEL[j.level] ?? j.level}</span></td>
-      <td data-label="Candidaturas"><strong>${j.total_candidaturas}</strong></td>
-      <td data-label="Status"><span class="badge ${j.active ? "badge-green" : "badge-muted"}">${j.active ? "Ativa" : "Pausada"}</span></td>
-      <td data-label="Ações">
-        <button class="btn-icon ${j.active ? "btn-toggle-on" : "btn-toggle-off"}" title="${j.active ? "Pausar vaga" : "Reativar vaga"}"
-          onclick="toggleStatus(${j.id}, ${!j.active})">
-          ${j.active
-            ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
-            : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`}
-        </button>
-      </td>`;
+      <td class="adv-title"><a href="/vagas/${Number(j.id)}" target="_blank" rel="noopener">${t}</a>${j.active ? "" : '<span class="adv-paused-tag">Pausada</span>'}</td>
+      <td class="adv-company">${escapeHtml(j.company ?? "—")}</td>
+      <td><span class="adm-badge">${escapeHtml(LEVEL_LABEL[j.level] ?? j.level)}</span></td>
+      <td title="${escapeHtml(j.location ?? "")}">${escapeHtml(shortLocation(j.location))}</td>
+      <td>${Number(j.total_candidaturas)}</td>
+      <td>${formatExpiry(j.expires_at)}</td>
+      <td><span class="adv-actions">
+        <a class="adv-icon-btn" href="/admin/vagas/${Number(j.id)}" aria-label="Ver vaga ${t}">${ICON_EYE}</a>
+        <button type="button" class="adv-icon-btn" data-act="edit" data-id="${Number(j.id)}" aria-label="Editar vaga ${t}">${ICON_EDIT}</button>
+        <button type="button" class="adv-icon-btn adv-icon-btn--danger" data-act="delete" data-id="${Number(j.id)}" aria-label="Excluir vaga ${t}">${ICON_TRASH}</button>
+      </span></td>`;
     tbody.appendChild(tr);
   });
+  if (keep) tbody.querySelector(`[data-act="${keep.act}"][data-id="${keep.id}"]`)?.focus();
 }
 
-document.querySelectorAll(".filter-chip").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".filter-chip").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed", "false"); });
-    btn.classList.add("active"); btn.setAttribute("aria-pressed", "true");
-    activeFilter = btn.dataset.f;
-    applyFilter();
-  });
+// ── Filtros ──
+function bindChips(groupId, key) {
+  $(groupId).querySelectorAll("[data-v]").forEach(btn => btn.addEventListener("click", () => {
+    state[key] = btn.dataset.v;
+    syncChips();
+    render();
+  }));
+}
+function syncChips() {
+  [["status-group", "status"], ["level-group", "level"]].forEach(([g, k]) =>
+    $(g).querySelectorAll("[data-v]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === state[k]))));
+}
+bindChips("status-group", "status");
+bindChips("level-group", "level");
+$("search").addEventListener("input", e => { state.q = e.target.value; render(); });
+$("clear-filters").addEventListener("click", () => {
+  Object.assign(state, { q: "", status: "todas", level: "todas", sort: "todas" });
+  $("search").value = "";
+  syncChips(); syncSort(); render();
 });
 
-async function toggleStatus(id, newActive) {
-  try {
-    const res = await fetch(`/api/admin/jobs/${id}`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ active: newActive }),
-    });
-    if (!res.ok) throw new Error();
-    showToast(newActive ? "Vaga reativada." : "Vaga pausada.");
-    await reload();
-  } catch {
-    showToast("Erro ao atualizar. Tente novamente.", true);
-  }
+// ── Ordenação (listbox acessível por teclado) ──
+const sortBtn = $("sort-btn"), sortList = $("sort-list");
+const options = () => [...sortList.querySelectorAll("[role=option]")];
+function syncSort() {
+  options().forEach(o => o.setAttribute("aria-selected", String(o.dataset.v === state.sort)));
+  $("sort-label").textContent = options().find(o => o.dataset.v === state.sort).textContent;
 }
-
-async function reload() {
-  const res = await fetch("/api/admin/jobs");
-  if (!res.ok) return;
-  allJobs = await res.json();
-  applyFilter();
+function openSort() {
+  sortList.hidden = false; sortBtn.setAttribute("aria-expanded", "true");
+  (options().find(o => o.getAttribute("aria-selected") === "true") ?? options()[0]).focus();
 }
+function closeSort(refocus) {
+  sortList.hidden = true; sortBtn.setAttribute("aria-expanded", "false");
+  if (refocus) sortBtn.focus();
+}
+function pick(opt) { state.sort = opt.dataset.v; syncSort(); closeSort(true); render(); }
+sortBtn.addEventListener("click", () => sortList.hidden ? openSort() : closeSort(false));
+sortBtn.addEventListener("keydown", e => { if (e.key === "ArrowDown") { e.preventDefault(); openSort(); } });
+sortList.addEventListener("click", e => { const o = e.target.closest("[role=option]"); if (o) pick(o); });
+sortList.addEventListener("keydown", e => {
+  const opts = options(), i = opts.indexOf(document.activeElement);
+  if (e.key === "ArrowDown") { e.preventDefault(); opts[Math.min(i + 1, opts.length - 1)].focus(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); opts[Math.max(i - 1, 0)].focus(); }
+  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (i >= 0) pick(opts[i]); }
+  else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeSort(true); }
+  else if (e.key === "Tab") closeSort(false);
+});
+document.addEventListener("click", e => { if (!e.target.closest(".adv-sort")) closeSort(false); });
 
-let toastTimer = null;
-function showToast(msg, isErr = false) {
-  const el = document.getElementById("toast");
-  el.textContent = msg;
-  el.style.borderColor = isErr ? "rgba(248,81,73,.35)" : "var(--border-lite)";
-  el.classList.add("show");
+// ── Toast ──
+let toastTimer;
+function toast(msg, isErr = false) {
+  const el = $("toast");
+  el.textContent = msg; el.classList.toggle("is-error", isErr); el.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
 }
 
-async function init() {
-  try {
-    await reload();
-    document.getElementById("loading").hidden = true;
-    document.getElementById("content").hidden = false;
-  } catch (err) {
-    console.error(err);
-    document.getElementById("loading").innerHTML = `
-      <section style="text-align:center">
-        <p style="color:var(--red);margin-bottom:10px">Erro ao carregar as vagas.</p>
-        <a href="/admin/dashboard" style="color:var(--blue);font-size:.9rem">← Voltar ao painel</a>
-      </section>`;
-  }
+async function api(method, id, body) {
+  const res = await fetch(`/api/admin/jobs/${id}`, {
+    method, headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Erro ao atualizar. Tente novamente.");
+  return data;
+}
+async function reload() {
+  const res = await fetch("/api/admin/jobs");
+  if (!res.ok) throw new Error("Falha ao carregar");
+  allJobs = await res.json();
+  render();
 }
 
-init();
+// ── Ações da tabela ──
+let opener = null, current = null;
+$("jobs-tbody").addEventListener("click", async e => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const job = allJobs.find(j => j.id === Number(btn.dataset.id));
+  if (!job) return;
+  opener = btn; current = job;
+
+  if (btn.dataset.act === "edit") {
+    openEdit(job);
+  } else {
+    openDelete(job);
+  }
+});
+
+function restoreFocus() {
+  const target = opener && document.contains(opener) ? opener : $("search");
+  target.focus();
+}
+
+// ── Editar ──
+const editDlg = $("edit-dialog");
+function openEdit(j) {
+  $("edit-title").textContent = `Editar vaga: ${j.title}`;
+  $("f-title").value = j.title ?? "";
+  $("f-company").value = j.company ?? "";
+  $("f-level").value = j.level;
+  $("f-location").value = j.location ?? "";
+  $("f-expires").value = j.expires_at ?? "";
+  $("edit-error").textContent = "";
+  const mail = $("edit-mail");
+  mail.hidden = !j.company_email;
+  if (j.company_email) mail.href = `mailto:${j.company_email}?subject=${encodeURIComponent("Sobre a vaga: " + j.title)}`;
+  editDlg.showModal();
+  $("f-title").focus();
+}
+$("edit-close").addEventListener("click", () => editDlg.close());
+$("edit-cancel").addEventListener("click", () => editDlg.close());
+editDlg.addEventListener("close", restoreFocus);
+$("edit-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const save = $("edit-save");
+  save.disabled = true; $("edit-error").textContent = "";
+  try {
+    await api("PATCH", current.id, {
+      title: $("f-title").value, company: $("f-company").value, level: $("f-level").value,
+      location: $("f-location").value, expires_at: $("f-expires").value || null,
+    });
+    editDlg.close();
+    toast("Vaga atualizada.");
+    await reload();
+  } catch (err) {
+    $("edit-error").textContent = err.message;
+  } finally { save.disabled = false; }
+});
+
+// ── Excluir ──
+const delDlg = $("delete-dialog");
+function openDelete(j) {
+  const n = Number(j.total_candidaturas);
+  $("delete-text").innerHTML = `A vaga <strong>${escapeHtml(j.title)}</strong> será excluída definitivamente` +
+    (n ? `, junto com ${n} ${n === 1 ? "candidatura" : "candidaturas"} e os matchs ligados a ela` : "") +
+    `. Para só tirá-la do ar, use a opção de pausar. Esta ação não pode ser desfeita.`;
+  $("delete-error").textContent = "";
+  delDlg.showModal();
+  $("delete-cancel").focus();
+}
+$("delete-cancel").addEventListener("click", () => delDlg.close());
+delDlg.addEventListener("close", restoreFocus);
+$("delete-confirm").addEventListener("click", async () => {
+  const btn = $("delete-confirm");
+  btn.disabled = true; $("delete-error").textContent = "";
+  try {
+    await api("DELETE", current.id);
+    opener = null;
+    delDlg.close();
+    toast("Vaga excluída.");
+    await reload();
+  } catch (err) {
+    $("delete-error").textContent = err.message;
+  } finally { btn.disabled = false; }
+});
+
+(async function init() {
+  try {
+    await reload();
+    $("loading").hidden = true;
+    $("content").hidden = false;
+  } catch (err) {
+    console.error(err);
+    $("loading").innerHTML = `
+      <div role="alert">
+        <p class="adm-error">Erro ao carregar as vagas.</p>
+        <a class="adm-error-link" href="/admin/dashboard">← Voltar ao painel</a>
+      </div>`;
+  }
+})();
 </script>
 
 </body>

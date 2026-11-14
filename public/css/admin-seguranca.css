@@ -1,0 +1,81 @@
+/* =============================================
+   admin-seguranca.css — Admin → Configurações → Segurança e privacidade (desktop)
+   Carrega depois de admin-categorias.css (abas, cartão, diálogo).
+============================================= */
+
+.ads-head { margin: 4px 0 22px; max-width: 70ch; }
+.ads-tabs { justify-content: center; gap: 0; }
+.ads-tabs .adk-tab { flex: 1; max-width: 50%; text-align: center; }
+
+.ads-search {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 0 16px; height: 44px;
+  background: #0b0b0b; border: 1px solid var(--border-lite); border-radius: var(--radius-lg); color: var(--muted);
+}
+.ads-search[hidden] { display: none; }
+.ads-search:focus-within { border-color: var(--admin); }
+.ads-search input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--text); font: inherit; font-size: .78rem; }
+.ads-search input::placeholder { color: var(--muted); }
+
+.ads-period { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; }
+.ads-period[hidden], .ads-custom[hidden] { display: none; }
+.ads-chips { display: inline-flex; gap: 4px; margin: 0; padding: 4px; border: 0; background: #111; border-radius: 99px; min-width: 0; }
+.ads-chip {
+  min-height: 30px; padding: 4px 22px; border: 0; border-radius: 99px; cursor: pointer; background: transparent;
+  color: var(--text); font: inherit; font-size: .76rem;
+}
+.ads-chip:hover { background: rgba(255,255,255,.06); }
+.ads-chip[aria-pressed="true"] { background: #3a3a3a; font-weight: 600; }
+.ads-chip:focus-visible, .ads-custom input:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+.ads-custom { display: flex; gap: 12px; font-size: .72rem; color: var(--muted); }
+.ads-custom input { margin-left: 6px; height: 32px; padding: 0 8px; background: #111; color: var(--text); border: 1px solid var(--border-lite); border-radius: 8px; font: inherit; color-scheme: dark; }
+.ads-detail { color: var(--muted); font-size: .7rem; line-height: 1.4; overflow-wrap: anywhere; max-width: 260px; }
+
+.ads-table-card { background: #0b0b0b; border: 1px solid var(--border-lite); border-radius: var(--radius-xl); overflow: hidden; }
+.ads-table { width: 100%; border-collapse: collapse; font-size: .76rem; }
+.ads-table th { padding: 18px 22px 12px; text-align: left; font-family: var(--font-display); font-size: .8rem; font-weight: 500; white-space: nowrap; }
+.ads-table tbody th { padding: 8px 22px; font-family: inherit; font-size: .76rem; font-weight: 400; white-space: normal; }
+.ads-table td { padding: 8px 22px; vertical-align: middle; }
+.ads-table tbody tr { border-top: 1px solid var(--border); }
+.ads-table tbody tr:hover { background: rgba(255,255,255,.02); }
+.ads-person { display: flex; align-items: center; gap: 14px; }
+.ads-avatar {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+  background: #6b6b6b; color: #fff; font-family: var(--font-display); font-size: .66rem; font-weight: 700;
+}
+.ads-you { color: var(--muted); font-size: .66rem; }
+.ads-email { overflow-wrap: anywhere; }
+.ads-when { color: var(--muted); white-space: nowrap; }
+.ads-what { overflow-wrap: anywhere; }
+.ads-act { width: 48px; text-align: right; }
+.ads-kebab { width: 28px; height: 32px; background: none; border: 0; border-radius: 6px; cursor: pointer; color: var(--text); }
+.ads-kebab:hover { background: rgba(255,255,255,.07); }
+.ads-kebab:focus-visible, .ads-page:focus-visible, .ads-danger:focus-visible, .ads-cancel:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+
+.ads-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 22px; border-top: 1px solid var(--border-lite); }
+.ads-count { font-size: .7rem; color: #B7BD1F; }
+.ads-pager { display: flex; gap: 8px; }
+.ads-page {
+  min-width: 32px; height: 32px; padding: 0 8px; border-radius: 8px; cursor: pointer; font: inherit; font-size: .78rem;
+  color: var(--text); background: #111; border: 1px solid var(--border-lite);
+}
+.ads-page:hover:not(:disabled) { border-color: var(--muted); }
+.ads-page:disabled { opacity: .4; cursor: default; }
+.ads-page.is-current { background: var(--admin); border-color: var(--admin); color: #14140a; font-weight: 700; }
+
+/* ── Folha de ações (⋮) e confirmação: "Remover administrador" / "Cancelar" ── */
+.ads-sheet {
+  position: absolute; z-index: 300; width: 260px; display: flex; flex-direction: column; gap: 10px; padding: 12px;
+  background: #080808; border: 1px solid var(--border-lite); border-radius: var(--radius-lg); box-shadow: 0 18px 44px rgba(0,0,0,.7);
+}
+.ads-sheet[hidden] { display: none; }
+.ads-danger, .ads-cancel {
+  display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 52px; padding: 8px 16px;
+  border-radius: var(--radius-md); cursor: pointer; font-family: var(--font-body); font-size: .82rem; font-weight: 600;
+}
+.ads-danger { color: #ff3b30; background: #1a0000; border: 1px solid #b3261e; text-align: left; line-height: 1.25; }
+.ads-danger:hover { background: #270000; border-color: #ff3b30; }
+.ads-danger:disabled { opacity: .6; cursor: progress; }
+.ads-cancel { color: var(--muted); background: transparent; border: 1px solid var(--border-lite); }
+.ads-cancel:hover { color: var(--text); border-color: var(--muted); }
+.ads-confirm { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.adk-dialog .adv-dialog-text { margin-bottom: 4px; }

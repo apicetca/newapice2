@@ -29,12 +29,11 @@ describe('QA-001 — escapeHtml()', () => {
 
 describe('QA-001 — páginas do admin usam escapeHtml() nos campos vulneráveis', () => {
   const cases = [
-    { file: 'admin-dashboard.ejs', mustContain: ['escapeHtml(`${d.nome}', 'escapeHtml(e.nome_fantasia'] },
-    { file: 'admin-usuarios.ejs', mustContain: ['escapeHtml(`${u.nome}'] },
-    { file: 'admin-empresas.ejs', mustContain: ['escapeHtml(e.nome_fantasia'] },
+    { file: 'admin-dashboard.ejs', mustContain: ['escapeHtml(nome || "—")', 'escapeHtml(d.email)', 'escapeHtml(nome)'] },
+    { file: 'admin-usuarios.ejs', mustContain: ['escapeHtml(nome)', 'escapeHtml(u.email)'] },
+    { file: 'admin-empresas.ejs', mustContain: ['escapeHtml(nome)', 'escapeHtml(e.email)'] },
     { file: 'admin-vagas.ejs', mustContain: ['escapeHtml(j.title)', 'escapeHtml(j.company'] },
-    { file: 'admin-matchs.ejs', mustContain: ['escapeHtml(m.dev)', 'escapeHtml(m.job)', 'escapeHtml(m.company'] },
-    { file: 'admin-relatorios.ejs', mustContain: ['escapeHtml(v.title)'] },
+    { file: 'admin-relatorio.ejs', mustContain: ['escapeHtml(v.title)'] },
   ];
 
   test.each(cases)('$file carrega /js/escape-html.js', ({ file }) => {

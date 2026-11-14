@@ -1,0 +1,36 @@
+/* =============================================
+   admin-usuarios.css — Admin · Usuários (desktop)
+   Carrega depois de admin-dashboard.css e admin-vagas.css
+   (filtros, tabela, diálogos e toast são compartilhados).
+============================================= */
+
+.adu-person { display: flex; align-items: center; gap: 14px; text-align: left; min-width: 0; }
+.adu-person-txt { display: flex; flex-direction: column; min-width: 0; line-height: 1.5; }
+.adu-name { color: var(--text); overflow-wrap: anywhere; }
+.adu-gh { color: var(--admin); width: fit-content; }
+.adu-gh:hover { text-decoration: underline; }
+.adu-gh:focus-visible, .adu-plan:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+.adu-dash { color: var(--muted); }
+.adu-warn { margin-top: 2px; font-size: .64rem; color: var(--yellow); max-width: 220px; }
+
+.adu-email { text-align: left; overflow-wrap: anywhere; }
+.adu-login { display: block; font-size: .62rem; color: var(--muted); }
+
+.adu-plan {
+  height: 30px; padding: 0 28px 0 10px; font: inherit; font-size: .7rem; color: var(--text);
+  background-color: var(--bg-3); border: 1px solid var(--border-lite); border-radius: var(--radius-sm);
+  appearance: none; color-scheme: dark; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+}
+.adu-plan:disabled { opacity: .55; cursor: progress; }
+
+.adu-suspended .adu-name { color: var(--muted); }
+.adu-tag { display: inline-block; margin-top: 2px; width: fit-content; font-size: .62rem; color: var(--red); }
+
+.adv-icon-btn--ok { border-color: var(--teal-border); color: var(--teal); background: var(--teal-dim); }
+.adv-icon-btn[aria-disabled="true"] { opacity: .4; cursor: not-allowed; }
+a.adv-icon-btn { text-decoration: none; }
+.adv-field-opt { font-size: .66rem; color: var(--muted); margin-left: 6px; }
+
+.adu-logo { color: #0a0a0a; border: 0; }

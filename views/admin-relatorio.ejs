@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <meta name="description" content="Relatório da plataforma — Ápice." />
+  <title>Ápice — Admin · <%= categoria.titulo %></title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-relatorios.css" />
+</head>
+<body>
+
+  <%- include('partials/header-admin', { currentPage: 'admin-relatorios' }) %>
+
+<main class="adm-main" id="main-content">
+  <div class="adr-wrap">
+
+    <a href="/admin/relatorios" class="adr-back">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Voltar
+    </a>
+
+    <header class="adr-head">
+      <h1 class="adr-title"><%= categoria.titulo %></h1>
+      <p class="adr-sub"><%= categoria.descricao %></p>
+    </header>
+
+    <% if (!categoria.secoes.length) { %>
+    <section class="adr-panel adr-soon" aria-label="Relatório indisponível">
+      <p>Este relatório ainda não está disponível.</p>
+    </section>
+    <% } else { %>
+
+    <section class="adm-loading" id="loading" role="status" aria-live="polite">
+      <span class="adm-spinner" aria-hidden="true"></span>
+      <p>Carregando relatório...</p>
+    </section>
+
+    <div id="content" hidden>
+
+      <% if (categoria.secoes.includes('cadastros')) { %>
+      <section class="adr-section" aria-labelledby="h-cadastros">
+        <h2 class="adr-h2" id="h-cadastros">Cadastros — últimas 8 semanas</h2>
+        <figure class="adr-panel">
+          <table class="adr-table">
+            <caption class="visually-hidden">Cadastros por semana e tipo de conta</caption>
+            <thead><tr><th scope="col">Semana</th><th scope="col">Tipo</th><th scope="col">Cadastros</th></tr></thead>
+            <tbody id="cadastros-tbody"></tbody>
+          </table>
+          <p class="adm-empty" id="cadastros-empty" hidden>Nenhum cadastro nas últimas 8 semanas</p>
+        </figure>
+      </section>
+      <% } %>
+
+      <% if (categoria.secoes.includes('vagasPorNivel')) { %>
+      <section class="adr-section" aria-labelledby="h-nivel">
+        <h2 class="adr-h2" id="h-nivel">Vagas ativas por nível</h2>
+        <figure class="adr-panel"><ul class="adr-bars" id="nivel-bars"></ul></figure>
+      </section>
+      <% } %>
+
+      <% if (categoria.secoes.includes('candidaturas')) { %>
+      <section class="adr-section" aria-labelledby="h-cand">
+        <h2 class="adr-h2" id="h-cand">Vagas com mais candidaturas</h2>
+        <figure class="adr-panel">
+          <table class="adr-table">
+            <caption class="visually-hidden">Candidaturas por vaga</caption>
+            <thead><tr><th scope="col">Vaga</th><th scope="col">Candidaturas</th></tr></thead>
+            <tbody id="candidaturas-tbody"></tbody>
+          </table>
+          <p class="adm-empty" id="candidaturas-empty" hidden>Nenhuma candidatura registrada ainda</p>
+        </figure>
+      </section>
+      <% } %>
+
+      <% if (categoria.secoes.includes('skills')) { %>
+      <section class="adr-section" aria-labelledby="h-skills">
+        <h2 class="adr-h2" id="h-skills">Skills mais comuns entre devs</h2>
+        <figure class="adr-panel"><ul class="adr-bars" id="skills-bars"></ul></figure>
+      </section>
+      <% } %>
+
+    </div>
+    <% } %>
+
+  </div>
+</main>
+
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
+</footer>
+
+<% if (categoria.secoes.length) { %>
+<script src="/js/escape-html.js"></script>
+<script>
+const SECOES = <%- JSON.stringify(categoria.secoes) %>;
+const TIPO_LABEL = { dev: "Desenvolvedores", empresa: "Empresas", admin: "Admins" };
+const NIVEL_LABEL = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
+const $ = (id) => document.getElementById(id);
+
+function renderBars(id, items, labelKey) {
+  const el = $(id);
+  if (!items.length) { el.innerHTML = '<li class="adr-nodata">Sem dados suficientes ainda.</li>'; return; }
+  const max = Math.max(...items.map(i => i.total));
+  el.innerHTML = items.map(i => `
+    <li class="adr-bar-row">
+      <span class="adr-bar-label">${escapeHtml(i[labelKey])}</span>
+      <span class="adr-bar-track"><span class="adr-bar-fill" style="width:${max ? (i.total / max * 100) : 0}%"></span></span>
+      <span class="adr-bar-val">${Number(i.total)}</span>
+    </li>`).join("");
+}
+
+function renderTable(tbodyId, emptyId, rows, rowFn) {
+  $(emptyId).hidden = rows.length > 0;
+  $(tbodyId).innerHTML = rows.map(rowFn).join("");
+}
+
+(async function init() {
+  try {
+    const res = await fetch("/api/admin/reports");
+    if (!res.ok) throw new Error("Falha ao carregar dados");
+    const data = await res.json();
+
+    if (SECOES.includes("cadastros")) {
+      renderTable("cadastros-tbody", "cadastros-empty", data.cadastrosPorSemana,
+        c => `<tr><td>${escapeHtml(c.semana)}</td><td>${escapeHtml(TIPO_LABEL[c.type] ?? c.type)}</td><td><strong>${Number(c.total)}</strong></td></tr>`);
+    }
+    if (SECOES.includes("vagasPorNivel")) {
+      renderBars("nivel-bars", data.vagasPorNivel.map(v => ({ ...v, level: NIVEL_LABEL[v.level] ?? v.level })), "level");
+    }
+    if (SECOES.includes("candidaturas")) {
+      renderTable("candidaturas-tbody", "candidaturas-empty", data.candidaturasPorVaga,
+        v => `<tr><td>${escapeHtml(v.title)}</td><td><strong>${Number(v.total)}</strong></td></tr>`);
+    }
+    if (SECOES.includes("skills")) renderBars("skills-bars", data.skillsPopulares, "name");
+
+    $("loading").hidden = true;
+    $("content").hidden = false;
+  } catch (err) {
+    console.error(err);
+    $("loading").innerHTML = `
+      <div role="alert">
+        <p class="adm-error">Erro ao carregar o relatório.</p>
+        <a class="adm-error-link" href="/admin/relatorios">← Voltar às categorias</a>
+      </div>`;
+  }
+})();
+</script>
+<% } %>
+
+</body>
+</html>

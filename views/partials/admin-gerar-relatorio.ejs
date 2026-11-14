@@ -1,0 +1,54 @@
+<%#
+  admin-gerar-relatorio.ejs — cartão "Gerar relatório" + pop-up de filtragem (período e formato).
+  Locals: comTipo (boolean) — mostra "Tipo de plano: Dev | Empresa" (relatório de planos).
+  JS: AR.initGerar({ api, comTipo, toast }) em /js/admin-relatorio.js
+%>
+<section class="adc-card adg-card" aria-labelledby="h-gen">
+  <div class="adg-card-txt">
+    <h2 class="adc-h2" id="h-gen">Gerar relatório</h2>
+    <p class="adc-kpi-sub">Exporte este relatório em PDF ou Excel, com o período que quiser.</p>
+  </div>
+  <button type="button" class="adg-open" id="gen-open" aria-haspopup="dialog">Gerar relatório</button>
+</section>
+
+<dialog class="adg-dialog" id="gen-dialog" aria-labelledby="gen-title">
+  <header class="adg-head">
+    <h2 class="adg-title" id="gen-title"><%= locals.comTipo ? 'Filtragem do relatório de planos' : 'Filtragem do relatório' %></h2>
+    <button type="button" class="adv-dialog-close" id="gen-close" aria-label="Fechar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </header>
+  <form id="gen-form" novalidate>
+    <% if (locals.comTipo) { %>
+    <fieldset class="adc-fs">
+      <legend>Tipo de plano</legend>
+      <div class="adc-radios">
+        <label class="adc-radio"><input type="radio" name="gt" value="dev" checked> <span>Dev</span></label>
+        <label class="adc-radio"><input type="radio" name="gt" value="empresa"> <span>Empresa</span></label>
+      </div>
+    </fieldset>
+    <% } %>
+    <fieldset class="adc-fs">
+      <legend>Período de análise</legend>
+      <div class="adc-radios">
+        <label class="adc-radio"><input type="radio" name="gp" value="7" checked> <span>7 dias</span></label>
+        <label class="adc-radio"><input type="radio" name="gp" value="30"> <span>30 dias</span></label>
+        <label class="adc-radio"><input type="radio" name="gp" value="90"> <span>90 dias</span></label>
+        <label class="adc-radio"><input type="radio" name="gp" value="custom"> <span>Personalizado</span></label>
+      </div>
+      <div class="adc-range adc-range--gen" id="gen-range" hidden>
+        <div class="adv-field"><label for="g-from">De</label><input type="date" id="g-from" /></div>
+        <div class="adv-field"><label for="g-to">Até</label><input type="date" id="g-to" /></div>
+      </div>
+    </fieldset>
+    <fieldset class="adc-fs">
+      <legend>Formato do arquivo</legend>
+      <div class="adc-radios">
+        <label class="adc-radio"><input type="radio" name="gf" value="pdf" checked> <span>PDF</span></label>
+        <label class="adc-radio"><input type="radio" name="gf" value="xlsx"> <span>Excel</span></label>
+      </div>
+    </fieldset>
+    <p class="adv-form-error" id="gen-error" role="alert"></p>
+    <div class="adg-foot"><button type="submit" class="adg-primary" id="gen-btn">Gerar relatório</button></div>
+  </form>
+</dialog>

@@ -1,0 +1,120 @@
+/* =============================================
+   admin-crescimento.css — Relatório "Crescimento de usuários" (desktop)
+   Carrega depois de admin-relatorios.css (título, voltar, tabelas).
+============================================= */
+
+.adc-wrap { max-width: 1040px; margin-inline: auto; }
+.adc-card { background: #080808; border: 1px solid var(--border-lite); border-radius: var(--radius-xl); padding: 20px 24px; }
+.adc-section { margin-top: 26px; display: flex; flex-direction: column; gap: 16px; }
+.adc-h2 { font-family: var(--font-display); font-size: 1rem; font-weight: 600; }
+.adc-h3 { font-family: var(--font-display); font-size: .92rem; font-weight: 600; }
+.adc-note { margin-top: 10px; font-size: .66rem; color: var(--muted); line-height: 1.6; }
+
+/* ── Indicadores ── */
+.adc-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.adc-kpis .adc-card { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; border-radius: var(--radius-lg); }
+.adc-kpi-title { font-size: .72rem; line-height: 1.4; }
+.adc-kpi-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.adc-kpi-value { font-family: var(--font-display); font-size: 2rem; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
+.adc-badge {
+  padding: 1px 10px; border-radius: 99px; font-size: .68rem; font-weight: 600; white-space: nowrap;
+  border: 1px solid var(--border-lite); color: var(--muted); background: var(--bg-3);
+}
+.adc-badge.is-up   { color: var(--teal); border-color: var(--teal-border); background: var(--teal-dim); }
+.adc-badge.is-down { color: var(--red); border-color: rgba(248,113,113,.4); background: var(--red-dim); }
+.adc-split { display: block; height: 6px; border-radius: 3px; background: #1f1f1f; overflow: hidden; }
+.adc-split > span { display: block; height: 100%; border-radius: 3px; background: var(--teal); }
+.adc-kpi-sub { font-size: .66rem; color: var(--muted); }
+
+/* ── Período ── */
+.adc-evo-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.adc-seg { padding: 4px; background: #0b0b0b; border: 1px solid var(--border-lite); border-radius: 99px; }
+.adc-range { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+.adc-range[hidden] { display: none; }
+.adc-range .adv-field { width: 170px; }
+.adc-range .adv-form-error { flex-basis: 100%; margin: 0; }
+
+/* ── Gráficos ── */
+.adc-chart { margin: 0; }
+.adc-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.adc-tbl-btn {
+  min-height: 26px; padding: 2px 14px; border-radius: 99px; cursor: pointer; font: inherit; font-size: .68rem;
+  color: var(--text); background: var(--bg-3); border: 1px solid var(--border-lite);
+}
+.adc-tbl-btn:hover { border-color: var(--muted); }
+.adc-tbl-btn[aria-pressed="true"] { border-color: var(--admin); color: var(--admin); }
+.adc-tbl-btn:focus-visible, .adc-radio:has(input:focus-visible) { outline: 2px solid var(--admin); outline-offset: 2px; }
+.adc-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 8px; font-size: .72rem; }
+.adc-legend li { display: inline-flex; align-items: center; gap: 8px; }
+.adc-sw { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.adc-plot { position: relative; }
+.adc-plot[hidden] { display: none; }
+.adc-plot svg { display: block; overflow: visible; }
+.adc-table-wrap[hidden] { display: none; }
+.adc-table-wrap { overflow-x: auto; }
+.adr-table th.num, .adr-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.adc-tip {
+  position: absolute; top: 10px; z-index: 5; min-width: 170px; padding: 10px 12px; pointer-events: none;
+  transform: translateX(12px); background: #111; border: 1px solid var(--border-lite); border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0,0,0,.6); font-size: .7rem; line-height: 1.6;
+}
+.adc-tip[hidden] { display: none; }
+.adc-tip.is-right { transform: translateX(calc(-100% - 12px)); }
+.adc-tip strong { display: block; margin-bottom: 4px; font-size: .72rem; }
+.adc-tip-row { display: flex; align-items: center; gap: 8px; }
+.adc-tip-row i { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.adc-tip-row span { flex: 1; color: var(--muted); }
+
+/* ── Gerar relatório ── */
+.adc-gen { margin-top: 26px; }
+.adc-gen .adc-h2 { margin-bottom: 14px; }
+.adc-fs { border: 0; padding: 0; margin: 0 0 16px; }
+.adc-fs legend { font-size: .74rem; margin-bottom: 8px; padding: 0; }
+.adc-radios { display: flex; flex-wrap: wrap; gap: 8px; }
+.adc-radio { display: inline-flex; cursor: pointer; }
+.adc-radio input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.adc-radio span {
+  min-height: 28px; padding: 4px 16px; border-radius: 99px; font-size: .72rem;
+  background: var(--bg-3); border: 1px solid var(--border-lite); transition: border-color .15s, color .15s, background .15s;
+}
+.adc-radio:hover span { border-color: var(--muted); }
+.adc-radio input:checked + span { border-color: var(--admin); color: var(--admin); background: var(--admin-dim); }
+.adc-range--gen { margin-top: 12px; }
+
+@media (prefers-reduced-motion: reduce) { .adc-radio span { transition: none; } }
+
+/* aviso de coleta parcial (Uso da plataforma) */
+.adc-notice {
+  margin-bottom: 16px; padding: 10px 16px; font-size: .72rem; line-height: 1.6;
+  color: var(--yellow); background: var(--yellow-dim); border: 1px solid rgba(251,191,36,.35); border-radius: var(--radius-md);
+}
+.adc-notice[hidden] { display: none; }
+
+.adp-money { font-size: 1.6rem; }
+
+/* ── Gerar relatório: cartão + pop-up de filtragem ── */
+.adg-card { margin-top: 26px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.adg-card-txt { display: flex; flex-direction: column; gap: 4px; }
+.adg-open, .adg-primary {
+  min-height: 42px; padding: 0 34px; border-radius: 99px; cursor: pointer; border: 1px solid var(--admin);
+  font-family: var(--font-display); font-size: .82rem; font-weight: 700; color: #14140a; background: var(--admin);
+  transition: background .15s, box-shadow .15s;
+}
+.adg-open:hover, .adg-primary:hover { background: #eef04f; box-shadow: 0 0 22px var(--admin-glow); }
+.adg-open:focus-visible, .adg-primary:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+.adg-primary:disabled { opacity: .6; cursor: progress; }
+
+.adg-dialog {
+  margin: auto; width: min(480px, calc(100vw - 32px)); padding: 24px 28px 28px;
+  background: #080808; color: var(--text); border: 1px solid var(--border-lite); border-radius: var(--radius-xl);
+}
+.adg-dialog::backdrop { background: rgba(0,0,0,.72); }
+.adg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.adg-title { font-family: var(--font-display); font-size: 1rem; font-weight: 600; line-height: 1.4; }
+.adg-dialog .adv-dialog-close:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+.adg-dialog .adc-fs { margin-bottom: 18px; }
+.adg-foot { display: flex; justify-content: center; margin-top: 8px; }
+.adg-dialog .adv-form-error { margin-top: 0; }
+
+@media (prefers-reduced-motion: reduce) { .adg-open, .adg-primary { transition: none; } }

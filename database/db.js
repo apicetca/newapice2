@@ -281,6 +281,77 @@ async function testarConexao() {
     await addColumn("jobs", "foreign_language", "VARCHAR(30) DEFAULT NULL");
     await addColumn("jobs", "foreign_level", "VARCHAR(20) DEFAULT NULL");
 
+    // Data de expiração da vaga (opcional) — editada pelo admin em Admin → Vagas.
+    await addColumn("jobs", "expires_at", "DATE DEFAULT NULL");
+
+    // Eventos de uso (middlewares/usageTracker.js) — base de Admin → Relatórios → Uso da
+    // plataforma. Só o id do usuário e uma chave de sessão com hash; created_at em UTC.
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS usage_events (
+        id          BIGINT      NOT NULL AUTO_INCREMENT,
+        user_id     INT         NOT NULL,
+        user_type   VARCHAR(10) NOT NULL,
+        session_key CHAR(16)    NOT NULL,
+        module      VARCHAR(20) NOT NULL,
+        created_at  DATETIME    NOT NULL,
+        PRIMARY KEY (id),
+        KEY idx_usage_created (created_at),
+        KEY idx_usage_user (user_id, created_at),
+        KEY idx_usage_session (session_key),
+        CONSTRAINT fk_usage_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+    `);
+    // Retenção dos eventos: o relatório aceita até 730 dias.
+    await pool.query("DELETE FROM usage_events WHERE created_at < (UTC_TIMESTAMP() - INTERVAL 800 DAY)");
+
+    // Histórico de atividades do painel (Admin → Configurações → Segurança e privacidade).
+    // Uma linha por ação que alterou algo (middlewares/adminAudit.js); guarda o nome do admin
+    // na hora, para o registro continuar legível mesmo se a conta dele for removida.
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admin_audit_log (
+        id         BIGINT       NOT NULL AUTO_INCREMENT,
+        admin_id   INT          NULL DEFAULT NULL,
+        admin_nome VARCHAR(100) NOT NULL,
+        acao       VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_audit_created (created_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+    `);
+    // Título curto da ação ("Edição de empresa"); `acao` guarda o detalhe. Linhas antigas ficam NULL.
+    await addColumn("admin_audit_log", "titulo", "VARCHAR(80) NULL DEFAULT NULL");
+
+    // Categorias de vaga (Admin → Configurações → Categorias e vagas). Cadastro novo e
+    // independente de jobs.area (que continua ligado ao roadmap); jobs.category_id é opcional.
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS job_categories (
+        id         INT          NOT NULL AUTO_INCREMENT,
+        nome       VARCHAR(60)  NOT NULL,
+        descricao  VARCHAR(255) NULL DEFAULT NULL,
+        active     TINYINT(1)   NOT NULL DEFAULT 1,
+        created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_job_categories_nome (nome)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+    `);
+    await addColumn("jobs", "category_id", "INT DEFAULT NULL");
+    // Categorias iniciais (idempotente: o nome é único).
+    await pool.query(`
+      INSERT IGNORE INTO job_categories (nome, descricao) VALUES
+        ('Tecnologia', 'Área relacionada ao desenvolvimento, programação e tecnologia da informação.'),
+        ('Marketing', 'Vagas de comunicação, marketing digital, conteúdo e growth.'),
+        ('Design', 'Vagas de design de produto, interface, experiência do usuário e identidade visual.'),
+        ('Dados', 'Vagas de análise, engenharia e ciência de dados.'),
+        ('Outras', 'Vagas que não se encaixam nas demais categorias.')
+    `);
+
+    // Quando a vaga saiu do ar (preenchido ao pausar; limpo ao reativar) — base do
+    // "tempo médio de fechamento" em Admin → Relatórios → Desempenho das vagas.
+    await addColumn("jobs", "closed_at", "DATETIME DEFAULT NULL");
+
+    // Última atividade do usuário logado (middlewares/lastSeen.js) — Admin → Usuários.
+    await addColumn("users", "last_seen_at", "DATETIME DEFAULT NULL");
+
     // ── Perfil técnico gerado por IA (análise de repositórios) ──
     await pool.query(`
       CREATE TABLE IF NOT EXISTS perfil_tecnico_ia (

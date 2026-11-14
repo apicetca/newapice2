@@ -20,7 +20,7 @@ describe('QA-008 — onclick com escape de aspas incompleto foi eliminado', () =
     'empresa-dashboard.ejs',
     'empresa-vagas.ejs',
     'empresa-vaga-form.ejs',
-    'admin-configuracoes.ejs',
+    'admin-configuracoes-catalogo.ejs',
   ])('%s não contém mais o padrão onclick + replace(/\'/g...)', (file) => {
     const content = readView(file);
     expect(content).not.toMatch(VULNERABLE_PATTERN);
@@ -36,8 +36,8 @@ describe('QA-008 — onclick com escape de aspas incompleto foi eliminado', () =
     }
   });
 
-  test('admin-configuracoes.ejs usa addEventListener para recursos/excluir skill', () => {
-    const content = readView('admin-configuracoes.ejs');
+  test('admin-configuracoes-catalogo.ejs usa addEventListener para recursos/excluir skill', () => {
+    const content = readView('admin-configuracoes-catalogo.ejs');
     expect(content).toContain('addEventListener("click", () => toggleResources(s.id, s.name))');
     expect(content).toContain('addEventListener("click", () => deleteSkill(s.id, s.name))');
   });
