@@ -45,12 +45,12 @@ describe('excluirConta (serviço)', () => {
   });
 
   test('empresa: apaga as vagas dela e depois o usuário', async () => {
-    const { sqls } = conexao({ ...semPagamento, 'FROM users WHERE id': [{ id: 9, type: 'company' }] });
+    const { sqls } = conexao({ ...semPagamento, 'FROM users WHERE id': [{ id: 9, type: 'empresa' }] });
     await excluirConta(db, 9, 'empresa');
     const textos = sqls.map(s => s[0]);
     expect(textos.some(s => /DELETE FROM jobs WHERE company_id = \?/.test(s))).toBe(true);
     expect(textos.some(s => s.includes('user_skills'))).toBe(false);
-    expect(sqls[sqls.length - 1][1]).toEqual([9, 'company']);
+    expect(sqls[sqls.length - 1][1]).toEqual([9, 'empresa']);
   });
 
   test('conta com pagamentos não é apagada (409) e nada é alterado', async () => {
@@ -60,6 +60,27 @@ describe('excluirConta (serviço)', () => {
     expect(conn.rollback).toHaveBeenCalled();
     expect(conn.commit).not.toHaveBeenCalled();
     expect(conn.release).toHaveBeenCalled();
+  });
+
+  test('ambiente sem as tabelas de pagamento (Mercado Pago não configurado) conta como "sem pagamentos"', async () => {
+    const { conn } = conexao();
+    conn.query.mockImplementation(async (sql) => {
+      if (sql.includes('FOR UPDATE')) return [[{ id: 9, type: 'empresa' }]];
+      if (/mp_subscriptions|annual_payments/.test(sql)) throw Object.assign(new Error("Table doesn't exist"), { errno: 1146, code: 'ER_NO_SUCH_TABLE' });
+      return [{ affectedRows: 1 }];
+    });
+    await expect(excluirConta(db, 9, 'empresa')).resolves.toBeUndefined();
+    expect(conn.commit).toHaveBeenCalled();
+  });
+
+  test('outro erro ao checar pagamentos não é engolido', async () => {
+    const { conn } = conexao();
+    conn.query.mockImplementation(async (sql) => {
+      if (sql.includes('FOR UPDATE')) return [[{ id: 9, type: 'empresa' }]];
+      throw new Error('conexão caiu');
+    });
+    await expect(excluirConta(db, 9, 'empresa')).rejects.toThrow('conexão caiu');
+    expect(conn.commit).not.toHaveBeenCalled();
   });
 
   test('tipo errado ou inexistente → 404; admin nunca é apagado por aqui', async () => {
@@ -91,7 +112,7 @@ describe('excluirConta (serviço)', () => {
 
   test('falha ao encerrar sessões não desfaz a exclusão', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    conexao({ ...semPagamento, 'FROM users WHERE id': [{ id: 9, type: 'company' }] });
+    conexao({ ...semPagamento, 'FROM users WHERE id': [{ id: 9, type: 'empresa' }] });
     db.query = jest.fn().mockRejectedValue(new Error('sem tabela sessions'));
     await expect(excluirConta(db, 9, 'empresa')).resolves.toBeUndefined();
   });
@@ -105,7 +126,7 @@ describe('endpoints DELETE', () => {
   test('200 em caso de sucesso', async () => {
     conexao({ ...semPagamento, 'FROM users WHERE id': [{ id: 5, type: 'dev' }], 'FROM user_dev_profiles': [] });
     expect((await request(app).delete('/users/5')).body).toEqual({ success: true });
-    conexao({ ...semPagamento, 'FROM users WHERE id': [{ id: 9, type: 'company' }] });
+    conexao({ ...semPagamento, 'FROM users WHERE id': [{ id: 9, type: 'empresa' }] });
     expect((await request(app).delete('/empresas/9')).status).toBe(200);
   });
   test('propaga 409/404 do serviço com a mensagem', async () => {

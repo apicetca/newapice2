@@ -8,16 +8,25 @@
 //  - dev: remove também os dados ligados ao github_id (sem FK no banco);
 //  - empresa: remove as vagas dela (candidaturas/matches das vagas caem em cascata);
 //  - as sessões abertas da conta são encerradas (best-effort, depois do commit).
-const TIPOS = { dev: "dev", empresa: "company" };
+const TIPOS = { dev: "dev", empresa: "empresa" };
 
 class ErroExclusao extends Error {
   constructor(status, mensagem) { super(mensagem); this.status = status; }
 }
 
+// Tabela ausente (ambiente sem Mercado Pago configurado) = sem pagamentos.
+async function contar(conn, tabela, id) {
+  try {
+    const [[linha]] = await conn.query(`SELECT COUNT(*) AS n FROM ${tabela} WHERE user_id = ?`, [id]);
+    return Number(linha.n);
+  } catch (err) {
+    if (err.errno === 1146 || err.code === "ER_NO_SUCH_TABLE") return 0;
+    throw err;
+  }
+}
+
 async function temPagamentos(conn, id) {
-  const [[a]] = await conn.query("SELECT COUNT(*) AS n FROM mp_subscriptions WHERE user_id = ?", [id]);
-  const [[b]] = await conn.query("SELECT COUNT(*) AS n FROM annual_payments WHERE user_id = ?", [id]);
-  return Number(a.n) + Number(b.n) > 0;
+  return (await contar(conn, "mp_subscriptions", id)) + (await contar(conn, "annual_payments", id)) > 0;
 }
 
 async function excluirConta(db, id, tipo) {
