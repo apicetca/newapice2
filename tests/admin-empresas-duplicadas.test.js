@@ -93,6 +93,6 @@ describe("tela de empresas do admin", () => {
 
   test("escapa e-mail e CNPJ antes de montar o HTML", () => {
     expect(view).toMatch(/escapeHtml\(e\.email\)/);
-    expect(view).toMatch(/escapeHtml\(e\.cnpj\)/);
+    expect(view).toMatch(/escapeHtml\(formatCnpj\(e\.cnpj\)\)/);
   });
 });

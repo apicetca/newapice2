@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
-  <meta name="description" content="Configurações gerais — catálogo de skills — Ápice." />
+  <meta name="description" content="Configurações do painel do administrador — Ápice." />
   <title>Ápice — Admin · Configurações</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -12,334 +12,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
   <link rel="stylesheet" href="/css/header.css" />
-  <link rel="stylesheet" href="/css/empresa-dashboard.css" />
-  <style>
-    .inline-form { display: grid; grid-template-columns: 1fr 140px 1fr 1fr auto; gap: 10px; padding: 18px 20px; align-items: end; }
-    .inline-form .form-field { gap: 4px; }
-    @media (max-width: 900px) { .inline-form { grid-template-columns: 1fr; } }
-    .resources-panel { padding: 16px 20px; border-top: 1px solid var(--border); }
-    #resources-list { margin: 0; padding: 0; list-style: none; } /* é um <ul>: neutraliza o estilo padrão de lista */
-    .resource-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: .85rem; }
-    .resource-row:last-child { border-bottom: none; }
-    .resource-title { flex: 1; }
-    .resource-form { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-    .resource-form .form-input, .resource-form .form-select { width: auto; flex: 1; min-width: 120px; }
-  </style>
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-relatorios.css" />
 </head>
 <body>
 
   <%- include('partials/header-admin', { currentPage: 'admin-configuracoes' }) %>
 
-<main class="page-content" id="main-content">
+<main class="adm-main" id="main-content">
+  <div class="adr-wrap">
 
-  <section class="loading-screen" id="loading" role="status" aria-live="polite">
-    <span class="spinner" aria-hidden="true"></span>
-    <p>Carregando catálogo de skills...</p>
-  </section>
+    <h1 class="visually-hidden">Configurações</h1>
 
-  <article id="content" hidden>
+    <ul class="adr-list adr-list--text" aria-label="Categorias de configuração">
+      <% categorias.forEach(c => { %>
+      <li>
+        <a class="adr-card" href="/admin/configuracoes/<%= c.slug %>">
+          <span class="adr-txt">
+            <span class="adr-card-title"><%= c.titulo %></span>
+            <span class="adr-card-desc"><%= c.descricao %></span>
+          </span>
+          <svg class="adr-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+      </li>
+      <% }) %>
+    </ul>
 
-    <section class="section" aria-label="Cadastrar ou editar skill">
-      <header class="section-header">
-        <h2 class="section-title" id="form-title">Nova skill</h2>
-      </header>
-      <figure class="jobs-table-wrap">
-        <form class="inline-form" id="skill-form">
-          <input type="hidden" id="editing-id" value="" />
-          <fieldset class="form-field">
-            <label class="form-label" for="f-name">Nome</label>
-            <input class="form-input" type="text" id="f-name" placeholder="Ex: Docker" required />
-          </fieldset>
-          <fieldset class="form-field">
-            <label class="form-label" for="f-type">Tipo</label>
-            <select class="form-select" id="f-type" required>
-              <option value="hard">Hard skill</option>
-              <option value="soft">Soft skill</option>
-            </select>
-          </fieldset>
-          <fieldset class="form-field">
-            <label class="form-label" for="f-category">Categoria <span class="opt">(opcional)</span></label>
-            <input class="form-input" type="text" id="f-category" placeholder="Ex: DevOps" />
-          </fieldset>
-          <fieldset class="form-field">
-            <label class="form-label" for="f-signals">Sinais do GitHub <span class="opt">(opcional)</span></label>
-            <input class="form-input" type="text" id="f-signals" placeholder="docker,dockerfile" />
-          </fieldset>
-          <button type="submit" class="btn-save" id="btn-save">Salvar</button>
-        </form>
-      </figure>
-    </section>
-
-    <section class="section" aria-label="Catálogo de skills">
-      <header class="section-header">
-        <h2 class="section-title">Catálogo de skills <span class="section-count" id="skills-count"></span></h2>
-      </header>
-      <figure class="jobs-table-wrap">
-        <table class="jobs-table" id="skills-table" aria-label="Lista de skills">
-          <thead>
-            <tr>
-              <th scope="col">Nome</th>
-              <th scope="col">Tipo</th>
-              <th scope="col">Categoria</th>
-              <th scope="col">Recursos</th>
-              <th scope="col">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="skills-tbody"></tbody>
-        </table>
-        <section class="table-empty" id="skills-empty" hidden>
-          <p class="table-empty-title">Nenhuma skill cadastrada ainda</p>
-        </section>
-
-        <section class="resources-panel" id="resources-panel" hidden>
-          <h2 class="section-title" style="font-size:.9rem;margin-bottom:10px">
-            Recursos de aprendizado — <span id="resources-skill-name"></span>
-          </h2>
-          <ul id="resources-list"></ul>
-          <form class="resource-form" id="resource-form">
-            <select class="form-select" id="r-type" required>
-              <option value="curso">Curso</option>
-              <option value="video">Vídeo</option>
-              <option value="documentacao">Documentação</option>
-              <option value="projeto">Projeto</option>
-            </select>
-            <input class="form-input" type="text" id="r-title" placeholder="Título do recurso" required />
-            <input class="form-input" type="text" id="r-url" placeholder="URL (opcional)" />
-            <input class="form-input" type="text" id="r-duration" placeholder="Duração (opcional)" style="max-width:120px" />
-            <button type="submit" class="btn-save">Adicionar</button>
-          </form>
-        </section>
-      </figure>
-    </section>
-
-  </article>
+  </div>
 </main>
 
-<output class="toast" id="toast" role="status" aria-live="polite"></output>
-
-<footer class="site-footer">
-  <p>&copy; <script>document.write(new Date().getFullYear())</script> Ápice. Painel do administrador.</p>
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
 </footer>
 
-<script>
-const TYPE_LABEL = { hard: "Hard skill", soft: "Soft skill" };
-const RESOURCE_TYPE_LABEL = { curso: "Curso", video: "Vídeo", documentacao: "Documentação", projeto: "Projeto" };
-let allSkills = [];
-let openResourcesFor = null;
-
-function renderSkills() {
-  const tbody = document.getElementById("skills-tbody");
-  const empty = document.getElementById("skills-empty");
-  const table = document.getElementById("skills-table");
-  document.getElementById("skills-count").textContent = `(${allSkills.length})`;
-  tbody.innerHTML = "";
-
-  if (!allSkills.length) { table.style.display = "none"; empty.hidden = false; return; }
-  table.style.display = ""; empty.hidden = true;
-
-  allSkills.forEach(s => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td data-label="Nome"><span class="job-title-cell">${s.name}</span></td>
-      <td data-label="Tipo"><span class="badge ${s.type === "hard" ? "badge-blue" : "badge-muted"}">${TYPE_LABEL[s.type]}</span></td>
-      <td data-label="Categoria">${s.category ?? "—"}</td>
-      <td data-label="Recursos">
-        <button class="btn-icon btn-resources" title="Ver recursos">${s.total_resources}</button>
-      </td>
-      <td data-label="Ações">
-        <nav class="job-actions" aria-label="Ações para ${s.name}">
-          <button class="btn-icon" title="Editar" onclick="editSkill(${s.id})">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn-icon btn-danger btn-delete-skill" title="Excluir">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          </button>
-        </nav>
-      </td>`;
-    tr.querySelector(".btn-resources").addEventListener("click", () => toggleResources(s.id, s.name));
-    tr.querySelector(".btn-delete-skill").addEventListener("click", () => deleteSkill(s.id, s.name));
-    tbody.appendChild(tr);
-  });
-}
-
-function resetForm() {
-  document.getElementById("editing-id").value = "";
-  document.getElementById("form-title").textContent = "Nova skill";
-  document.getElementById("f-name").value = "";
-  document.getElementById("f-type").value = "hard";
-  document.getElementById("f-category").value = "";
-  document.getElementById("f-signals").value = "";
-  document.getElementById("btn-save").textContent = "Salvar";
-}
-
-function editSkill(id) {
-  const skill = allSkills.find(s => s.id === id);
-  if (!skill) return;
-  document.getElementById("editing-id").value = id;
-  document.getElementById("form-title").textContent = `Editando: ${skill.name}`;
-  document.getElementById("f-name").value = skill.name;
-  document.getElementById("f-type").value = skill.type;
-  document.getElementById("f-category").value = skill.category ?? "";
-  document.getElementById("f-signals").value = skill.github_signals ?? "";
-  document.getElementById("btn-save").textContent = "Salvar alterações";
-  document.getElementById("f-name").scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-document.getElementById("skill-form").addEventListener("submit", async e => {
-  e.preventDefault();
-  const editId = document.getElementById("editing-id").value;
-  const payload = {
-    name: document.getElementById("f-name").value.trim(),
-    type: document.getElementById("f-type").value,
-    category: document.getElementById("f-category").value.trim() || null,
-    github_signals: document.getElementById("f-signals").value.trim() || null,
-  };
-  if (!payload.name) { showToast("Informe o nome da skill.", true); return; }
-
-  const btn = document.getElementById("btn-save");
-  btn.disabled = true;
-  try {
-    const url = editId ? `/api/admin/skills/${editId}` : "/api/admin/skills";
-    const res = await fetch(url, {
-      method: editId ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? "Erro ao salvar");
-    showToast(editId ? "Skill atualizada!" : "Skill criada!");
-    resetForm();
-    await reload();
-  } catch (err) {
-    showToast(err.message, true);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-async function deleteSkill(id, name) {
-  if (!confirm(`Excluir a skill "${name}"? Isso também remove os recursos associados e desvincula de vagas/perfis. Não pode ser desfeito.`)) return;
-  try {
-    const res = await fetch(`/api/admin/skills/${id}`, { method: "DELETE" });
-    if (!res.ok) throw new Error();
-    showToast("Skill excluída.");
-    if (openResourcesFor === id) document.getElementById("resources-panel").hidden = true;
-    await reload();
-  } catch {
-    showToast("Erro ao excluir. Tente novamente.", true);
-  }
-}
-
-async function toggleResources(id, name) {
-  const panel = document.getElementById("resources-panel");
-  if (openResourcesFor === id && !panel.hidden) { panel.hidden = true; openResourcesFor = null; return; }
-  openResourcesFor = id;
-  document.getElementById("resources-skill-name").textContent = name;
-  document.getElementById("resource-form").dataset.skillId = id;
-  panel.hidden = false;
-  await loadResources(id);
-  panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-
-async function loadResources(skillId) {
-  const list = document.getElementById("resources-list");
-  list.innerHTML = `<li style="color:var(--muted);font-size:.85rem">Carregando...</li>`;
-  try {
-    const res = await fetch(`/api/admin/skills/${skillId}/resources`);
-    const resources = await res.json();
-    if (!resources.length) {
-      list.innerHTML = `<li style="color:var(--muted);font-size:.85rem">Nenhum recurso cadastrado ainda.</li>`;
-      return;
-    }
-    list.innerHTML = resources.map(r => `
-      <li class="resource-row">
-        <span class="badge badge-muted">${RESOURCE_TYPE_LABEL[r.type] ?? r.type}</span>
-        <span class="resource-title">${r.url ? `<a href="${r.url}" target="_blank" rel="noopener" style="color:var(--blue)">${r.title}</a>` : r.title}</span>
-        <span style="color:var(--muted)">${r.duration ?? ""}</span>
-        <button class="btn-icon btn-danger" title="Remover recurso" onclick="deleteResource(${skillId}, ${r.id})">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </li>`).join("");
-  } catch {
-    list.innerHTML = `<li style="color:var(--red);font-size:.85rem">Erro ao carregar recursos.</li>`;
-  }
-}
-
-document.getElementById("resource-form").addEventListener("submit", async e => {
-  e.preventDefault();
-  const skillId = e.target.dataset.skillId;
-  const payload = {
-    type: document.getElementById("r-type").value,
-    title: document.getElementById("r-title").value.trim(),
-    url: document.getElementById("r-url").value.trim() || null,
-    duration: document.getElementById("r-duration").value.trim() || null,
-  };
-  if (!payload.title) { showToast("Informe o título do recurso.", true); return; }
-
-  try {
-    const res = await fetch(`/api/admin/skills/${skillId}/resources`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error();
-    document.getElementById("r-title").value = "";
-    document.getElementById("r-url").value = "";
-    document.getElementById("r-duration").value = "";
-    showToast("Recurso adicionado.");
-    await loadResources(skillId);
-    await reload(true);
-  } catch {
-    showToast("Erro ao adicionar recurso.", true);
-  }
-});
-
-async function deleteResource(skillId, resourceId) {
-  try {
-    const res = await fetch(`/api/admin/skills/${skillId}/resources/${resourceId}`, { method: "DELETE" });
-    if (!res.ok) throw new Error();
-    showToast("Recurso removido.");
-    await loadResources(skillId);
-    await reload(true);
-  } catch {
-    showToast("Erro ao remover recurso.", true);
-  }
-}
-
-let toastTimer = null;
-function showToast(msg, isErr = false) {
-  const el = document.getElementById("toast");
-  el.textContent = msg;
-  el.style.borderColor = isErr ? "rgba(248,81,73,.35)" : "var(--border-lite)";
-  el.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
-}
-
-async function reload(silent) {
-  const res = await fetch("/api/admin/skills");
-  if (!res.ok) return;
-  allSkills = await res.json();
-  renderSkills();
-}
-
-async function init() {
-  try {
-    await reload();
-    document.getElementById("loading").hidden = true;
-    document.getElementById("content").hidden = false;
-  } catch (err) {
-    console.error(err);
-    document.getElementById("loading").innerHTML = `
-      <section style="text-align:center">
-        <p style="color:var(--red);margin-bottom:10px">Erro ao carregar o catálogo.</p>
-        <a href="/admin/dashboard" style="color:var(--blue);font-size:.9rem">← Voltar ao painel</a>
-      </section>`;
-  }
-}
-
-init();
-</script>
-
-  <script src="/js/form-validation.js"></script>
 </body>
 </html>

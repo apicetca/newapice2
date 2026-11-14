@@ -19,10 +19,10 @@ describe('QA-018 — cada página tem exatamente um <h1>', () => {
     }
   );
 
-  test.each(['admin-dashboard.ejs', 'admin-configuracoes.ejs', 'admin-relatorios.ejs'])(
-    '%s: os <h1> de seção foram rebaixados para <h2> (nenhum <h1> restante)',
+  test.each(['admin-configuracoes-catalogo.ejs'])(
+    '%s: os <h1> de seção foram rebaixados para <h2> (resta só o <h1> da página, oculto)',
     (file) => {
-      expect(countTag(readView(file), 'h1')).toBe(0);
+      expect(countTag(readView(file), 'h1')).toBe(1);
     }
   );
 });

@@ -28,6 +28,14 @@ const EMAIL_VALIDO     = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Mesmo corte de "pronto para a vaga" (readyFor) do matchCalculator.
 const ALTA_COMPATIBILIDADE = 70;
 
+// Categoria de vaga existe e está ativa (Admin → Configurações → Categorias e vagas).
+async function categoriaValida(id) {
+  const n = Number(id);
+  if (!Number.isInteger(n) || n <= 0) return false;
+  const [rows] = await db.query("SELECT id FROM job_categories WHERE id = ? AND active = 1", [n]);
+  return rows.length > 0;
+}
+
 // Blocos auxiliares do dashboard: se um falhar, o painel segue sem ele.
 async function seguro(fn, fallback, rotulo) {
   try {
@@ -407,7 +415,7 @@ const empresaController = {
       title, level, description, modality, contract_type,
       salary_min, salary_max, location, years_experience,
       english_level, responsibilities, benefits, max_candidates,
-      tags, active, area, foreign_language, foreign_level,
+      tags, active, area, foreign_language, foreign_level, category_id,
     } = req.body;
     const companyId = req.session.user.id;
 
@@ -416,6 +424,10 @@ const empresaController = {
       return res.status(400).json({ error: "Nível inválido." });
 
     try {
+      if (category_id && !(await categoriaValida(category_id))) {
+        return res.status(400).json({ error: "Categoria inválida ou desativada." });
+      }
+
       const willBeActive = active !== undefined ? Boolean(active) : true;
       if (willBeActive && !(await canCreateJob(companyId))) {
         const plan = await getUserPlan(companyId, "empresa");
@@ -435,8 +447,8 @@ const empresaController = {
           (title, company, company_id, description, level, modality, contract_type,
            salary_min, salary_max, location, years_experience, english_level,
            responsibilities, benefits, max_candidates, tags, active,
-           area, foreign_language, foreign_level)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+           area, foreign_language, foreign_level, category_id)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       `, [
         title.trim(), companyName, companyId,
         description   || null,
@@ -456,6 +468,7 @@ const empresaController = {
         area             || null,
         foreign_language || null,
         foreign_level    || null,
+        category_id ? Number(category_id) : null,
       ]);
       res.status(201).json({ success: true, id: result.insertId });
     } catch (err) {
@@ -470,10 +483,16 @@ const empresaController = {
 
     try {
       const [rows] = await db.query(
-        "SELECT id, active FROM jobs WHERE id = ? AND company_id = ?",
+        "SELECT id, active, category_id FROM jobs WHERE id = ? AND company_id = ?",
         [jobId, companyId]
       );
       if (!rows.length) return res.status(404).json({ error: "Vaga não encontrada." });
+
+      // Manter a categoria atual é sempre permitido (mesmo desativada); trocar exige uma ativa.
+      const novaCategoria = req.body.category_id;
+      if (novaCategoria && Number(novaCategoria) !== rows[0].category_id && !(await categoriaValida(novaCategoria))) {
+        return res.status(400).json({ error: "Categoria inválida ou desativada." });
+      }
 
       const reactivating = req.body.active === true && !rows[0].active;
       if (reactivating && !(await canCreateJob(companyId))) {
@@ -487,7 +506,7 @@ const empresaController = {
         "title","level","description","modality","contract_type",
         "salary_min","salary_max","location","years_experience",
         "english_level","responsibilities","benefits","max_candidates",
-        "tags","active","area","foreign_language","foreign_level",
+        "tags","active","area","foreign_language","foreign_level","category_id",
       ];
 
       const updates = [];
@@ -496,8 +515,13 @@ const empresaController = {
       for (const field of allowed) {
         if (req.body[field] !== undefined) {
           updates.push(`${field} = ?`);
-          if (field === "active") values.push(req.body[field] ? 1 : 0);
-          else values.push(req.body[field] ?? null);
+          if (field === "active") {
+            values.push(req.body[field] ? 1 : 0);
+            // registra quando a vaga saiu do ar (relatório "Desempenho das vagas")
+            updates.push(req.body[field] ? "closed_at = NULL" : "closed_at = COALESCE(closed_at, NOW())");
+          } else if (field === "category_id") {
+            values.push(req.body[field] ? Number(req.body[field]) : null);
+          } else values.push(req.body[field] ?? null);
         }
       }
 

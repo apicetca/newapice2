@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <meta name="description" content="Segurança e privacidade — painel do administrador." />
+  <title>Ápice — Admin · Segurança e privacidade</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-vagas.css" />
+  <link rel="stylesheet" href="/css/admin-relatorios.css" />
+  <link rel="stylesheet" href="/css/admin-categorias.css" />
+  <link rel="stylesheet" href="/css/admin-seguranca.css" />
+</head>
+<body>
+
+  <%- include('partials/header-admin', { currentPage: 'admin-configuracoes' }) %>
+
+<main class="adm-main" id="main-content">
+  <div class="adk-wrap">
+
+    <a href="/admin/configuracoes" class="adr-back">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Voltar
+    </a>
+
+    <header class="ads-head">
+      <h1 class="adr-title">Segurança e privacidade</h1>
+      <p class="adk-sub">Gerencie o acesso de administradores, proteja os dados e consulte o histórico da plataforma</p>
+    </header>
+
+    <section class="adk-card" aria-label="Segurança e privacidade">
+      <div class="adk-tabs ads-tabs" role="tablist" aria-label="Seções de segurança">
+        <button type="button" role="tab" class="adk-tab" id="tab-acesso" data-tab="acesso" aria-selected="true" aria-controls="panel" tabindex="0">Controle de acesso</button>
+        <button type="button" role="tab" class="adk-tab" id="tab-historico" data-tab="historico" aria-selected="false" aria-controls="panel" tabindex="-1">Histórico de atividades</button>
+      </div>
+
+      <div class="adk-panel" id="panel" role="tabpanel" aria-labelledby="tab-acesso" tabindex="0">
+
+        <div class="ads-search" id="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="search" id="search" placeholder="Buscar por nome ou e-mail..." aria-label="Buscar administradores por nome ou e-mail" autocomplete="off" />
+        </div>
+
+        <div class="ads-period" id="period-wrap" hidden>
+          <fieldset class="ads-chips">
+            <legend class="visually-hidden">Período do histórico</legend>
+            <button type="button" class="ads-chip" data-periodo="7" aria-pressed="true">7 dias</button>
+            <button type="button" class="ads-chip" data-periodo="30" aria-pressed="false">30 dias</button>
+            <button type="button" class="ads-chip" data-periodo="90" aria-pressed="false">90 dias</button>
+            <button type="button" class="ads-chip" data-periodo="custom" aria-pressed="false">Personalizado</button>
+          </fieldset>
+          <div class="ads-custom" id="custom-wrap" hidden>
+            <label>De <input type="date" id="from" /></label>
+            <label>Até <input type="date" id="to" /></label>
+          </div>
+        </div>
+
+        <div class="ads-table-card">
+          <table class="ads-table">
+            <caption class="visually-hidden" id="table-caption"></caption>
+            <thead id="thead"></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <p class="adm-empty" id="empty" hidden></p>
+          <div class="ads-foot">
+            <p class="ads-count" id="count" role="status" aria-live="polite"></p>
+            <nav class="ads-pager" id="pager" aria-label="Paginação"></nav>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <%# ── Menu de ações do administrador (aberto pelo ⋮) ── %>
+    <div class="ads-sheet" id="sheet" role="menu" aria-label="Ações do administrador" hidden>
+      <button type="button" role="menuitem" class="ads-danger" id="sheet-remove">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>
+        <span>Remover administrador</span>
+      </button>
+      <button type="button" role="menuitem" class="ads-cancel" id="sheet-cancel">Cancelar</button>
+    </div>
+
+  </div>
+</main>
+
+<%# ── Confirmação ── %>
+<dialog class="adv-dialog adk-dialog" id="rm-dialog" aria-labelledby="rm-title" aria-describedby="rm-text">
+  <header class="adv-dialog-head">
+    <h2 class="adv-dialog-title" id="rm-title">Remover administrador?</h2>
+  </header>
+  <p class="adv-dialog-text" id="rm-text"></p>
+  <p class="adv-form-error" id="rm-error" role="alert"></p>
+  <div class="ads-confirm">
+    <button type="button" class="ads-danger" id="rm-confirm">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>
+      <span>Remover administrador</span>
+    </button>
+    <button type="button" class="ads-cancel" id="rm-cancel">Cancelar</button>
+  </div>
+</dialog>
+
+<output class="adv-toast" id="toast" role="status" aria-live="polite"></output>
+
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
+</footer>
+
+<script src="/js/escape-html.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const nf = new Intl.NumberFormat("pt-BR");
+const POR_PAGINA = 10;
+const state = { tab: "acesso", q: "", periodo: "7", from: "", to: "", page: 1, total: 0, items: [], alvo: null, gatilho: null };
+
+const initials = (s) => String(s || "?").trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0)).join("").toUpperCase() || "?";
+const dois = (n) => String(n).padStart(2, "0");
+// "12/11/2026 às 19:42"
+function dataHora(segundos) {
+  const d = new Date(Date.now() - segundos * 1000);
+  return `${dois(d.getDate())}/${dois(d.getMonth() + 1)}/${d.getFullYear()} às ${dois(d.getHours())}:${dois(d.getMinutes())}`;
+}
+// "Hoje, 09:42" · "Ontem, 18:32" · "11/11/2026, 11:05" — a partir de quantos segundos atrás (independe do fuso do servidor)
+function quando(segundos) {
+  if (segundos == null) return "Nunca";
+  const d = new Date(Date.now() - segundos * 1000), agora = new Date();
+  const hora = `${dois(d.getHours())}:${dois(d.getMinutes())}`;
+  const dia = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((dia(agora) - dia(d)) / 86400000);
+  if (diff === 0) return `Hoje, ${hora}`;
+  if (diff === 1) return `Ontem, ${hora}`;
+  return `${dois(d.getDate())}/${dois(d.getMonth() + 1)}/${d.getFullYear()}, ${hora}`;
+}
+
+let toastTimer;
+function toast(msg, isErr = false) {
+  const t = $("toast"); t.textContent = msg; t.classList.toggle("is-error", isErr); t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+// ── Carga e renderização ──
+async function carregar() {
+  const url = state.tab === "acesso"
+    ? `/api/admin/admins?page=${state.page}&limit=${POR_PAGINA}&q=${encodeURIComponent(state.q)}`
+    : `/api/admin/audit-log?page=${state.page}&limit=${POR_PAGINA}&${state.periodo === "custom"
+        ? `from=${encodeURIComponent(state.from)}&to=${encodeURIComponent(state.to)}` : `periodo=${state.periodo}`}`;
+  if (state.tab !== "acesso" && state.periodo === "custom" && (!state.from || !state.to)) {
+    state.items = []; state.total = 0; return render();
+  }
+  const res = await fetch(url);
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Falha ao carregar");
+  const data = await res.json();
+  state.items = data.items; state.total = data.total;
+  render();
+}
+
+function render() {
+  const acesso = state.tab === "acesso";
+  $("search-wrap").hidden = !acesso;
+  $("panel").setAttribute("aria-labelledby", `tab-${state.tab}`);
+  document.querySelectorAll(".adk-tab").forEach(t => { const on = t.dataset.tab === state.tab; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; });
+  $("table-caption").textContent = acesso ? "Administradores do painel" : "Histórico de atividades do painel";
+
+  if (acesso) {
+    $("thead").innerHTML = '<tr><th scope="col">Nome</th><th scope="col">E-mail</th><th scope="col">Último acesso</th><th scope="col"><span class="visually-hidden">Ações</span></th></tr>';
+    $("tbody").innerHTML = state.items.map(a => `
+      <tr>
+        <th scope="row"><span class="ads-person"><span class="ads-avatar" aria-hidden="true">${escapeHtml(initials(a.nome))}</span>
+          <span>${escapeHtml(a.nome)}${a.voce ? ' <span class="ads-you">(você)</span>' : ""}</span></span></th>
+        <td class="ads-email">${escapeHtml(a.email)}</td>
+        <td class="ads-when">${escapeHtml(quando(a.visto_ha_segundos))}</td>
+        <td class="ads-act">${a.voce ? "" : `<button type="button" class="ads-kebab" data-id="${Number(a.id)}" aria-haspopup="menu" aria-label="Ações de ${escapeHtml(a.nome)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>`}</td>
+      </tr>`).join("");
+  } else {
+    $("thead").innerHTML = '<tr><th scope="col">Data e hora</th><th scope="col">Administrador</th><th scope="col">Ação realizada</th><th scope="col">Detalhes</th></tr>';
+    $("tbody").innerHTML = state.items.map(l => `
+      <tr><th scope="row" class="ads-when">${escapeHtml(dataHora(l.ha_segundos))}</th><td>${escapeHtml(l.admin)}</td><td class="ads-what">${escapeHtml(l.titulo)}</td><td class="ads-detail">${escapeHtml(l.acao)}</td></tr>`).join("");
+  }
+  $("period-wrap").hidden = acesso;
+  $("custom-wrap").hidden = acesso || state.periodo !== "custom";
+  document.querySelectorAll(".ads-chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.periodo === state.periodo)));
+
+  const vazio = state.items.length === 0;
+  $("empty").hidden = !vazio;
+  $("empty").textContent = acesso ? "Nenhum administrador encontrado." : "Nenhuma atividade registrada ainda.";
+  const ini = vazio ? 0 : (state.page - 1) * POR_PAGINA + 1, fim = (state.page - 1) * POR_PAGINA + state.items.length;
+  $("count").textContent = vazio ? "" : `Mostrando ${ini}-${fim} de ${nf.format(state.total)} ${acesso ? "administradores" : "registros"}`;
+  renderPager();
+}
+
+function renderPager() {
+  const paginas = Math.max(Math.ceil(state.total / POR_PAGINA), 1);
+  if (paginas <= 1 && state.page === 1) { $("pager").innerHTML = ""; return; }
+  const de = Math.max(1, Math.min(state.page - 2, paginas - 4)), ate = Math.min(paginas, de + 4);
+  let html = `<button type="button" class="ads-page" data-page="${state.page - 1}" aria-label="Página anterior" ${state.page <= 1 ? "disabled" : ""}>‹</button>`;
+  for (let p = de; p <= ate; p++) html += `<button type="button" class="ads-page${p === state.page ? " is-current" : ""}" data-page="${p}" aria-label="Página ${p}" ${p === state.page ? 'aria-current="page"' : ""}>${p}</button>`;
+  html += `<button type="button" class="ads-page" data-page="${state.page + 1}" aria-label="Próxima página" ${state.page >= paginas ? "disabled" : ""}>›</button>`;
+  $("pager").innerHTML = html;
+}
+$("pager").addEventListener("click", async e => {
+  const b = e.target.closest("[data-page]"); if (!b || b.disabled) return;
+  state.page = Number(b.dataset.page); await carregar().catch(() => toast("Erro ao carregar.", true));
+  document.querySelector(`#pager [data-page="${state.page}"]`)?.focus();
+});
+
+// ── Abas ──
+async function abrirAba(nome, focar) {
+  state.tab = nome; state.page = 1; fecharSheet(false);
+  try { await carregar(); } catch { toast("Erro ao carregar.", true); }
+  if (focar) $(`tab-${nome}`).focus();
+}
+document.querySelectorAll(".adk-tab").forEach(t => t.addEventListener("click", () => abrirAba(t.dataset.tab, false)));
+document.querySelector(".adk-tabs").addEventListener("keydown", e => {
+  const lista = [...document.querySelectorAll(".adk-tab")], i = lista.findIndex(t => t.dataset.tab === state.tab);
+  const alvo = { ArrowRight: (i + 1) % lista.length, ArrowLeft: (i - 1 + lista.length) % lista.length, Home: 0, End: lista.length - 1 }[e.key];
+  if (alvo == null) return; e.preventDefault(); abrirAba(lista[alvo].dataset.tab, true);
+});
+
+// ── Período do histórico ──
+const recarregar = async () => { state.page = 1; try { await carregar(); } catch (e) { toast(e.message || "Erro ao carregar.", true); } };
+document.querySelectorAll(".ads-chip").forEach(c => c.addEventListener("click", () => { state.periodo = c.dataset.periodo; recarregar(); }));
+$("from").addEventListener("change", e => { state.from = e.target.value; recarregar(); });
+$("to").addEventListener("change", e => { state.to = e.target.value; recarregar(); });
+
+// ── Busca ──
+let busca;
+$("search").addEventListener("input", e => {
+  clearTimeout(busca);
+  busca = setTimeout(async () => { state.q = e.target.value.trim(); state.page = 1; try { await carregar(); } catch { toast("Erro ao carregar.", true); } }, 250);
+});
+
+// ── Menu ⋮ (folha com "Remover administrador" e "Cancelar") ──
+const sheet = $("sheet");
+function fecharSheet(devolverFoco) {
+  if (sheet.hidden) return; sheet.hidden = true;
+  if (devolverFoco) state.gatilho?.focus();
+}
+$("tbody").addEventListener("click", e => {
+  const k = e.target.closest(".ads-kebab"); if (!k) return;
+  e.stopPropagation();
+  if (!sheet.hidden && state.gatilho === k) return fecharSheet(true);
+  state.gatilho = k; state.alvo = state.items.find(a => a.id === Number(k.dataset.id));
+  const r = k.getBoundingClientRect();
+  sheet.style.top = `${r.bottom + window.scrollY + 6}px`; sheet.style.left = `${Math.max(r.right + window.scrollX - 260, 12)}px`;
+  sheet.hidden = false; $("sheet-remove").focus();
+});
+$("sheet-cancel").addEventListener("click", () => fecharSheet(true));
+document.addEventListener("click", e => { if (!e.target.closest("#sheet") && !e.target.closest(".ads-kebab")) fecharSheet(false); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") fecharSheet(true); });
+
+// ── Confirmação de remoção ──
+const dlg = $("rm-dialog");
+$("sheet-remove").addEventListener("click", () => {
+  fecharSheet(false);
+  $("rm-text").textContent = `${state.alvo.nome} (${state.alvo.email}) perde o acesso ao painel na hora e é desconectado(a). Esta ação não pode ser desfeita.`;
+  $("rm-error").textContent = "";
+  dlg.showModal(); $("rm-cancel").focus();
+});
+$("rm-cancel").addEventListener("click", () => dlg.close());
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+dlg.addEventListener("close", () => state.gatilho?.isConnected && state.gatilho.focus());
+$("rm-confirm").addEventListener("click", async () => {
+  const btn = $("rm-confirm"); btn.disabled = true; $("rm-error").textContent = "";
+  try {
+    const res = await fetch(`/api/admin/admins/${state.alvo.id}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Não foi possível remover. Tente novamente.");
+    dlg.close(); toast("Administrador removido.");
+    if (state.items.length === 1 && state.page > 1) state.page--;
+    await carregar();
+  } catch (err) { $("rm-error").textContent = err.message; }
+  finally { btn.disabled = false; }
+});
+
+carregar().catch(() => { $("empty").hidden = false; $("empty").textContent = "Erro ao carregar. Recarregue a página."; });
+</script>
+
+</body>
+</html>

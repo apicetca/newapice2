@@ -1,0 +1,93 @@
+/* =============================================
+   admin-vaga.css — Admin · detalhe da vaga (desktop)
+   Carrega depois de admin-dashboard.css e admin-vagas.css.
+============================================= */
+
+.adj-wrap { max-width: 880px; margin-inline: auto; display: flex; flex-direction: column; gap: 14px; }
+
+.adj-back {
+  display: inline-flex; align-items: center; gap: 6px; width: fit-content; min-height: 24px;
+  font-size: .72rem; color: var(--text); margin-bottom: 6px;
+}
+.adj-back:hover { color: var(--admin); }
+.adj-back:focus-visible, .adj-btn:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+
+.adj-card {
+  background: #0b0b0b; border: 1px solid var(--border-lite); border-radius: var(--radius-lg);
+  padding: 22px 24px;
+}
+
+/* ── Hero ── */
+.adj-hero {
+  display: grid; grid-template-columns: auto 1fr; gap: 14px 22px; align-items: center;
+  border-radius: var(--radius-xl);
+}
+.adj-logo { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 76px; }
+.adj-logo-mark {
+  display: flex; align-items: center; justify-content: center;
+  width: 62px; height: 62px; border-radius: 50%; background: #fff; color: #0a0a0a;
+  font-family: var(--font-display); font-size: 1.3rem; font-weight: 800;
+}
+.adj-logo-name {
+  max-width: 110px; font-size: .62rem; letter-spacing: .04em; text-transform: uppercase;
+  text-align: center; overflow-wrap: anywhere; color: var(--text);
+}
+.adj-title {
+  font-family: var(--font-display); font-size: clamp(1.4rem, 2.4vw, 1.9rem); font-weight: 600;
+  line-height: 1.25; letter-spacing: -.01em; overflow-wrap: anywhere;
+}
+.adj-dates { margin-top: 8px; font-size: .68rem; line-height: 1.7; color: var(--text); }
+.adj-chips {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px;
+  padding-top: 14px; border-top: 1px solid var(--border);
+}
+.adj-chips li {
+  min-width: 96px; padding: 3px 18px; text-align: center; font-size: .66rem; color: var(--muted);
+  border: 1px solid var(--border-lite); border-radius: 99px; background: var(--bg-3);
+}
+
+/* ── Situação ── */
+.adj-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.adj-stats dt { font-size: .66rem; color: var(--muted); margin-bottom: 4px; }
+.adj-stats dd { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; }
+.adj-pill {
+  display: inline-block; padding: 2px 12px; border-radius: 99px; font-size: .74rem; font-weight: 600;
+  border: 1px solid var(--border-lite);
+}
+.adj-pill.is-on  { color: var(--teal); border-color: var(--teal-border); background: var(--teal-dim); }
+.adj-pill.is-off { color: var(--yellow); border-color: rgba(251,191,36,.4); background: var(--yellow-dim); }
+
+.adj-skills { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+.adj-sub { font-family: var(--font-display); font-size: .78rem; font-weight: 600; margin-bottom: 8px; }
+.adj-skill-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.adj-skill-list li {
+  padding: 2px 12px; font-size: .68rem; border-radius: 99px; color: var(--admin);
+  border: 1px solid var(--admin-border); background: var(--admin-dim);
+}
+.adj-skill-list.is-soft li { color: var(--muted); border-color: var(--border-lite); background: var(--bg-3); }
+
+/* ── Conteúdo ── */
+.adj-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; align-items: start; }
+.adj-main { display: flex; flex-direction: column; gap: 22px; }
+.adj-h2 { font-family: var(--font-display); font-size: .9rem; font-weight: 600; margin-bottom: 10px; }
+.adj-body { font-size: .74rem; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; }
+.adj-side { display: flex; flex-direction: column; gap: 14px; }
+.adj-side .adj-card { display: flex; flex-direction: column; gap: 10px; }
+
+.adj-btn {
+  display: flex; align-items: center; justify-content: center; min-height: 38px; padding: 0 16px;
+  border-radius: var(--radius-md); cursor: pointer; text-align: center;
+  background: var(--bg-3); border: 1px solid var(--border-lite); color: var(--text);
+  font-family: var(--font-display); font-size: .78rem; font-weight: 600;
+}
+.adj-btn:hover { border-color: var(--muted); }
+.adj-btn--primary { background: var(--admin); border-color: var(--admin); color: #14140a; }
+.adj-btn--primary:hover { background: #eef04f; border-color: #eef04f; }
+.adj-btn:disabled { opacity: .6; cursor: progress; }
+.adj-error { font-size: .72rem; color: var(--red); }
+.adj-error:empty { display: none; }
+
+.adj-meta { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; }
+.adj-meta dt { font-size: .64rem; color: var(--muted); }
+.adj-meta dd { font-size: .74rem; }
+.adj-meta dd.is-accent { color: var(--admin); font-weight: 600; }

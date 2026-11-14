@@ -12,168 +12,326 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
   <link rel="stylesheet" href="/css/header.css" />
-  <link rel="stylesheet" href="/css/empresa-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-vagas.css" />
+  <link rel="stylesheet" href="/css/admin-usuarios.css" />
 </head>
 <body>
 
   <%- include('partials/header-admin', { currentPage: 'admin-empresas' }) %>
 
-<main class="page-content" id="main-content">
+<main class="adm-main" id="main-content">
+  <h1 class="visually-hidden">Empresas</h1>
 
-  <section class="loading-screen" id="loading" role="status" aria-live="polite">
-    <span class="spinner" aria-hidden="true"></span>
+  <section class="adm-loading" id="loading" role="status" aria-live="polite">
+    <span class="adm-spinner" aria-hidden="true"></span>
     <p>Carregando empresas...</p>
   </section>
 
-  <article id="content" hidden>
-    <section class="section" aria-label="Empresas cadastradas">
-      <header class="section-header">
-        <h1 class="section-title">Empresas <span class="section-count" id="empresas-count"></span></h1>
-        <fieldset class="filter-row" role="group" aria-label="Filtrar por status">
-          <button class="filter-chip active" data-f="todas"     aria-pressed="true">Todas</button>
-          <button class="filter-chip"        data-f="ativas"    aria-pressed="false">Ativas</button>
-          <button class="filter-chip"        data-f="suspensas" aria-pressed="false">Suspensas</button>
-        </fieldset>
-      </header>
+  <div class="adv-wrap" id="content" hidden>
 
-      <figure class="jobs-table-wrap">
-        <table class="jobs-table" id="empresas-table" aria-label="Lista de empresas">
+    <section class="adv-filters" aria-label="Filtros de empresas">
+      <div class="adv-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="search" placeholder="Buscar por nome ou CNPJ..." aria-label="Buscar empresas por nome ou CNPJ" autocomplete="off" />
+      </div>
+
+      <fieldset class="adv-group" id="vagas-group" aria-label="Filtrar por quantidade de vagas ativas">
+        <button type="button" class="adv-chip" data-v="todas" aria-pressed="true">Todas</button>
+        <button type="button" class="adv-chip" data-v="sem"   aria-pressed="false">Sem vagas</button>
+        <button type="button" class="adv-chip" data-v="1a3"   aria-pressed="false">1 a 3 vagas</button>
+        <button type="button" class="adv-chip" data-v="4mais" aria-pressed="false">4+ vagas</button>
+      </fieldset>
+
+      <fieldset class="adv-group" id="status-group" aria-label="Filtrar por situação da conta">
+        <button type="button" class="adv-chip" data-v="ativas"    aria-pressed="true">Ativas</button>
+        <button type="button" class="adv-chip" data-v="inativas"  aria-pressed="false">Inativos</button>
+        <button type="button" class="adv-chip" data-v="suspensas" aria-pressed="false">Suspensos</button>
+        <button type="button" class="adv-chip adv-chip--ghost" id="clear-filters">Limpar</button>
+      </fieldset>
+    </section>
+
+    <div class="adv-bar">
+      <p class="adv-count" id="count" role="status" aria-live="polite"></p>
+
+      <div class="adv-sort">
+        <button type="button" class="adv-sort-btn" id="sort-btn" aria-haspopup="listbox"
+                aria-expanded="false" aria-controls="sort-list" aria-label="Ordenar empresas">
+          <span id="sort-label">Todas</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <ul class="adv-listbox" id="sort-list" role="listbox" aria-label="Ordenar por" hidden>
+          <li class="adv-option" role="option" tabindex="-1" data-v="az" aria-selected="false">A-Z</li>
+          <li class="adv-option" role="option" tabindex="-1" data-v="recentes" aria-selected="false">Mais recentes</li>
+          <li class="adv-option" role="option" tabindex="-1" data-v="todas" aria-selected="true">Todas</li>
+        </ul>
+      </div>
+    </div>
+
+    <section aria-label="Lista de empresas">
+      <figure class="adv-panel">
+        <table class="adv-table" id="empresas-table">
+          <caption class="visually-hidden">Empresas cadastradas na plataforma</caption>
           <thead>
             <tr>
               <th scope="col">Empresa</th>
               <th scope="col">E-mail</th>
               <th scope="col">Setor</th>
-              <th scope="col">Vagas ativas</th>
+              <th scope="col">Vagas</th>
               <th scope="col">Plano</th>
-              <th scope="col">Cadastro</th>
-              <th scope="col">Status</th>
+              <th scope="col">Atividade</th>
               <th scope="col">Ações</th>
             </tr>
           </thead>
           <tbody id="empresas-tbody"></tbody>
         </table>
-        <section class="table-empty" id="empresas-empty" hidden>
-          <p class="table-empty-title">Nenhuma empresa encontrada</p>
-        </section>
+        <p class="adm-empty" id="empresas-empty" hidden>Nenhuma empresa encontrada</p>
       </figure>
     </section>
-  </article>
+
+  </div>
 </main>
 
-<output class="toast" id="toast" role="status" aria-live="polite"></output>
+<%# ── Editar empresa ── %>
+<dialog class="adv-dialog" id="edit-dialog" aria-labelledby="edit-title">
+  <header class="adv-dialog-head">
+    <h2 class="adv-dialog-title" id="edit-title">Editar empresa</h2>
+    <button type="button" class="adv-dialog-close" id="edit-close" aria-label="Fechar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </header>
+  <form id="edit-form" novalidate>
+    <div class="adv-form-grid">
+      <div class="adv-field">
+        <label for="f-razao">Nome</label>
+        <input type="text" id="f-razao" maxlength="200" required autocomplete="off" />
+      </div>
+      <div class="adv-field">
+        <label for="f-fantasia">Nome fantasia<span class="adv-field-opt">(Opcional)</span></label>
+        <input type="text" id="f-fantasia" maxlength="200" placeholder="Nome fantasia" autocomplete="off" />
+      </div>
+      <div class="adv-field">
+        <label for="f-setor">Setor de atuação</label>
+        <select id="f-setor">
+          <option value="">Não informado</option>
+          <option value="tecnologia">Tecnologia</option>
+          <option value="financeiro">Financeiro</option>
+          <option value="educacao">Educação</option>
+          <option value="saude">Saúde</option>
+          <option value="varejo">Varejo</option>
+          <option value="industria">Indústria</option>
+          <option value="consultoria">Consultoria</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label for="f-maturidade">Faixa de maturidade</label>
+        <select id="f-maturidade">
+          <option value="">Não informada</option>
+          <option value="startup">Startup</option>
+          <option value="crescimento">Em crescimento</option>
+          <option value="consolidada">Empresa consolidada</option>
+        </select>
+      </div>
+    </div>
+    <p class="adv-form-error" id="edit-error" role="alert"></p>
+    <footer class="adv-dialog-foot">
+      <a class="adv-icon-btn adv-mail" id="edit-mail" href="#" aria-label="Enviar e-mail à empresa" hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      </a>
+      <button type="button" class="adv-btn" id="edit-cancel">Cancelar</button>
+      <button type="submit" class="adv-btn adv-btn--primary" id="edit-save">Salvar</button>
+    </footer>
+  </form>
+</dialog>
 
-<footer class="site-footer">
-  <p>&copy; <script>document.write(new Date().getFullYear())</script> Ápice. Painel do administrador.</p>
+<output class="adv-toast" id="toast" role="status" aria-live="polite"></output>
+
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
 </footer>
 
 <script src="/js/escape-html.js"></script>
 <script>
 const SETOR_LABEL = {
-  tecnologia:"Tecnologia", financeiro:"Financeiro", educacao:"Educação",
-  saude:"Saúde", varejo:"Varejo", industria:"Indústria",
-  consultoria:"Consultoria", outro:"Outro",
+  tecnologia: "Tecnologia", financeiro: "Financeiro", educacao: "Educação",
+  saude: "Saúde", varejo: "Varejo", industria: "Indústria",
+  consultoria: "Consultoria", outro: "Outro",
 };
-const PLAN_LABEL = { empresa_free: "Free", empresa_basico: "Básico", empresa_premium: "Premium" };
+const PLAN_LABEL = { empresa_free: "FREE", empresa_premium: "PRO" };
+const CORES = ["#E2E52B", "#59E435", "#60a5fa", "#c084fc", "#f87171", "#fbbf24"];
+const INATIVA_APOS_SEG = 30 * 24 * 3600;
+const $ = (id) => document.getElementById(id);
+
 let allEmpresas = [];
+// A conta "Ativas" já vem marcada, como no protótipo; clicar de novo desmarca.
+const state = { q: "", vagas: "todas", status: "ativas", sort: "todas" };
+
+const norm = (s) => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const nomeDe = (e) => e.nome_fantasia || e.razao_social || "";
+const digits = (s) => String(s ?? "").replace(/\D/g, "");
+const initials = (s) => String(s || "?").trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0)).join("").toUpperCase() || "?";
+const formatCnpj = (c) => { const d = digits(c); return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") : (c ?? ""); };
 
 // O plano vale por conta e uma empresa pode ter mais de uma (mesmo CNPJ ou
 // mesmo nome): o admin precisa saber disso ao trocar o plano.
-function contaLabel(o) {
-  return `${o.email}${o.nome ? ` — ${o.nome}` : ""} (mesmo ${o.motivo})`;
-}
-let activeFilter = "todas";
+const contaLabel = (o) => `${o.email}${o.nome ? ` — ${o.nome}` : ""} (mesmo ${o.motivo})`;
 
-function formatDate(raw) {
-  if (!raw) return "—";
-  return new Date(raw).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+function activityLabel(s) {
+  if (s == null) return "—";
+  const min = Math.floor(s / 60), h = Math.floor(min / 60), d = Math.floor(h / 24);
+  if (min < 5)  return "Online";
+  if (min < 60) return `Há ${min} min`;
+  if (h < 24)   return `Há ${h} ${h === 1 ? "hora" : "horas"}`;
+  if (d < 2)    return "Ontem";
+  return `${d} dias atrás`;
 }
 
-function applyFilter() {
-  const filtered = allEmpresas.filter(e => {
-    if (activeFilter === "ativas")    return e.active;
-    if (activeFilter === "suspensas") return !e.active;
-    return true;
+// Ativas = conta liberada e vista nos últimos 30 dias (ou ainda sem registro);
+// Inativos = conta liberada sem acesso há mais de 30 dias; Suspensos = bloqueadas.
+const situacao = (e) => !e.active ? "suspensas" : (e.visto_ha_segundos != null && e.visto_ha_segundos > INATIVA_APOS_SEG ? "inativas" : "ativas");
+
+function visibleEmpresas() {
+  const q = norm(state.q.trim()), qd = digits(state.q);
+  const list = allEmpresas.filter(e => {
+    if (state.status && situacao(e) !== state.status) return false;
+    const n = e.vagas_ativas;
+    if (state.vagas === "sem" && n !== 0) return false;
+    if (state.vagas === "1a3" && (n < 1 || n > 3)) return false;
+    if (state.vagas === "4mais" && n < 4) return false;
+    return !q || norm(nomeDe(e)).includes(q) || norm(e.razao_social).includes(q) || (qd && digits(e.cnpj).includes(qd));
   });
-  document.getElementById("empresas-count").textContent = `(${filtered.length})`;
-  renderTable(filtered);
+  const by = {
+    az: (a, b) => nomeDe(a).localeCompare(nomeDe(b), "pt-BR"),
+    recentes: (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  }[state.sort];
+  return by ? list.sort(by) : list;
 }
 
-function renderTable(empresas) {
-  const tbody = document.getElementById("empresas-tbody");
-  const empty = document.getElementById("empresas-empty");
-  const table = document.getElementById("empresas-table");
+const ICON_EYE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const ICON_EDIT = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+const ICON_BAN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg>';
+const ICON_OK = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 9.5"/></svg>';
+
+function render() {
+  const list = visibleEmpresas();
+  const tbody = $("empresas-tbody");
+  const f = document.activeElement?.closest?.("[data-act]");
+  const keep = f ? { act: f.dataset.act, id: f.dataset.id } : null;
   tbody.innerHTML = "";
+  $("count").textContent = `${list.length} ${list.length === 1 ? "empresa" : "empresas"}`;
+  $("empresas-table").hidden = list.length === 0;
+  $("empresas-empty").hidden = list.length > 0;
 
-  if (!empresas.length) { table.style.display = "none"; empty.hidden = false; return; }
-  table.style.display = ""; empty.hidden = true;
+  list.forEach(e => {
+    const nome = nomeDe(e) || "—";
+    const label = escapeHtml(nome);
+    const cor = CORES[e.id % CORES.length];
+    const warn = e.outras_contas.length
+      ? `<span class="adu-warn">⚠ outra(s) conta(s) desta empresa: ${e.outras_contas.map(o => escapeHtml(contaLabel(o))).join(", ")}</span>` : "";
+    const eye = `<a class="adv-icon-btn" href="/admin/empresas/${Number(e.id)}" aria-label="Ver perfil de ${label}">${ICON_EYE}</a>`;
 
-  empresas.forEach(e => {
     const tr = document.createElement("tr");
+    if (!e.active) tr.className = "adu-suspended";
     tr.innerHTML = `
-      <td data-label="Empresa">
-        <span class="job-title-cell">${escapeHtml(e.nome_fantasia || e.razao_social || "—")}</span>
-        ${e.cnpj ? `<span class="job-company-level">CNPJ ${escapeHtml(e.cnpj)}</span>` : ""}
-        ${e.outras_contas.length
-          ? `<br><small style="color:var(--yellow)">⚠ outra(s) conta(s) desta empresa: ${e.outras_contas.map(o => escapeHtml(contaLabel(o))).join(", ")}</small>`
-          : ""}
-      </td>
-      <td data-label="E-mail">${escapeHtml(e.email)}</td>
-      <td data-label="Setor"><span class="badge badge-muted">${SETOR_LABEL[e.setor] ?? "—"}</span></td>
-      <td data-label="Vagas ativas"><strong>${e.vagas_ativas}</strong> / ${e.total_vagas}</td>
-      <td data-label="Plano">
-        <select class="form-select" style="padding:4px 24px 4px 8px;font-size:.78rem" onchange="changePlan(${e.id}, this.value)">
-          <option value="empresa_free"    ${e.plan_code === "empresa_free"    ? "selected" : ""}>Free</option>
-          <option value="empresa_premium" ${e.plan_code === "empresa_premium" ? "selected" : ""}>PRO</option>
-        </select>
-      </td>
-      <td data-label="Cadastro">${formatDate(e.created_at)}</td>
-      <td data-label="Status"><span class="badge ${e.active ? "badge-green" : "badge-red"}">${e.active ? "Ativa" : "Suspensa"}</span></td>
-      <td data-label="Ações">
-        <button class="btn-icon ${e.active ? "" : "btn-toggle-on"}" title="${e.active ? "Suspender" : "Reativar"}"
-          onclick="toggleStatus(${e.id}, ${!e.active})">
-          ${e.active
-            ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`
-            : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`}
-        </button>
-      </td>`;
+      <td><div class="adu-person"><span class="adm-avatar adu-logo" style="background:${cor}" aria-hidden="true">${escapeHtml(initials(nome))}</span>
+        <span class="adu-person-txt"><span class="adu-name adv-company">${label}</span>${e.cnpj ? `<span class="adu-login">${escapeHtml(formatCnpj(e.cnpj))}</span>` : ""}${e.active ? "" : '<span class="adu-tag">Suspensa</span>'}${warn}</span></div></td>
+      <td class="adu-email">${escapeHtml(e.email)}</td>
+      <td><span class="adm-badge">${escapeHtml(SETOR_LABEL[e.setor] ?? "—")}</span></td>
+      <td>${Number(e.vagas_ativas)}</td>
+      <td><select class="adu-plan" data-id="${Number(e.id)}" aria-label="Plano de ${label}">
+        <option value="empresa_free"${e.plan_code === "empresa_free" ? " selected" : ""}>FREE</option>
+        <option value="empresa_premium"${e.plan_code === "empresa_premium" ? " selected" : ""}>PRO</option>
+      </select></td>
+      <td>${activityLabel(e.visto_ha_segundos)}</td>
+      <td><span class="adv-actions">${eye}
+        <button type="button" class="adv-icon-btn" data-act="edit" data-id="${Number(e.id)}" aria-label="Editar ${label}">${ICON_EDIT}</button>
+        <button type="button" class="adv-icon-btn ${e.active ? "adv-icon-btn--danger" : "adv-icon-btn--ok"}" data-act="status" data-id="${Number(e.id)}"
+          aria-label="${e.active ? "Suspender" : "Reativar"} ${label}">${e.active ? ICON_BAN : ICON_OK}</button>
+      </span></td>`;
     tbody.appendChild(tr);
   });
+  if (keep) tbody.querySelector(`[data-act="${keep.act}"][data-id="${keep.id}"]`)?.focus();
 }
 
-document.querySelectorAll(".filter-chip").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".filter-chip").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed", "false"); });
-    btn.classList.add("active"); btn.setAttribute("aria-pressed", "true");
-    activeFilter = btn.dataset.f;
-    applyFilter();
-  });
+// ── Filtros ──
+function syncChips() {
+  [["vagas-group", "vagas"], ["status-group", "status"]].forEach(([g, k]) =>
+    $(g).querySelectorAll("[data-v]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === state[k]))));
+}
+$("vagas-group").querySelectorAll("[data-v]").forEach(btn => btn.addEventListener("click", () => {
+  state.vagas = btn.dataset.v; syncChips(); render();
+}));
+$("status-group").querySelectorAll("[data-v]").forEach(btn => btn.addEventListener("click", () => {
+  state.status = state.status === btn.dataset.v ? "" : btn.dataset.v; syncChips(); render();
+}));
+$("search").addEventListener("input", e => { state.q = e.target.value; render(); });
+$("clear-filters").addEventListener("click", () => {
+  Object.assign(state, { q: "", vagas: "todas", status: "", sort: "todas" });
+  $("search").value = "";
+  syncChips(); syncSort(); render();
 });
 
-async function toggleStatus(id, newActive) {
-  try {
-    const res = await fetch(`/api/admin/empresas/${id}`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ active: newActive }),
-    });
-    if (!res.ok) throw new Error();
-    showToast(newActive ? "Empresa reativada." : "Empresa suspensa.");
-    await reload();
-  } catch {
-    showToast("Erro ao atualizar. Tente novamente.", true);
-  }
+// ── Ordenação (listbox acessível por teclado) ──
+const sortBtn = $("sort-btn"), sortList = $("sort-list");
+const options = () => [...sortList.querySelectorAll("[role=option]")];
+function syncSort() {
+  options().forEach(o => o.setAttribute("aria-selected", String(o.dataset.v === state.sort)));
+  $("sort-label").textContent = options().find(o => o.dataset.v === state.sort).textContent;
 }
+function openSort() {
+  sortList.hidden = false; sortBtn.setAttribute("aria-expanded", "true");
+  (options().find(o => o.getAttribute("aria-selected") === "true") ?? options()[0]).focus();
+}
+function closeSort(refocus) {
+  sortList.hidden = true; sortBtn.setAttribute("aria-expanded", "false");
+  if (refocus) sortBtn.focus();
+}
+function pick(opt) { state.sort = opt.dataset.v; syncSort(); closeSort(true); render(); }
+sortBtn.addEventListener("click", () => sortList.hidden ? openSort() : closeSort(false));
+sortBtn.addEventListener("keydown", e => { if (e.key === "ArrowDown") { e.preventDefault(); openSort(); } });
+sortList.addEventListener("click", e => { const o = e.target.closest("[role=option]"); if (o) pick(o); });
+sortList.addEventListener("keydown", e => {
+  const opts = options(), i = opts.indexOf(document.activeElement);
+  if (e.key === "ArrowDown") { e.preventDefault(); opts[Math.min(i + 1, opts.length - 1)].focus(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); opts[Math.max(i - 1, 0)].focus(); }
+  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (i >= 0) pick(opts[i]); }
+  else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeSort(true); }
+  else if (e.key === "Tab") closeSort(false);
+});
+document.addEventListener("click", e => { if (!e.target.closest(".adv-sort")) closeSort(false); });
 
+// ── Toast / API ──
+let toastTimer;
+function toast(msg, isErr = false) {
+  const el = $("toast");
+  el.textContent = msg; el.classList.toggle("is-error", isErr); el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+async function api(path, body) {
+  const res = await fetch(`/api/admin/empresas/${path}`, {
+    method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Erro ao atualizar. Tente novamente.");
+  return data;
+}
 async function reload() {
   const res = await fetch("/api/admin/empresas");
-  if (!res.ok) return;
+  if (!res.ok) throw new Error("Falha ao carregar");
   allEmpresas = await res.json();
-  applyFilter();
+  render();
 }
 
-async function changePlan(id, planCode) {
+// ── Plano ──
+$("empresas-tbody").addEventListener("change", async e => {
+  const sel = e.target.closest("select.adu-plan");
+  if (!sel) return;
+  const id = Number(sel.dataset.id), planCode = sel.value;
   // Se a empresa tem outra conta, o plano trocado só nesta não vale quando
   // ela entra pela outra — oferece aplicar em todas.
-  const empresa = allEmpresas.find(e => e.id === id);
+  const empresa = allEmpresas.find(x => x.id === id);
   const outras  = (empresa?.outras_contas ?? []).filter(o => o.plan_code !== planCode);
   const ids     = [id];
   if (outras.length && confirm(
@@ -181,52 +339,86 @@ async function changePlan(id, planCode) {
     outras.map(o => `• ${contaLabel(o)}`).join("\n") +
     `\n\nAplicar o plano ${PLAN_LABEL[planCode]} nelas também? ` +
     `Se não, ela continua no plano antigo quando entrar por essa(s) conta(s).`
-  )) {
-    ids.push(...outras.map(o => o.id));
-  }
+  )) ids.push(...outras.map(o => o.id));
 
+  sel.disabled = true;
   try {
-    for (const target of ids) {
-      const res = await fetch(`/api/admin/empresas/${target}/plan`, {
-        method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan_code: planCode }),
-      });
-      if (!res.ok) throw new Error();
-    }
-    showToast(ids.length > 1 ? `Plano atualizado em ${ids.length} contas.` : "Plano atualizado.");
-  } catch {
-    showToast("Erro ao atualizar o plano.", true);
-  }
+    for (const target of ids) await api(`${target}/plan`, { plan_code: planCode });
+    toast(ids.length > 1 ? `Plano atualizado em ${ids.length} contas.` : "Plano atualizado.");
+  } catch { toast("Erro ao atualizar o plano.", true); }
   // Recarrega mesmo no erro, pra o seletor não ficar mostrando um plano que não foi salvo.
   await reload();
-}
+});
 
-let toastTimer = null;
-function showToast(msg, isErr = false) {
-  const el = document.getElementById("toast");
-  el.textContent = msg;
-  el.style.borderColor = isErr ? "rgba(248,81,73,.35)" : "var(--border-lite)";
-  el.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
-}
+// ── Ações da tabela ──
+let opener = null, current = null;
+$("empresas-tbody").addEventListener("click", async e => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const empresa = allEmpresas.find(x => x.id === Number(btn.dataset.id));
+  if (!empresa) return;
+  opener = btn; current = empresa;
 
-async function init() {
+  if (btn.dataset.act === "edit") return openEdit(empresa);
+  btn.disabled = true;
+  try {
+    await api(String(empresa.id), { active: !empresa.active });
+    toast(empresa.active ? "Empresa suspensa." : "Empresa reativada.");
+    await reload();
+  } catch (err) { toast(err.message, true); btn.disabled = false; }
+});
+
+// ── Editar ──
+const editDlg = $("edit-dialog");
+function openEdit(e) {
+  $("edit-title").textContent = `Editar empresa: ${nomeDe(e) || e.email}`;
+  $("f-razao").value = e.razao_social ?? "";
+  $("f-fantasia").value = e.nome_fantasia ?? "";
+  $("f-setor").value = e.setor ?? "";
+  $("f-maturidade").value = e.maturidade ?? "";
+  $("edit-error").textContent = "";
+  const mail = $("edit-mail");
+  mail.hidden = !e.email;
+  mail.href = `mailto:${e.email}`;
+  editDlg.showModal();
+  $("f-razao").focus();
+}
+$("edit-close").addEventListener("click", () => editDlg.close());
+$("edit-cancel").addEventListener("click", () => editDlg.close());
+editDlg.addEventListener("close", () => {
+  (opener && document.contains(opener) ? opener : $("search")).focus();
+});
+$("edit-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const save = $("edit-save");
+  save.disabled = true; $("edit-error").textContent = "";
+  try {
+    await api(String(current.id), {
+      razao_social: $("f-razao").value, nome_fantasia: $("f-fantasia").value,
+      setor: $("f-setor").value, maturidade: $("f-maturidade").value,
+    });
+    editDlg.close();
+    toast("Empresa atualizada.");
+    await reload();
+  } catch (err) {
+    $("edit-error").textContent = err.message;
+  } finally { save.disabled = false; }
+});
+
+(async function init() {
   try {
     await reload();
-    document.getElementById("loading").hidden = true;
-    document.getElementById("content").hidden = false;
+    $("loading").hidden = true;
+    $("content").hidden = false;
   } catch (err) {
     console.error(err);
-    document.getElementById("loading").innerHTML = `
-      <section style="text-align:center">
-        <p style="color:var(--red);margin-bottom:10px">Erro ao carregar as empresas.</p>
-        <a href="/admin/dashboard" style="color:var(--blue);font-size:.9rem">← Voltar ao painel</a>
-      </section>`;
+    $("loading").innerHTML = `
+      <div role="alert">
+        <p class="adm-error">Erro ao carregar as empresas.</p>
+        <a class="adm-error-link" href="/admin/dashboard">← Voltar ao painel</a>
+      </div>`;
   }
-}
-
-init();
+})();
 </script>
 
 </body>

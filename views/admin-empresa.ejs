@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/webp" href="/img/principal-gradiente.webp" />
+  <meta name="description" content="Perfil da empresa — painel do administrador." />
+  <title>Ápice — Admin · Perfil da empresa</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/design-system.css" />
+  <link rel="stylesheet" href="/css/header.css" />
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-vagas.css" />
+  <link rel="stylesheet" href="/css/admin-vaga.css" />
+  <link rel="stylesheet" href="/css/admin-usuarios.css" />
+  <link rel="stylesheet" href="/css/admin-usuario.css" />
+  <link rel="stylesheet" href="/css/admin-empresa.css" />
+</head>
+<body>
+
+  <%- include('partials/header-admin', { currentPage: 'admin-empresas' }) %>
+
+<main class="adm-main" id="main-content">
+
+  <section class="adm-loading" id="loading" role="status" aria-live="polite">
+    <span class="adm-spinner" aria-hidden="true"></span>
+    <p>Carregando perfil...</p>
+  </section>
+
+  <div class="adj-wrap" id="content" hidden>
+
+    <a href="/admin/empresas" class="adj-back">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Voltar
+    </a>
+
+    <%# ── Cabeçalho ── %>
+    <header class="adj-card adu-head">
+      <div class="adu-head-main">
+        <div id="head-logo"></div>
+        <div class="adu-head-txt">
+          <h1 class="adu-h1" id="p-name"></h1>
+          <p class="adu-head-email" id="p-legal"></p>
+          <p class="adu-head-email" id="p-email"></p>
+          <ul class="adu-badges" id="p-badges" aria-label="Setor e situação"></ul>
+        </div>
+        <ul class="adu-counters" aria-label="Números da empresa">
+          <li><strong id="c-vagas">0</strong><span>Vagas</span></li>
+          <li><strong id="c-cand">0</strong><span>Candidaturas</span></li>
+        </ul>
+      </div>
+      <div class="adu-head-foot">
+        <p class="adu-status" id="p-status"></p>
+        <div class="adv-actions">
+          <a class="adv-icon-btn" id="btn-mail" href="#" aria-label="Enviar e-mail à empresa">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          </a>
+          <button type="button" class="adv-icon-btn" id="btn-edit" aria-label="Editar informações da empresa">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+          </button>
+          <button type="button" class="adv-icon-btn" id="btn-status"></button>
+        </div>
+      </div>
+    </header>
+    <p class="adj-error" id="status-error" role="alert"></p>
+
+    <%# ── Informações ── %>
+    <section class="adj-card" aria-labelledby="h-info">
+      <h2 class="adj-h2" id="h-info">Informações</h2>
+      <form id="info-form" novalidate>
+        <div class="adv-form-grid">
+          <div class="adv-field">
+            <label for="f-endereco">Endereço</label>
+            <input type="text" id="f-endereco" maxlength="255" autocomplete="off" />
+          </div>
+          <div class="adv-field">
+            <label for="f-setor">Setor de atuação</label>
+            <select id="f-setor">
+              <option value="">Não informado</option>
+              <option value="tecnologia">Tecnologia</option>
+              <option value="financeiro">Financeiro</option>
+              <option value="educacao">Educação</option>
+              <option value="saude">Saúde</option>
+              <option value="varejo">Varejo</option>
+              <option value="industria">Indústria</option>
+              <option value="consultoria">Consultoria</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="adv-field">
+            <label for="f-modelo">Modelo de trabalho dominante</label>
+            <select id="f-modelo">
+              <option value="">Não informado</option>
+              <option value="remoto">Remoto</option>
+              <option value="hibrido">Híbrido</option>
+              <option value="presencial">Presencial</option>
+            </select>
+          </div>
+          <div class="adv-field">
+            <label for="f-maturidade">Faixa de maturidade</label>
+            <select id="f-maturidade">
+              <option value="">Não informada</option>
+              <option value="startup">Startup</option>
+              <option value="crescimento">Em crescimento</option>
+              <option value="consolidada">Empresa consolidada</option>
+            </select>
+          </div>
+        </div>
+        <p class="adv-form-error" id="info-error" role="alert"></p>
+        <div class="adu-form-foot"><button type="submit" class="adv-btn adv-btn--primary" id="info-save">Salvar dados</button></div>
+      </form>
+    </section>
+
+    <%# ── Sobre a empresa ── %>
+    <section class="adj-card" aria-labelledby="h-sobre">
+      <h2 class="adj-h2" id="h-sobre">Sobre a empresa</h2>
+      <form id="about-form" novalidate>
+        <div class="adv-field">
+          <label for="f-descricao" class="visually-hidden">Descrição da empresa</label>
+          <textarea id="f-descricao" class="ade-textarea" rows="5" maxlength="1000" placeholder="Sem descrição cadastrada."></textarea>
+        </div>
+        <p class="adv-form-error" id="about-error" role="alert"></p>
+        <div class="adu-form-foot"><button type="submit" class="adv-btn adv-btn--primary" id="about-save">Salvar descrição</button></div>
+      </form>
+    </section>
+
+    <%# ── Vagas ── %>
+    <section class="adj-card" aria-labelledby="h-vagas">
+      <h2 class="adj-h2" id="h-vagas">Vagas <span class="adu-count" id="vagas-count"></span></h2>
+      <p class="adu-empty" id="vagas-empty" hidden>Esta empresa ainda não publicou vagas.</p>
+      <ul class="ade-jobs" id="vagas-list"></ul>
+    </section>
+
+    <%# ── Plano ── %>
+    <section class="adj-card" aria-labelledby="h-plano">
+      <div class="adu-plan-head">
+        <h2 class="adj-h2" id="h-plano">Plano do usuário</h2>
+        <p class="adu-next" id="plan-next" hidden></p>
+      </div>
+      <p class="adu-plan-name" id="plan-name"></p>
+      <ul class="adu-benefits" id="plan-benefits"></ul>
+      <div class="adv-field adu-plan-change">
+        <label for="plan-select">Alterar plano</label>
+        <select id="plan-select">
+          <option value="empresa_free">FREE</option>
+          <option value="empresa_premium">PRO</option>
+        </select>
+      </div>
+      <p class="adv-form-error" id="plan-error" role="alert"></p>
+    </section>
+
+    <%# ── Conta ── %>
+    <section class="adj-card" aria-labelledby="h-conta">
+      <h2 class="adj-h2" id="h-conta">Informações da conta</h2>
+      <dl class="adu-account">
+        <div><dt>E-mail</dt><dd id="acc-email"></dd></div>
+        <div><dt>Tipo de conta</dt><dd>Empresa</dd></div>
+        <div><dt>CNPJ</dt><dd id="acc-cnpj"></dd></div>
+        <div><dt>Membro desde</dt><dd id="acc-since"></dd></div>
+      </dl>
+    </section>
+
+  </div>
+</main>
+
+<output class="adv-toast" id="toast" role="status" aria-live="polite"></output>
+
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
+</footer>
+
+<script src="/js/escape-html.js"></script>
+<script>
+const COMPANY_ID = <%- Number(userId) %>;
+const SETOR_LABEL = {
+  tecnologia: "Tecnologia", financeiro: "Financeiro", educacao: "Educação",
+  saude: "Saúde", varejo: "Varejo", industria: "Indústria", consultoria: "Consultoria", outro: "Outro",
+};
+const AREA_LABEL = { "front-end": "Front End", "back-end": "Back End", "full-stack": "Full Stack", dados: "Dados" };
+const CORES = ["#E2E52B", "#59E435", "#60a5fa", "#c084fc", "#f87171", "#fbbf24"];
+const $ = (id) => document.getElementById(id);
+
+let co = null;
+
+const nomeDe = (c) => c.nome_fantasia || c.razao_social || c.email;
+const initials = (s) => String(s || "?").trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0)).join("").toUpperCase() || "?";
+const formatCnpj = (c) => { const d = String(c ?? "").replace(/\D/g, ""); return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") : (c || "—"); };
+const longDate = (raw, opts) => raw ? new Date(raw).toLocaleDateString("pt-BR", opts) : "—";
+const dayDate = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ""); return m ? `${m[3]}/${m[2]}/${m[1]}` : null; };
+
+function activityText(s) {
+  if (s == null) return "Sem atividade registrada";
+  const min = Math.floor(s / 60), h = Math.floor(min / 60), d = Math.floor(h / 24);
+  if (min < 5)  return "Online agora";
+  if (min < 60) return `Online há ${min} min`;
+  if (h < 24)   return `Online há ${h} ${h === 1 ? "hora" : "horas"}`;
+  if (d < 2)    return "Online ontem";
+  return `Online há ${d} dias`;
+}
+
+let toastTimer;
+function toast(msg, isErr = false) {
+  const el = $("toast");
+  el.textContent = msg; el.classList.toggle("is-error", isErr); el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+
+async function api(path, body) {
+  const res = await fetch(`/api/admin/empresas/${COMPANY_ID}${path}`, {
+    method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Erro ao atualizar. Tente novamente.");
+  return data;
+}
+
+const ICON_BAN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg>';
+const ICON_OK = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 9.5"/></svg>';
+
+function renderHead() {
+  const nome = nomeDe(co);
+  document.title = `Ápice — Admin · ${nome}`;
+  $("head-logo").innerHTML = `<span class="adu-avatar ade-logo" style="background:${CORES[co.id % CORES.length]}" aria-hidden="true">${escapeHtml(initials(nome))}</span>`;
+  $("p-name").textContent = nome;
+  $("p-legal").textContent = co.razao_social && co.razao_social !== nome ? `${co.razao_social} · ${formatCnpj(co.cnpj)}` : formatCnpj(co.cnpj);
+  $("p-email").textContent = co.email;
+  $("p-badges").innerHTML =
+    (co.setor ? `<li class="adu-badge adu-badge--level">${escapeHtml(SETOR_LABEL[co.setor] ?? co.setor)}</li>` : "") +
+    `<li class="adu-badge adu-badge--gh">${co.active ? "Ativa" : "Suspensa"} desde ${escapeHtml(longDate(co.created_at, { month: "long", year: "numeric" }))}</li>`;
+  $("c-vagas").textContent = co.stats.vagas;
+  $("c-cand").textContent = co.stats.candidaturas;
+
+  $("p-status").innerHTML = `Status: <strong>${co.active ? "Ativo" : "Suspenso"}</strong><span>${escapeHtml(activityText(co.visto_ha_segundos))}</span>`;
+  $("btn-mail").href = `mailto:${co.email}`;
+  const st = $("btn-status");
+  st.className = "adv-icon-btn " + (co.active ? "adv-icon-btn--danger" : "adv-icon-btn--ok");
+  st.innerHTML = co.active ? ICON_BAN : ICON_OK;
+  st.setAttribute("aria-label", co.active ? "Suspender empresa" : "Reativar empresa");
+}
+
+function renderForms() {
+  $("f-endereco").value = co.endereco; $("f-setor").value = co.setor;
+  $("f-modelo").value = co.modelo_trabalho; $("f-maturidade").value = co.maturidade;
+  $("f-descricao").value = co.descricao;
+}
+
+function renderJobs() {
+  $("vagas-count").textContent = co.vagas.length;
+  $("vagas-empty").hidden = co.vagas.length > 0;
+  $("vagas-list").innerHTML = co.vagas.map(j => {
+    const periodo = [dayDate((j.created_at || "").slice(0, 10)), dayDate(j.expires_at)].filter(Boolean);
+    const limite = j.max_candidates && j.max_candidates < 9999 ? ` / ${Number(j.max_candidates)}` : "";
+    return `
+    <li class="ade-job${j.active ? "" : " is-paused"}">
+      <div class="ade-job-info">
+        <h3 class="ade-job-title">${escapeHtml(j.title)}</h3>
+        <p>Área: ${escapeHtml(AREA_LABEL[j.area] ?? "Não informada")}</p>
+        <p>Período: ${periodo.length ? escapeHtml(periodo.join(" - ")) : "—"}</p>
+        <p>Candidatos inscritos: ${Number(j.total_candidaturas)}${limite}</p>
+      </div>
+      <div class="ade-job-side">
+        <span class="adj-pill ${j.active ? "is-on" : "is-off"}">${j.active ? "ATIVA" : "PAUSADA"}</span>
+        <a class="adv-btn" href="/admin/vagas/${Number(j.id)}">ACESSAR VAGA</a>
+      </div>
+    </li>`;
+  }).join("");
+}
+
+function renderPlan() {
+  $("plan-name").textContent = `${co.plan.name} (${co.plan.code === "empresa_premium" ? "plano mensal" : "plano gratuito"})`;
+  const next = $("plan-next");
+  next.hidden = !co.plan.next_payment_date;
+  if (co.plan.next_payment_date) {
+    const [y, m, d] = co.plan.next_payment_date.split("-").map(Number);
+    next.textContent = `Próxima cobrança: ${new Date(y, m - 1, d).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}`;
+  }
+  $("plan-benefits").innerHTML = co.plan.benefits.map(b => `<li>${escapeHtml(b)}</li>`).join("");
+  $("plan-select").value = co.plan.code;
+}
+
+function renderAccount() {
+  $("acc-email").textContent = co.email;
+  $("acc-cnpj").textContent = formatCnpj(co.cnpj);
+  $("acc-since").textContent = longDate(co.created_at, { day: "numeric", month: "long", year: "numeric" });
+}
+
+async function load() {
+  const res = await fetch(`/api/admin/empresas/${COMPANY_ID}`);
+  if (res.status === 404) { location.replace("/admin/empresas"); return; }
+  if (!res.ok) throw new Error("Falha ao carregar");
+  co = await res.json();
+  renderHead(); renderForms(); renderJobs(); renderPlan(); renderAccount();
+}
+
+// ── Ações ──
+$("btn-edit").addEventListener("click", () => { $("f-endereco").scrollIntoView({ block: "center" }); $("f-endereco").focus(); });
+
+$("btn-status").addEventListener("click", async e => {
+  const btn = e.currentTarget; btn.disabled = true; $("status-error").textContent = "";
+  try {
+    await api("", { active: !co.active });
+    toast(co.active ? "Empresa suspensa." : "Empresa reativada.");
+    await load();
+  } catch (err) { $("status-error").textContent = err.message; }
+  finally { btn.disabled = false; }
+});
+
+function bindForm(formId, btnId, errId, okMsg, payload) {
+  $(formId).addEventListener("submit", async e => {
+    e.preventDefault();
+    const btn = $(btnId); btn.disabled = true; $(errId).textContent = "";
+    try { await api("", payload()); toast(okMsg); await load(); }
+    catch (err) { $(errId).textContent = err.message; }
+    finally { btn.disabled = false; }
+  });
+}
+bindForm("info-form", "info-save", "info-error", "Dados atualizados.", () => ({
+  endereco: $("f-endereco").value, setor: $("f-setor").value,
+  modelo_trabalho: $("f-modelo").value, maturidade: $("f-maturidade").value,
+}));
+bindForm("about-form", "about-save", "about-error", "Descrição atualizada.", () => ({ descricao: $("f-descricao").value }));
+
+$("plan-select").addEventListener("change", async e => {
+  const sel = e.currentTarget, code = sel.value; sel.disabled = true; $("plan-error").textContent = "";
+  try {
+    await api("/plan", { plan_code: code });
+    toast("Plano atualizado.");
+  } catch (err) { $("plan-error").textContent = err.message; }
+  finally { sel.disabled = false; await load(); }
+});
+
+(async function init() {
+  try {
+    await load();
+    $("loading").hidden = true;
+    $("content").hidden = false;
+  } catch (err) {
+    console.error(err);
+    $("loading").innerHTML = `
+      <div role="alert">
+        <p class="adm-error">Erro ao carregar o perfil.</p>
+        <a class="adm-error-link" href="/admin/empresas">← Voltar para a lista</a>
+      </div>`;
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -12,153 +12,188 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/design-system.css" />
   <link rel="stylesheet" href="/css/header.css" />
-  <link rel="stylesheet" href="/css/empresa-dashboard.css" />
+  <link rel="stylesheet" href="/css/admin-dashboard.css" />
 </head>
 <body>
 
   <%- include('partials/header-admin', { currentPage: 'admin-dashboard' }) %>
 
-<main class="page-content" id="main-content">
+<%
+  const ic = {
+    devs:    '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    empresa: '<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    vagas:   '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+    pro:     '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    matchs:  '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 9.5"/>',
+    mentor:  '<rect x="5" y="8" width="14" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9.5 17h5"/>'
+  };
+  const cards = [
+    { id: 'devs',     href: '/admin/usuarios',   icon: 'devs',    title: 'Desenvolvedores', sub: '— devs novos' },
+    { id: 'empresas', href: '/admin/empresas',   icon: 'empresa', title: 'Empresas',        sub: '— empresas novas' },
+    { id: 'vagas',    href: '/admin/vagas',      icon: 'vagas',   title: 'Vagas Ativas',    sub: '— vagas ativas' },
+    { id: 'pro',      href: '/admin/usuarios',   icon: 'pro',     title: 'Assinantes PRO',  sub: '— usuários PRO' },
+    { id: 'matchs',   href: '/admin/relatorios/compatibilidade-de-matchs', icon: 'matchs',  title: 'Matchs aceitos',  sub: '— matchs aceitos' },
+    { id: 'mentor',   href: '/admin/relatorios', icon: 'mentor',  title: 'Uso do mentor',   sub: '— análises com IA' }
+  ];
+%>
 
-  <section class="loading-screen" id="loading" role="status" aria-live="polite">
-    <span class="spinner" aria-hidden="true"></span>
+<main class="adm-main" id="main-content">
+  <h1 class="visually-hidden">Dashboard do administrador</h1>
+
+  <section class="adm-loading" id="loading" role="status" aria-live="polite">
+    <span class="adm-spinner" aria-hidden="true"></span>
     <p>Carregando painel...</p>
   </section>
 
-  <article id="content" hidden>
+  <div class="adm-layout" id="content" hidden>
 
-    <ul class="metrics-grid" aria-label="Métricas gerais da plataforma">
-      <li class="metric-card">
-        <span class="metric-icon ic-blue">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
-        </span>
-        <strong class="metric-val" id="m-devs">—</strong>
-        <p class="metric-lbl">Desenvolvedores</p>
-      </li>
-      <li class="metric-card">
-        <span class="metric-icon ic-green">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </span>
-        <strong class="metric-val" id="m-empresas">—</strong>
-        <p class="metric-lbl">Empresas</p>
-      </li>
-      <li class="metric-card">
-        <span class="metric-icon ic-yellow">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-        </span>
-        <strong class="metric-val" id="m-vagas-ativas" style="color:var(--accent)">—</strong>
-        <p class="metric-lbl">Vagas ativas</p>
-      </li>
-      <li class="metric-card">
-        <span class="metric-icon ic-purple">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-        </span>
-        <strong class="metric-val" id="m-vagas-total">—</strong>
-        <p class="metric-lbl">Vagas no total</p>
-      </li>
-      <li class="metric-card">
-        <span class="metric-icon ic-blue">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </span>
-        <strong class="metric-val" id="m-candidaturas">—</strong>
-        <p class="metric-lbl">Candidaturas</p>
-      </li>
-      <li class="metric-card">
-        <span class="metric-icon ic-green">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </span>
-        <strong class="metric-val" id="m-matchs">—</strong>
-        <p class="metric-lbl">Matchs aceitos</p>
-      </li>
-    </ul>
+    <div class="adm-col">
 
-    <section class="section" aria-label="Cadastros recentes">
-      <header class="section-header">
-        <h2 class="section-title">Desenvolvedores recentes</h2>
-      </header>
-      <figure class="jobs-table-wrap">
-        <table class="jobs-table" aria-label="Desenvolvedores recentes">
-          <thead><tr><th scope="col">Nome</th><th scope="col">E-mail</th><th scope="col">Cadastro</th></tr></thead>
-          <tbody id="devs-recentes-tbody"></tbody>
-        </table>
-        <section class="table-empty" id="devs-recentes-empty" hidden>
-          <p class="table-empty-title">Nenhum desenvolvedor cadastrado ainda</p>
-        </section>
-      </figure>
-    </section>
+      <section aria-label="Métricas da plataforma">
+        <ul class="adm-stats">
+          <% cards.forEach(c => { %>
+          <li>
+            <a class="adm-stat" href="<%= c.href %>">
+              <span class="adm-stat-ico" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><%- ic[c.icon] %></svg>
+              </span>
+              <span class="adm-stat-txt">
+                <span class="adm-stat-title"><%= c.title %></span>
+                <span class="adm-stat-sub" id="m-<%= c.id %>"><%= c.sub %></span>
+              </span>
+              <svg class="adm-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </a>
+          </li>
+          <% }) %>
+        </ul>
+      </section>
 
-    <section class="section" aria-label="Empresas recentes">
-      <header class="section-header">
-        <h2 class="section-title">Empresas recentes</h2>
-      </header>
-      <figure class="jobs-table-wrap">
-        <table class="jobs-table" aria-label="Empresas recentes">
-          <thead><tr><th scope="col">Nome</th><th scope="col">E-mail</th><th scope="col">Cadastro</th></tr></thead>
-          <tbody id="empresas-recentes-tbody"></tbody>
-        </table>
-        <section class="table-empty" id="empresas-recentes-empty" hidden>
-          <p class="table-empty-title">Nenhuma empresa cadastrada ainda</p>
-        </section>
-      </figure>
-    </section>
+      <section aria-labelledby="devs-heading">
+        <h2 class="adm-heading" id="devs-heading">Desenvolvedores recentes</h2>
+        <figure class="adm-panel">
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <caption class="visually-hidden">Desenvolvedores cadastrados mais recentemente</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Nome</th>
+                  <th scope="col">E-mail</th>
+                  <th scope="col">Nível</th>
+                  <th scope="col">Cadastro</th>
+                </tr>
+              </thead>
+              <tbody id="devs-recentes-tbody"></tbody>
+            </table>
+          </div>
+          <p class="adm-empty" id="devs-recentes-empty" hidden>Nenhum desenvolvedor cadastrado ainda</p>
+        </figure>
+      </section>
 
-  </article>
+    </div>
+
+    <aside class="adm-panel adm-aside" aria-labelledby="empresas-heading">
+      <h2 class="adm-heading" id="empresas-heading">Empresas recentes</h2>
+      <ul class="adm-companies" id="empresas-recentes-list"></ul>
+      <p class="adm-empty" id="empresas-recentes-empty" hidden>Nenhuma empresa cadastrada ainda</p>
+    </aside>
+
+  </div>
 </main>
 
-<output class="toast" id="toast" role="status" aria-live="polite"></output>
-
-<footer class="site-footer">
-  <p>&copy; <script>document.write(new Date().getFullYear())</script> Ápice. Painel do administrador.</p>
+<footer class="adm-footer">
+  <p>&copy; <%= new Date().getFullYear() %> Ápice. Painel do administrador.</p>
 </footer>
 
 <script src="/js/escape-html.js"></script>
 <script>
+const NIVEIS = { iniciante: "Iniciante", intermediario: "Intermediário", avancado: "Avançado" };
+const CORES  = ["#E2E52B", "#59E435", "#60a5fa", "#c084fc", "#f87171", "#fbbf24"];
+
 function formatDate(raw) {
   if (!raw) return "—";
-  return new Date(raw).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(raw).toLocaleDateString("pt-BR");
 }
 
-function renderList(rows, tbodyId, emptyId, rowFn) {
-  const tbody = document.getElementById(tbodyId);
-  const empty = document.getElementById(emptyId);
+function initials(name) {
+  return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0)).join("").toUpperCase() || "?";
+}
+
+function safeUrl(url) {
+  const u = String(url || "");
+  return /^https?:\/\//i.test(u) || (u.startsWith("/") && !u.startsWith("//")) ? u : "";
+}
+
+function setText(id, text) { document.getElementById(id).textContent = text; }
+
+function renderDevs(rows) {
+  const tbody = document.getElementById("devs-recentes-tbody");
+  const empty = document.getElementById("devs-recentes-empty");
   tbody.innerHTML = "";
-  if (!rows.length) { empty.hidden = false; return; }
-  empty.hidden = true;
-  rows.forEach(r => { const tr = document.createElement("tr"); tr.innerHTML = rowFn(r); tbody.appendChild(tr); });
+  empty.hidden = rows.length > 0;
+  rows.forEach(d => {
+    const nome = d.nome ? `${d.nome} ${d.sobrenome ?? ""}`.trim() : "";
+    const avatar = safeUrl(d.avatar_url)
+      ? `<img class="adm-avatar" src="${escapeHtml(d.avatar_url)}" alt="" width="36" height="36" loading="lazy" />`
+      : `<span class="adm-avatar" aria-hidden="true">${escapeHtml(initials(nome || d.email))}</span>`;
+    const nivel = NIVEIS[d.nivel] ? `<span class="adm-badge">${NIVEIS[d.nivel]}</span>` : "—";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="adm-person">${avatar}<span>${escapeHtml(nome || "—")}</span></span></td>
+      <td>${escapeHtml(d.email)}</td>
+      <td>${nivel}</td>
+      <td>${formatDate(d.created_at)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderEmpresas(rows) {
+  const list  = document.getElementById("empresas-recentes-list");
+  const empty = document.getElementById("empresas-recentes-empty");
+  list.innerHTML = "";
+  empty.hidden = rows.length > 0;
+  rows.forEach((e, i) => {
+    const nome = e.nome_fantasia ?? e.razao_social ?? "—";
+    const n = Number(e.vagasAtivas) || 0;
+    const sub = n === 0 ? "Nenhuma vaga ativa" : `${n} ${n === 1 ? "Vaga ativa" : "Vagas ativas"}`;
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <a class="adm-company" href="/admin/empresas">
+        <span class="adm-logo" style="background:${CORES[i % CORES.length]}" aria-hidden="true">${escapeHtml(initials(nome))}</span>
+        <span class="adm-company-txt">
+          <span class="adm-company-name">${escapeHtml(nome)}</span>
+          <span class="adm-company-sub">${sub}</span>
+        </span>
+        <svg class="adm-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      </a>`;
+    list.appendChild(li);
+  });
 }
 
 async function init() {
   try {
     const res = await fetch("/api/admin/dashboard");
     if (!res.ok) throw new Error("Falha ao carregar dados");
-    const data = await res.json();
+    const { stats, devsRecentes, empresasRecentes } = await res.json();
 
-    document.getElementById("m-devs").textContent          = data.stats.totalDevs;
-    document.getElementById("m-empresas").textContent      = data.stats.totalEmpresas;
-    document.getElementById("m-vagas-ativas").textContent  = data.stats.vagasAtivas;
-    document.getElementById("m-vagas-total").textContent   = data.stats.totalVagas;
-    document.getElementById("m-candidaturas").textContent  = data.stats.totalCandidaturas;
-    document.getElementById("m-matchs").textContent        = data.stats.matchsAceitos;
+    setText("m-devs",     `${stats.novosDevs ?? 0} devs novos`);
+    setText("m-empresas", `${stats.novasEmpresas ?? 0} empresas novas`);
+    setText("m-vagas",    `${stats.vagasAtivas} ${stats.vagasAtivas === 1 ? "vaga ativa" : "vagas ativas"}`);
+    setText("m-pro",      `${stats.assinantesPro ?? 0} usuários PRO`);
+    setText("m-matchs",   `${stats.matchsAceitos} matchs aceitos`);
+    setText("m-mentor",   `${stats.mentorAnalises ?? 0} análises com IA`);
 
-    renderList(data.devsRecentes, "devs-recentes-tbody", "devs-recentes-empty", d => `
-      <td data-label="Nome">${d.nome ? escapeHtml(`${d.nome} ${d.sobrenome ?? ""}`.trim()) : "—"}</td>
-      <td data-label="E-mail">${d.email}</td>
-      <td data-label="Cadastro">${formatDate(d.created_at)}</td>`);
-
-    renderList(data.empresasRecentes, "empresas-recentes-tbody", "empresas-recentes-empty", e => `
-      <td data-label="Nome">${escapeHtml(e.nome_fantasia ?? e.razao_social ?? "—")}</td>
-      <td data-label="E-mail">${e.email}</td>
-      <td data-label="Cadastro">${formatDate(e.created_at)}</td>`);
+    renderDevs(devsRecentes);
+    renderEmpresas(empresasRecentes);
 
     document.getElementById("loading").hidden = true;
     document.getElementById("content").hidden = false;
   } catch (err) {
     console.error(err);
     document.getElementById("loading").innerHTML = `
-      <section style="text-align:center">
-        <p style="color:var(--red);margin-bottom:10px">Erro ao carregar o painel.</p>
-        <a href="/" style="color:var(--blue);font-size:.9rem">← Voltar à home</a>
-      </section>`;
+      <div role="alert">
+        <p class="adm-error">Erro ao carregar o painel.</p>
+        <a class="adm-error-link" href="/">← Voltar à home</a>
+      </div>`;
   }
 }
 

@@ -1,0 +1,96 @@
+/* =============================================
+   admin-categorias.css — Admin → Configurações → Categorias e vagas (desktop)
+   Carrega depois de admin-vagas.css (diálogo, campos, toast) e admin-relatorios.css (voltar/título).
+============================================= */
+
+.adk-wrap { max-width: 1040px; margin-inline: auto; }
+
+.adk-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin: 4px 0 22px; }
+.adk-sub { font-size: .8rem; color: #B7BD1F; }
+
+.adk-primary {
+  min-height: 40px; padding: 0 28px; border-radius: 99px; cursor: pointer; border: 1px solid var(--admin);
+  font-family: var(--font-display); font-size: .8rem; font-weight: 700; color: #14140a; background: var(--admin);
+  transition: background .15s, box-shadow .15s;
+}
+.adk-primary:hover { background: #eef04f; box-shadow: 0 0 22px var(--admin-glow); }
+.adk-primary--sm { min-height: 36px; padding: 0 28px; }
+.adk-primary[hidden] { display: none; }
+.adk-primary:disabled { opacity: .6; cursor: progress; }
+.adk-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 0 24px;
+  border-radius: 99px; cursor: pointer; background: transparent; color: var(--text); border: 1px solid var(--border-lite);
+  font-family: var(--font-display); font-size: .78rem; font-weight: 600; text-decoration: none;
+}
+.adk-btn:hover { border-color: var(--muted); }
+.adk-primary:focus-visible, .adk-btn:focus-visible, .adk-tab:focus-visible, .adk-item-btn:focus-visible,
+.adk-kebab:focus-visible, .adk-menu button:focus-visible, .adk-panel:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+
+/* ── Cartão com abas ── */
+.adk-card { background: #080808; border: 1px solid var(--border-lite); border-radius: var(--radius-xl); overflow: hidden; }
+.adk-tabs { display: flex; gap: 8px; padding: 0 22px; border-bottom: 1px solid var(--border-lite); overflow-x: auto; }
+.adk-tab {
+  position: relative; min-height: 44px; padding: 12px 18px; background: none; border: 0; cursor: pointer;
+  font-family: var(--font-display); font-size: .82rem; color: var(--muted); white-space: nowrap;
+}
+.adk-tab:hover { color: var(--text); }
+.adk-tab[aria-selected="true"] { color: var(--text); font-weight: 600; }
+.adk-tab[aria-selected="true"]::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 2px; background: var(--admin); }
+
+.adk-panel { padding: 22px; }
+.adk-cols { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; }
+.adk-cols[hidden], .adk-skills[hidden] { display: none; }
+
+/* ── Lista ── */
+.adk-list-card { background: #0b0b0b; border: 1px solid var(--border-lite); border-radius: var(--radius-lg); padding: 16px 12px 12px; }
+.adk-list-title { font-family: var(--font-display); font-size: .82rem; font-weight: 600; padding: 0 8px 12px; }
+.adk-count { color: var(--muted); font-weight: 400; }
+.adk-list { display: flex; flex-direction: column; gap: 2px; }
+.adk-item { position: relative; display: flex; align-items: center; border-radius: var(--radius-md); border: 1px solid transparent; }
+.adk-item + .adk-item { border-top: 1px solid var(--border); }
+.adk-item.is-selected { background: var(--admin-dim); border-color: var(--admin-border); }
+.adk-item-btn {
+  flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px;
+  padding: 6px 8px 6px 12px; background: none; border: 0; cursor: pointer; color: var(--text); text-align: left; font: inherit; font-size: .78rem;
+}
+.adk-item.is-off .adk-item-name { color: var(--muted); }
+.adk-off { font-size: .62rem; color: var(--yellow); margin-left: 6px; }
+.adk-item-count { font-weight: 600; font-variant-numeric: tabular-nums; }
+.adk-empty { padding: 14px 12px; font-size: .74rem; color: var(--muted); }
+
+.adk-kebab-wrap { position: relative; }
+.adk-kebab { display: flex; align-items: center; justify-content: center; width: 28px; height: 32px; background: none; border: 0; border-radius: 6px; cursor: pointer; color: var(--text); }
+.adk-kebab:hover { background: rgba(255,255,255,.06); }
+.adk-menu {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 10; min-width: 130px; padding: 6px;
+  background: #111; border: 1px solid var(--border-lite); border-radius: var(--radius-md); box-shadow: 0 12px 32px rgba(0,0,0,.6);
+}
+.adk-menu[hidden] { display: none; }
+.adk-menu button { display: block; width: 100%; padding: 8px 12px; background: none; border: 0; border-radius: 6px; cursor: pointer; color: var(--text); font: inherit; font-size: .74rem; text-align: left; }
+.adk-menu button:hover { background: rgba(255,255,255,.06); }
+
+/* ── Detalhe ── */
+.adk-detail { background: #0b0b0b; border: 1px solid var(--border-lite); border-radius: var(--radius-lg); padding: 22px 24px; min-height: 230px; }
+.adk-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.adk-name { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
+.adk-badge { padding: 1px 14px; border-radius: 4px; font-size: .68rem; font-weight: 700; border: 1px solid var(--border-lite); }
+.adk-badge.is-on { color: var(--teal); background: var(--teal-dim); border-color: var(--teal-border); }
+.adk-badge.is-off { color: var(--muted); background: var(--bg-3); }
+.adk-desc { margin: 6px 0 14px; font-size: .72rem; line-height: 1.7; color: var(--muted); max-width: 60ch; overflow-wrap: anywhere; }
+.adk-stat { padding-top: 14px; border-top: 1px solid var(--border); }
+.adk-stat-label { font-size: .74rem; }
+.adk-stat-value { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; }
+.adk-actions { display: flex; gap: 14px; margin-top: 18px; }
+.adk-fixed { margin-top: 16px; font-size: .7rem; color: var(--muted); }
+
+/* ── Diálogo ── */
+.adk-dialog { width: min(520px, calc(100vw - 32px)); }
+.adk-field-gap { margin-top: 14px; }
+.adk-textarea {
+  width: 100%; min-height: 96px; padding: 10px 12px; resize: vertical; font: inherit; font-size: .74rem; line-height: 1.6;
+  color: var(--text); background: var(--bg-3); border: 1px solid var(--border-lite); border-radius: var(--radius-md);
+}
+.adk-textarea:focus-visible, .adk-dialog input:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+.adk-foot { display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 22px; }
+
+@media (prefers-reduced-motion: reduce) { .adk-primary { transition: none; } }

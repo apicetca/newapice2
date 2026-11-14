@@ -206,7 +206,6 @@ const ROTEIROS = {
   "minha-assinatura":     [estado("inicial")],
 
   "admin-dashboard":  [estado("inicial")],
-  "admin-matchs":     [estado("inicial")],
   "admin-relatorios": [estado("inicial")],
   "admin-usuarios": [
     estado("inicial"),

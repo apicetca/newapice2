@@ -108,7 +108,7 @@ describe("controller — grava área e língua", () => {
 
   test("updateJob aceita area/foreign_language/foreign_level", async () => {
     db.query.mockImplementation(async (sql) => {
-      if (/select id, active from jobs/i.test(sql)) return [[{ id: 3, active: 1 }]];
+      if (/select id, active, category_id from jobs/i.test(sql)) return [[{ id: 3, active: 1, category_id: null }]];
       if (/update jobs set/i.test(sql)) return [{ affectedRows: 1 }];
       throw new Error("rota não mapeada: " + sql);
     });

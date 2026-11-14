@@ -93,6 +93,11 @@ const areaField = body("area")
   .isIn(VALID_AREA)
     .withMessage(`Área inválida. Use: ${VALID_AREA.join(", ")}.`);
 
+const categoryField = body("category_id")
+  .optional({ nullable: true, checkFalsy: true })
+  .isInt({ min: 1 })
+    .withMessage("Categoria inválida.");
+
 const foreignLanguageField = body("foreign_language")
   .optional({ nullable: true, checkFalsy: true })
   .isIn(VALID_LANGUAGE)
@@ -160,6 +165,7 @@ const validateCreateJob = [
   contractTypeField,
   englishLevelField,
   areaField,
+  categoryField,
   foreignLanguageField,
   foreignLevelField,
   salaryMinField,
@@ -183,6 +189,7 @@ const validateUpdateJob = [
   contractTypeField,
   englishLevelField,
   areaField,
+  categoryField,
   foreignLanguageField,
   foreignLevelField,
   salaryMinField,

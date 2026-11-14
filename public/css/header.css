@@ -1091,3 +1091,34 @@
 @media (max-width: 860px) {
   body:has(.bottom-nav--empresa) { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
 }
+/* ═══════════════════════════════════════════
+   HEADER DO ADMINISTRADOR — amarelo-limão
+   (reformulação do fluxo de ADM: menu no padrão do protótipo)
+═══════════════════════════════════════════ */
+.site-header--admin {
+  background: #0a0a0a;
+  border-radius: 0 0 24px 24px;
+  border-bottom: 1px solid var(--admin-border);
+  box-shadow: 0 12px 40px -14px var(--admin-glow);
+}
+.site-header--admin .header-nav { gap: clamp(16px, 2.4vw, 34px); }
+.site-header--admin .header-link { color: var(--text); }
+.site-header--admin .header-link::after { background: var(--admin); }
+.site-header--admin .header-link:focus-visible,
+.site-header--admin .user-menu-btn:focus-visible { outline-color: var(--admin); }
+.site-header--admin .user-menu-btn { gap: 12px; padding: 4px 8px; border-color: transparent; color: var(--text); }
+.site-header--admin .user-menu-btn svg { color: var(--text); }
+
+.header-admin-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px;
+  color: var(--admin); background: var(--admin-dim); border: 1px solid var(--admin-border);
+}
+.site-header--admin .header-divider { margin: 0 14px 0 0; }
+.user-menu-list--admin { border-color: var(--admin-border); }
+
+@media (max-width: 860px) {
+  .site-header--admin { border-radius: 0; }
+  .site-header--admin .header-divider,
+  .site-header--admin .header-user-name small { display: none; }
+}

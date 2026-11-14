@@ -1,0 +1,131 @@
+/* =============================================
+   admin-dashboard.css — Dashboard do administrador
+   Padrão do protótipo: cards de métrica clicáveis,
+   tabela de devs recentes e lista de empresas recentes.
+   Larguras de referência: 1440 / 768 / 375.
+============================================= */
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.adm-main {
+  width: 100%; max-width: 1280px; margin-inline: auto;
+  padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 4vw, 2rem) 3rem;
+  min-height: calc(100vh - var(--header-h, 64px));
+}
+
+/* ── Carregando / erro ── */
+.adm-loading {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; min-height: 50vh; color: var(--muted); font-size: .9rem; text-align: center;
+}
+.adm-loading[hidden] { display: none; }
+.adm-spinner {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--border-lite); border-top-color: var(--admin);
+  animation: adm-spin .7s linear infinite;
+}
+@keyframes adm-spin { to { transform: rotate(360deg); } }
+.adm-error { color: var(--red); margin-bottom: 10px; }
+.adm-error-link { color: var(--blue); font-size: .9rem; text-decoration: underline; }
+
+/* ── Layout em duas colunas ── */
+.adm-layout {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: clamp(16px, 2vw, 24px); align-items: start;
+}
+.adm-layout[hidden] { display: none; }
+.adm-col { min-width: 0; display: flex; flex-direction: column; gap: 28px; }
+
+/* ── Painéis (borda arredondada, fundo escuro) ── */
+.adm-panel {
+  background: #080808; border: 1px solid var(--border-lite);
+  border-radius: var(--radius-xl); overflow: hidden;
+}
+.adm-heading {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 600;
+  letter-spacing: -.01em; margin-bottom: 14px;
+}
+.adm-aside .adm-heading { padding: 20px 20px 0; margin-bottom: 8px; }
+
+/* ── Cards de métrica ── */
+.adm-stats {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;
+}
+.adm-stat {
+  display: flex; align-items: center; gap: 12px; height: 100%;
+  min-height: 68px; padding: 12px 14px;
+  background: #080808; border: 1px solid var(--border-lite); border-radius: var(--radius-lg);
+  transition: border-color .15s, background .15s;
+}
+.adm-stat:hover { border-color: var(--admin-border); background: #0d0d0d; }
+.adm-stat:focus-visible, .adm-company:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+.adm-stat-ico {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--bg-3); border: 1px solid var(--border-lite); color: var(--text);
+}
+.adm-stat-txt { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.3; }
+.adm-stat-title { font-family: var(--font-display); font-size: .82rem; font-weight: 600; color: var(--text); }
+.adm-stat-sub { font-size: .7rem; color: var(--muted); overflow-wrap: anywhere; }
+.adm-chev { flex-shrink: 0; color: var(--text); }
+
+/* ── Tabela de devs recentes ── */
+.adm-table-wrap { overflow-x: auto; }
+.adm-table-wrap:focus-visible { outline: 2px solid var(--admin); outline-offset: -2px; }
+.adm-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+.adm-table th {
+  padding: 14px 18px; text-align: left; white-space: nowrap;
+  font-family: var(--font-display); font-size: .78rem; font-weight: 500; color: var(--text);
+  border-bottom: 1px solid var(--border-lite);
+}
+.adm-table td { padding: 12px 18px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.adm-table tbody tr:last-child td { border-bottom: none; }
+.adm-table td:nth-child(2) { color: var(--text); overflow-wrap: anywhere; font-size: .72rem; }
+.adm-table td:last-child { white-space: nowrap; font-size: .72rem; }
+
+.adm-person { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.adm-avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; object-fit: cover;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-3); border: 1px solid var(--border-lite);
+  font-family: var(--font-display); font-size: .8rem; font-weight: 700; color: var(--text);
+}
+.adm-badge {
+  display: inline-block; padding: 1px 9px; border-radius: 99px; white-space: nowrap;
+  font-size: .66rem; color: var(--muted); border: 1px solid var(--border-lite); background: var(--bg-3);
+}
+
+/* ── Empresas recentes ── */
+.adm-companies { padding: 4px 12px 12px; }
+.adm-company {
+  display: flex; align-items: center; gap: 12px; padding: 10px 8px;
+  border-bottom: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.adm-companies li:last-child .adm-company { border-bottom: none; }
+.adm-company:hover { background: rgba(255,255,255,.03); }
+.adm-logo {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: .78rem; font-weight: 800; color: #0a0a0a;
+}
+.adm-company-txt { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.35; }
+.adm-company-name {
+  font-family: var(--font-display); font-size: .82rem; font-weight: 600; letter-spacing: .02em;
+  text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.adm-company-sub { font-size: .7rem; color: var(--muted); }
+
+.adm-empty { padding: 32px 20px; text-align: center; color: var(--muted); font-size: .85rem; }
+.adm-empty[hidden] { display: none; }
+
+.adm-footer {
+  border-top: 1px solid var(--border); padding: 16px 20px;
+  text-align: center; font-size: .8rem; color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-stat, .adm-spinner { transition: none; animation: none; }
+}

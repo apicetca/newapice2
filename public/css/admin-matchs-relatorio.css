@@ -1,0 +1,16 @@
+/* =============================================
+   admin-matchs-relatorio.css — Relatório "Compatibilidade de matchs" (desktop)
+   Carrega depois de admin-desempenho.css (barras horizontais, ranking) e
+   reaproveita .adu-person/.adm-avatar de admin-usuarios.css (carregado aqui via o mesmo bloco).
+============================================= */
+
+.adu-person { display: flex; align-items: center; gap: 14px; text-align: left; min-width: 0; }
+.adu-person-txt { display: flex; flex-direction: column; min-width: 0; line-height: 1.5; font-weight: 400; }
+.adu-name { color: var(--text); overflow-wrap: anywhere; }
+.adu-gh { color: var(--admin); width: fit-content; font-size: .7rem; }
+.adu-dash { color: var(--muted); }
+.add-job-link { color: var(--text); }
+.add-job-link:hover { text-decoration: underline; }
+.add-job-link:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+a.adv-icon-btn { text-decoration: none; }
+.add-table th[scope="row"] { text-align: left; font-weight: 400; }
