@@ -11,6 +11,7 @@ router.get("/dashboard", adminController.getDashboard);
 router.get("/users",             adminController.getUsers);
 router.get("/users/:id",         adminController.getUserDetail);
 router.patch("/users/:id",       adminController.updateUserStatus);
+router.delete("/users/:id",      adminController.deleteUser);
 router.patch("/users/:id/plan",  adminController.updateUserPlan);
 router.post("/users/:id/skills",           adminController.addUserSkill);
 router.delete("/users/:id/skills/:skillId", adminController.removeUserSkill);
@@ -18,6 +19,7 @@ router.delete("/users/:id/skills/:skillId", adminController.removeUserSkill);
 router.get("/empresas",             adminController.getEmpresas);
 router.get("/empresas/:id",         adminController.getEmpresaDetail);
 router.patch("/empresas/:id",       adminController.updateEmpresaStatus);
+router.delete("/empresas/:id",     adminController.deleteEmpresa);
 router.patch("/empresas/:id/plan",  adminController.updateEmpresaPlan);
 
 router.get("/jobs",            adminController.getJobs);

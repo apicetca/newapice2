@@ -158,6 +158,8 @@
       </dl>
     </section>
 
+    <%- include('partials/admin-excluir-conta', { rotulo: 'desenvolvedor' }) %>
+
   </div>
 </main>
 
@@ -168,6 +170,7 @@
 </footer>
 
 <script src="/js/escape-html.js"></script>
+<script src="/js/admin-excluir-conta.js"></script>
 <script>
 const USER_ID = <%- Number(userId) %>;
 const NIVEL_LABEL = { iniciante: "Iniciante", intermediario: "Intermediário", avancado: "Avançado" };
@@ -362,6 +365,7 @@ async function loadCatalog() {
     await Promise.all([load(), loadCatalog()]);
     $("loading").hidden = true;
     $("content").hidden = false;
+    AdminExcluirConta.init({ url: `/api/admin/users/${USER_ID}`, nome: fullName(dev), voltar: "/admin/usuarios" });
   } catch (err) {
     console.error(err);
     $("loading").innerHTML = `

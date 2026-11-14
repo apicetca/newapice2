@@ -14,6 +14,8 @@ const REGRAS = [
   ["PATCH", /^\/users\/(\d+)\/plan$/, () => "Alteração de plano", (b, id) => `Alterou o plano do desenvolvedor #${id} para ${b.plan_code ?? "—"}`],
   ["PATCH", /^\/users\/(\d+)$/, (b) => (somenteActive(b) ? (b.active ? "Reativação de usuário" : "Suspensão de usuário") : "Edição de usuário"),
     (b, id) => (somenteActive(b) ? `${b.active ? "Reativou" : "Suspendeu"} o desenvolvedor #${id}` : `Editou os dados do desenvolvedor #${id}`)],
+  ["DELETE", /^\/users\/(\d+)$/, () => "Exclusão de conta", (b, id) => `Excluiu a conta do desenvolvedor #${id}`],
+  ["DELETE", /^\/empresas\/(\d+)$/, () => "Exclusão de conta", (b, id) => `Excluiu a conta da empresa #${id}`],
   ["POST", /^\/users\/(\d+)\/skills$/, () => "Edição de usuário", (b, id) => `Declarou uma habilidade para o desenvolvedor #${id}`],
   ["DELETE", /^\/users\/(\d+)\/skills\/\d+$/, () => "Edição de usuário", (b, id) => `Removeu uma habilidade declarada do desenvolvedor #${id}`],
   ["PATCH", /^\/empresas\/(\d+)\/plan$/, () => "Alteração de plano", (b, id) => `Alterou o plano da empresa #${id} para ${b.plan_code ?? "—"}`],

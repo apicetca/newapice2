@@ -11,6 +11,7 @@ const relatorioEmpresas = require("../services/relatorioEmpresas");
 const relatorioUso = require("../services/relatorioUso");
 const relatorioPlanos = require("../services/relatorioPlanos");
 const relatorioExport = require("../services/relatorioExport");
+const { excluirConta, ErroExclusao } = require("../services/excluirConta");
 const { plansForType } = require("../config/plans");
 
 // Identifica o GitHub de uma conta dev, para achar outras contas da mesma
@@ -732,6 +733,28 @@ const adminController = {
         items: rows.map(r => ({ id: r.id, admin: r.admin_nome, titulo: r.titulo || "Alteração no painel", acao: r.acao, ha_segundos: Number(r.ha_segundos) })) });
     } catch (err) {
       console.error("[GET /api/admin/audit-log]", err.message);
+      res.status(500).json({ error: "Erro interno. Tente novamente." });
+    }
+  },
+
+  deleteUser: async (req, res) => {
+    try {
+      await excluirConta(db, Number(req.params.id), "dev");
+      res.json({ success: true });
+    } catch (err) {
+      if (err instanceof ErroExclusao) return res.status(err.status).json({ error: err.message });
+      console.error("[DELETE /api/admin/users/:id]", err.message);
+      res.status(500).json({ error: "Erro interno. Tente novamente." });
+    }
+  },
+
+  deleteEmpresa: async (req, res) => {
+    try {
+      await excluirConta(db, Number(req.params.id), "empresa");
+      res.json({ success: true });
+    } catch (err) {
+      if (err instanceof ErroExclusao) return res.status(err.status).json({ error: err.message });
+      console.error("[DELETE /api/admin/empresas/:id]", err.message);
       res.status(500).json({ error: "Erro interno. Tente novamente." });
     }
   },

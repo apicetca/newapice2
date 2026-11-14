@@ -163,6 +163,8 @@
       </dl>
     </section>
 
+    <%- include('partials/admin-excluir-conta', { rotulo: 'empresa' }) %>
+
   </div>
 </main>
 
@@ -173,6 +175,7 @@
 </footer>
 
 <script src="/js/escape-html.js"></script>
+<script src="/js/admin-excluir-conta.js"></script>
 <script>
 const COMPANY_ID = <%- Number(userId) %>;
 const SETOR_LABEL = {
@@ -338,6 +341,7 @@ $("plan-select").addEventListener("change", async e => {
     await load();
     $("loading").hidden = true;
     $("content").hidden = false;
+    AdminExcluirConta.init({ url: `/api/admin/empresas/${COMPANY_ID}`, nome: nomeDe(co), voltar: "/admin/empresas" });
   } catch (err) {
     console.error(err);
     $("loading").innerHTML = `

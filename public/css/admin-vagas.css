@@ -159,3 +159,17 @@
 }
 
 .adv-icon-btn[hidden] { display: none; }
+
+/* ── Excluir conta (perfil de dev/empresa) ── */
+.adx-danger { border-color: #4a1f1c; }
+.adx-text { margin: 0 0 14px; max-width: 70ch; font-size: .76rem; color: var(--muted); line-height: 1.5; }
+.adx-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 16px; cursor: pointer;
+  background: transparent; color: #ff6b61; border: 1px solid #b3261e; border-radius: 99px; font: inherit; font-size: .76rem; font-weight: 600;
+}
+.adx-btn:hover { background: #1a0000; border-color: #ff3b30; }
+.adx-btn:focus-visible { outline: 2px solid var(--admin); outline-offset: 2px; }
+.adx-btn:disabled { opacity: .55; cursor: progress; }
+.adx-btn--solid { background: #b3261e; color: #fff; border-color: #b3261e; }
+.adx-btn--solid:hover { background: #cf3027; }
+.adx-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
