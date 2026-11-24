@@ -224,7 +224,8 @@
   flex-direction: column;
   width: 100%;
   min-width: 0;
-  padding: calc(12 * var(--u)) calc(10 * var(--u)) calc(17.5 * var(--u));
+  /* mesma margem interna do card de vaga do dashboard ("Hoje para você", dashboard.css) */
+  padding: 20px 22px;
   background: var(--sup-000000);
   border: calc(3 * var(--u)) solid var(--lin-191919);
   border-radius: calc(20 * var(--u));
@@ -321,7 +322,8 @@
 .vagas-card__match {
   margin: calc(18 * var(--u)) 0 0;
   font-size: calc(20 * var(--u) * var(--texto-escala, 1));
-  font-weight: 700;
+  /* DM Mono não tem negrito (só 300/400/500): 700 virava negrito "falso", borrado */
+  font-weight: 500;
   line-height: 1.2;
   color: var(--txt-ffffff);
 }

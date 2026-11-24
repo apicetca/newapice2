@@ -34,7 +34,8 @@
 
       <!-- Saudação -->
       <header class="dash-card dash-welcome">
-        <h1 id="welcome-title">Olá!</h1>
+        <% const nomeDaConta = String((locals.user && locals.user.name) || "").trim(); %>
+        <h1 id="welcome-title" data-nome="<%= nomeDaConta %>"><%= nomeDaConta ? `Olá, ${nomeDaConta}!` : "Olá!" %></h1>
         <p>Confira suas vagas criadas, acompanhe match com desenvolvedores e analise os seus candidatos.</p>
       </header>
 
@@ -125,6 +126,7 @@
 <script src="/js/escape-html.js"></script>
 <script>
 const LEVEL_LABEL = { estagio: "Estágio", junior: "Júnior", pleno: "Pleno" };
+const NOME_DA_CONTA = document.getElementById("welcome-title").dataset.nome || "";
 const AREA_LABEL  = { "front-end": "Front End", "back-end": "Back End", "full-stack": "Full Stack", dados: "Dados" };
 
 const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
@@ -137,7 +139,12 @@ function formatDate(raw) {
 
 // ── Saudação e acesso rápido ──────────────────────────
 function renderHeader(profile, stats) {
-  const nome = profile?.nome_fantasia ?? profile?.razao_social ?? "Empresa";
+  // Nome fantasia vazio ("") também cai para a razão social: com "??" a saudação
+  // ficava "Olá, !". Sem nenhum dos dois, o nome da conta (o mesmo do cabeçalho).
+  const nome = String(profile?.nome_fantasia ?? "").trim()
+    || String(profile?.razao_social ?? "").trim()
+    || NOME_DA_CONTA
+    || "Empresa";
   document.getElementById("welcome-title").textContent = `Olá, ${nome}!`;
 
   document.getElementById("quick-vagas").textContent    = plural(stats.vagasAtivas, "Vaga disponível", "Vagas disponíveis");
